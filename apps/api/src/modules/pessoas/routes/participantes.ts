@@ -1,10 +1,16 @@
 import { FastifyInstance } from 'fastify'
 import { ParticipanteController } from '../controllers/ParticipanteController'
+import { authMiddleware, requireRole } from '../../../middleware/auth'
 
 export async function participanteRoutes(fastify: FastifyInstance) {
   const controller = new ParticipanteController()
+  
+  const requireAuth = { preHandler: [authMiddleware] }
+  const requireLider = { preHandler: [requireRole('lider')] }
+  const requireAdmin = { preHandler: [requireRole('admin')] }
 
   fastify.get('/participantes', {
+    ...requireAuth,
     schema: {
       querystring: {
         type: 'object',
@@ -18,6 +24,7 @@ export async function participanteRoutes(fastify: FastifyInstance) {
   }, controller.list.bind(controller))
 
   fastify.post('/participantes', {
+    ...requireLider,
     schema: {
       body: {
         type: 'object',
@@ -41,6 +48,7 @@ export async function participanteRoutes(fastify: FastifyInstance) {
   }, controller.create.bind(controller))
 
   fastify.get('/participantes/:id', {
+    ...requireAuth,
     schema: {
       params: {
         type: 'object',
@@ -53,6 +61,7 @@ export async function participanteRoutes(fastify: FastifyInstance) {
   }, controller.getById.bind(controller))
 
   fastify.get('/participantes/:id/historico', {
+    ...requireAuth,
     schema: {
       params: {
         type: 'object',
@@ -65,6 +74,7 @@ export async function participanteRoutes(fastify: FastifyInstance) {
   }, controller.getHistorico.bind(controller))
 
   fastify.patch('/participantes/:id/saude', {
+    ...requireLider,
     schema: {
       params: {
         type: 'object',
@@ -88,6 +98,7 @@ export async function participanteRoutes(fastify: FastifyInstance) {
   }, controller.updateSaude.bind(controller))
 
   fastify.delete('/participantes/:id', {
+    ...requireAdmin,
     schema: {
       params: {
         type: 'object',
