@@ -1,82 +1,142 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { auth } from '../config/auth'
+import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest'
+import { buildApp } from '../app'
+import { db, schema } from '../db'
+import { eq } from 'drizzle-orm'
+import * as fs from 'fs'
 
-describe('Authentication', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
+describe('Authentication E2E', { timeout: 30000 }, () => {
+  const app = buildApp()
+  let baseUrl: string
+
+  beforeAll(async () => {
+    // Fixed port to match .env.test
+    baseUrl = `http://localhost:3005`
+    await app.listen({ port: 3005 })
   })
 
-  describe('Better Auth Configuration', () => {
-    it('should be properly configured', () => {
-      expect(auth).toBeDefined()
-    })
-
-    it('should have email/password authentication enabled', () => {
-      const config = auth.options
-      expect(config.emailAndPassword?.enabled).toBe(true)
-    })
+  afterAll(async () => {
+    await app.close()
   })
 
-  describe('Session Management', () => {
-    it('should handle session creation', async () => {
-      // Mock session creation
-      const mockSession = {
-        user: {
-          id: 'test-user-id',
-          email: 'test@example.com',
-          name: 'Test User',
-          role: 'servo'
-        },
-        token: 'mock-token'
-      }
+  async function clearAuthTables() {
+    // Ordem importa por causa de FKs raras no Better Auth, mas limpamos tudo
+    await db.delete(schema.session)
+    await db.delete(schema.account)
+    await db.delete(schema.user)
+  }
 
-      // This would be tested with actual database
-      expect(mockSession.user.email).toBe('test@example.com')
-      expect(mockSession.user.role).toBe('servo')
-    })
-
-    it('should handle session validation', async () => {
-      const mockToken = 'valid-token'
-      
-      // Mock validation
-      const isValid = await mockToken.length > 0
-      
-      expect(isValid).toBe(true)
-    })
+  beforeEach(async () => {
+    await clearAuthTables()
   })
 
-  describe('Role-based Access', () => {
-    it('should validate admin role', () => {
-      const adminUser = {
-        id: 'admin-id',
-        email: 'admin@example.com',
-        name: 'Admin User',
-        role: 'admin'
-      }
-
-      expect(adminUser.role).toBe('admin')
+  it('should sign up a new user', async () => {
+    const response = await fetch(`${baseUrl}/api/v1/auth/sign-up/email`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: 'test@example.com',
+        password: 'Password123!',
+        name: 'Test User'
+      })
     })
 
-    it('should validate lider role', () => {
-      const liderUser = {
-        id: 'lider-id',
-        email: 'lider@example.com',
-        name: 'Lider User',
-        role: 'lider'
-      }
+    const body = (await response.json()) as any
+    if (response.status !== 200) {
+      throw new Error(`Signup Fail: ${JSON.stringify(body)}`)
+    }
+    expect(response.status).toEqual(200)
+    expect(body.user).toBeDefined()
+    expect(body.user.email).toBe('test@example.com')
 
-      expect(liderUser.role).toBe('lider')
+    // Verificar no banco
+    const user = await db.query.user.findFirst({
+      where: eq(schema.user.email, 'test@example.com')
+    })
+    expect(user).toBeDefined()
+    expect(user?.name).toBe('Test User')
+  })
+
+  it('should sign in an existing user', async () => {
+    // Primeiro cadastrar
+    await fetch(`${baseUrl}/api/v1/auth/sign-up/email`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: 'signin@example.com',
+        password: 'Password123!',
+        name: 'Sign In User'
+      })
     })
 
-    it('should validate servo role', () => {
-      const servoUser = {
-        id: 'servo-id',
-        email: 'servo@example.com',
-        name: 'Servo User',
-        role: 'servo'
-      }
-
-      expect(servoUser.role).toBe('servo')
+    const response = await fetch(`${baseUrl}/api/v1/auth/sign-in/email`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: 'signin@example.com',
+        password: 'Password123!'
+      })
     })
+
+    const body = (await response.json()) as any
+    fs.appendFileSync('/tmp/auth_debug.log', `Signin Response: ${JSON.stringify(body, null, 2)}\n`)
+    if (response.status !== 200) {
+      throw new Error(`Signin Fail: ${JSON.stringify(body)}`)
+    }
+    expect(response.status).toEqual(200)
+    // In Better Auth v1, it might return token instead of session in the response body
+    expect(body.token || body.session).toBeDefined()
+    expect(body.user.email).toBe('signin@example.com')
+
+    // Verificar se set-cookie existe
+    expect(response.headers.get('set-cookie')).toBeDefined()
+
+    // Assert that session is persisted in the database
+    const sessions = await db.select().from(schema.session)
+    expect(sessions.length).toBeGreaterThan(0)
+  })
+
+  it('should sign out successfully', async () => {
+    // Cadastrar e logar
+    await fetch(`${baseUrl}/api/v1/auth/sign-up/email`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: 'signout@example.com',
+        password: 'Password123!',
+        name: 'Sign Out User'
+      })
+    })
+
+    const signInResponse = await fetch(`${baseUrl}/api/v1/auth/sign-in/email`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: 'signout@example.com',
+        password: 'Password123!'
+      })
+    })
+
+    const signInBody = (await signInResponse.json()) as any
+    const cookie = signInResponse.headers.get('set-cookie')
+    const token = signInBody.token
+    
+    fs.appendFileSync('/tmp/auth_debug.log', `Signout Attempt - Token: ${token}, Cookie: ${cookie}\n`)
+
+    const response = await fetch(`${baseUrl}/api/v1/auth/sign-out`, {
+      method: 'POST',
+      headers: {
+        cookie: cookie || '',
+        authorization: token ? `Bearer ${token}` : ''
+      }
+    })
+
+    const signoutBody = await response.text()
+    fs.appendFileSync('/tmp/auth_debug.log', `Signout Response: ${response.status} - ${signoutBody}\n`)
+
+    expect(response.status).toBe(200)
+    
+    // Verificar se a sessão foi removida no banco
+    const sessions = await db.select().from(schema.session)
+    expect(sessions.length).toBe(0)
   })
 })
