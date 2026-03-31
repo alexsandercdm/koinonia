@@ -26,6 +26,7 @@ export async function authMiddleware(request: FastifyRequest, reply: FastifyRepl
     })
     
     if (!session) {
+      console.error(`AuthMiddleware - No session found for token: ${token.substring(0, 5)}...`)
       reply.code(401).send({ error: 'Unauthorized - Invalid token' })
       return
     }

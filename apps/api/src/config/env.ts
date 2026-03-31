@@ -6,6 +6,8 @@ const envSchema = z.object({
   DATABASE_URL: z.string(),
   JWT_SECRET: z.string(),
   CORS_ORIGIN: z.string().default('http://localhost:3000'),
+  BETTER_AUTH_SECRET: z.string().optional(),
+  BETTER_AUTH_URL: z.string().optional(),
 })
 
 const env = envSchema.parse(process.env)
