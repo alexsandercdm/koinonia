@@ -6,9 +6,9 @@ status: unknown
 last_updated: "2026-03-31T04:35:58.649Z"
 progress:
   total_phases: 4
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 4
-  completed_plans: 0
+  completed_plans: 4
 ---
 
 # STATE
@@ -18,7 +18,7 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-03-31)
 
 **Core value:** Gestão de participantes e alocação de quartos com regras estritas de gênero.
-**Current focus:** Phase 01 — core-foundation-pessoas
+**Current focus:** Phase 02 — core-business-inscricoes-eventos
 
 ## Developer Preferences
 
