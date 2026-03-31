@@ -5,6 +5,7 @@ import { GetParticipanteByIdUseCase } from '../usecases/GetParticipanteByIdUseCa
 import { GetParticipanteHistoricoUseCase } from '../usecases/GetParticipanteHistoricoUseCase'
 import { UpdateParticipanteSaudeUseCase } from '../usecases/UpdateParticipanteSaudeUseCase'
 import { DeleteParticipanteUseCase } from '../usecases/DeleteParticipanteUseCase'
+import { AuditLogRepository } from '../repositories/AuditLogRepository'
 import { db } from '../../../db'
 
 export class ParticipanteController {
@@ -20,7 +21,10 @@ export class ParticipanteController {
     this.listUseCase = new ListParticipantesUseCase(db)
     this.getByIdUseCase = new GetParticipanteByIdUseCase(db)
     this.getHistoricoUseCase = new GetParticipanteHistoricoUseCase(db)
-    this.updateSaudeUseCase = new UpdateParticipanteSaudeUseCase(db)
+    
+    const auditLogRepo = new AuditLogRepository(db)
+    this.updateSaudeUseCase = new UpdateParticipanteSaudeUseCase(db, auditLogRepo)
+    
     this.deleteUseCase = new DeleteParticipanteUseCase(db)
   }
 
@@ -82,7 +86,8 @@ export class ParticipanteController {
     try {
       const { id } = request.params as any
       const updateData = request.body as any
-      const participante = await this.updateSaudeUseCase.execute(id, updateData)
+      const user_id = (request as any).user.id
+      const participante = await this.updateSaudeUseCase.execute(id, user_id, updateData)
       return reply.send(participante)
     } catch (error) {
       if (error instanceof Error) {

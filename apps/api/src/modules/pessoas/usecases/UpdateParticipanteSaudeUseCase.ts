@@ -1,11 +1,12 @@
 import { Database } from '../../../db'
 import { pessoas } from '../../../db/schema'
 import { eq, isNull, and } from 'drizzle-orm'
+import { AuditLogRepository } from '../repositories/AuditLogRepository'
 
 export class UpdateParticipanteSaudeUseCase {
-  constructor(private db: Database) {}
+  constructor(private db: Database, private auditLogRepo: AuditLogRepository) {}
 
-  async execute(id: string, data: Partial<{
+  async execute(id: string, user_id: string, data: Partial<{
     alergias: string
     restricoes_alimentares: string[]
     medicamentos: string
@@ -20,6 +21,15 @@ export class UpdateParticipanteSaudeUseCase {
       })
       .where(and(eq(pessoas.id, id), isNull(pessoas.deleted_at)))
       .returning()
+
+    if (participante) {
+      await this.auditLogRepo.logAction({
+        user_id,
+        target_id: id,
+        action: 'UPDATE_HEALTH',
+        changes: data as any,
+      })
+    }
 
     return participante
   }

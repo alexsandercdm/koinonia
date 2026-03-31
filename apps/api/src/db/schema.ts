@@ -1,8 +1,9 @@
-import { pgTable, uuid, varchar, text, date, numeric, integer, timestamp, boolean, index } from 'drizzle-orm/pg-core'
+import { pgTable, uuid, varchar, text, date, numeric, integer, timestamp, boolean, index, jsonb } from 'drizzle-orm/pg-core'
 import { relations } from 'drizzle-orm'
 
 // Import Better Auth schema
-export { user, session, account, verification, userRelations, sessionRelations, accountRelations } from './auth-schema'
+import { user, session, account, verification, userRelations, sessionRelations, accountRelations } from './auth-schema'
+export { user, session, account, verification, userRelations, sessionRelations, accountRelations }
 
 // Tables
 export const pessoas = pgTable('pessoas', {
@@ -22,6 +23,15 @@ export const pessoas = pgTable('pessoas', {
   created_at: timestamp('created_at').defaultNow(),
   updated_at: timestamp('updated_at').defaultNow(),
   deleted_at: timestamp('deleted_at'),
+})
+
+export const auditLogs = pgTable('audit_logs', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  user_id: text('user_id').notNull().references(() => user.id),
+  target_id: uuid('target_id').notNull().references(() => pessoas.id),
+  action: varchar('action', { length: 100 }).notNull(),
+  changes: jsonb('changes'),
+  created_at: timestamp('created_at').defaultNow(),
 })
 
 // Add the self-reference after the table definition
@@ -115,6 +125,7 @@ export const pessoasRelations = relations(pessoas, ({ many, one }) => ({
   }),
   afilhados: many(pessoas),
   inscricoes: many(inscricoes),
+  auditLogs: many(auditLogs),
 }))
 
 export const locaisRelations = relations(locais, ({ many }) => ({
@@ -177,6 +188,17 @@ export const despesasRelations = relations(despesas, ({ one }) => ({
   }),
 }))
 
+export const auditLogsRelations = relations(auditLogs, ({ one }) => ({
+  user: one(user, {
+    fields: [auditLogs.user_id],
+    references: [user.id],
+  }),
+  target: one(pessoas, {
+    fields: [auditLogs.target_id],
+    references: [pessoas.id],
+  }),
+}))
+
 // Types
 export type Pessoa = typeof pessoas.$inferSelect
 export type CreatePessoa = typeof pessoas.$inferInsert
@@ -194,3 +216,5 @@ export type Pagamento = typeof pagamentos.$inferSelect
 export type CreatePagamento = typeof pagamentos.$inferInsert
 export type Despesa = typeof despesas.$inferSelect
 export type CreateDespesa = typeof despesas.$inferInsert
+export type AuditLog = typeof auditLogs.$inferSelect
+export type CreateAuditLog = typeof auditLogs.$inferInsert

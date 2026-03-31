@@ -1,3 +1,6 @@
+import { eq } from 'drizzle-orm'
+import { schema } from '../../../db'
+import { db } from '../../../db'
 import { describe, it, expect, beforeEach, beforeAll, afterAll } from 'vitest'
 import { buildApp } from '../../../app'
 import { clearDatabase } from '../../../tests/helpers/setupTestDB'
@@ -9,17 +12,29 @@ describe('GetParticipanteByIdUseCase (Integração E2E)', () => {
 
   beforeAll(async () => {
     app = buildApp()
-    await app.ready()
+    try { await app.listen({ port: 3005 }) } catch {}
   })
 
   afterAll(async () => {
     await app.close()
   })
 
+  let adminToken: string
+  async function setupAuth() {
+    const email = 'admin_' + Date.now() + Math.random().toString(36).substring(7) + '@example.com'
+    await fetch('http://localhost:3005/api/v1/auth/sign-up/email', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password: 'Password123!', name: 'Admin' }) })
+    await db.update(schema.user).set({ role: 'admin' }).where(eq(schema.user.email, email))
+    const res = await fetch('http://localhost:3005/api/v1/auth/sign-in/email', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password: 'Password123!' }) })
+    const body = await res.json()
+    adminToken = body.token
+  }
+
   beforeEach(async () => {
     await clearDatabase()
+    await setupAuth()
 
     const response = await app.inject({
+      headers: { authorization: `Bearer ${adminToken}` },
       method: 'POST',
       url: '/api/v1/participantes',
       payload: { nome: 'Carlos', genero: 'M', email: 'carlos@test.com' }
@@ -30,6 +45,7 @@ describe('GetParticipanteByIdUseCase (Integração E2E)', () => {
 
   it('deve retornar 200 e os dados do participante existente', async () => {
     const response = await app.inject({
+      headers: { authorization: `Bearer ${adminToken}` },
       method: 'GET',
       url: `/api/v1/participantes/${createdId}`
     })
@@ -42,6 +58,7 @@ describe('GetParticipanteByIdUseCase (Integração E2E)', () => {
     // Gerando um UUID fake que não tem no banco
     const fakeUuid = '00000000-0000-0000-0000-000000000000'
     const response = await app.inject({
+      headers: { authorization: `Bearer ${adminToken}` },
       method: 'GET',
       url: `/api/v1/participantes/${fakeUuid}`
     })
