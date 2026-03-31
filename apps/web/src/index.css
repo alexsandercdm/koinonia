@@ -1,0 +1,47 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root, .dark {
+    /* Midnight Koinonia Theme (The Digital Sanctuary) */
+    --background: 276 40% 10%; /* #1b0f23 */
+    --foreground: 270 20% 95%; /* #f1eef4 */
+
+    --card: 271 27% 12%; /* #24162e */
+    --card-foreground: 270 20% 95%; /* #f1eef4 */
+
+    --popover: 271 27% 12%; /* #24162e */
+    --popover-foreground: 270 20% 95%; /* #f1eef4 */
+
+    --primary: 275 100% 26%; /* #4d0085 */
+    --primary-foreground: 0 0% 100%; /* #ffffff */
+
+    --secondary: 45 100% 50%; /* #ffbf00 */
+    --secondary-foreground: 44 100% 8%; /* #281d00 */
+
+    --muted: 271 57% 17%; /* #2d1345 */
+    --muted-foreground: 283 15% 79%; /* #cec2d3 */
+
+    --accent: 271 57% 17%; /* #2d1345 */
+    --accent-foreground: 45 100% 50%; /* #ffbf00 */
+
+    --destructive: 6 100% 84%; /* #ffb4ab */
+    --destructive-foreground: 356 100% 21%; /* #690005 */
+
+    --border: 277 9% 29%; /* #4c4451 */
+    --input: 277 9% 29%; /* #4c4451 */
+    --ring: 45 100% 50%; /* #ffbf00 */
+
+    --radius: 0.5rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+}

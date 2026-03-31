@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: koinonia-postgres-dev
+    environment:
+      POSTGRES_USER: koinonia
+      POSTGRES_PASSWORD: koinonia123
+      POSTGRES_DB: koinonia
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
