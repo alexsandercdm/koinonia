@@ -7,6 +7,7 @@ import staticFiles from '@fastify/static'
 import path from 'path'
 import { env } from './config/env'
 import { participanteRoutes } from './modules/pessoas/routes/participantes'
+import { inscricaoRoutes } from './modules/inscricoes/routes/inscricoes'
 import { authRoutes } from './routes/auth'
 import { customAuthRoutes } from './routes/custom-auth'
 
@@ -50,6 +51,7 @@ export const buildApp = () => {
   app.register(authRoutes)
   app.register(customAuthRoutes)
   app.register(participanteRoutes, { prefix: '/api/v1' })
+  app.register(inscricaoRoutes, { prefix: '/api/v1' })
 
   return app
 }

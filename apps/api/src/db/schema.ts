@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, text, date, numeric, integer, timestamp, boolean, index, jsonb } from 'drizzle-orm/pg-core'
+import { pgTable, uuid, varchar, text, date, numeric, integer, timestamp, boolean, index, jsonb, uniqueIndex } from 'drizzle-orm/pg-core'
 import { relations } from 'drizzle-orm'
 
 // Import Better Auth schema
@@ -71,14 +71,22 @@ export const eventos = pgTable('eventos', {
   descricao: text('descricao'),
   data_inicio: date('data_inicio').notNull(),
   data_fim: date('data_fim').notNull(),
-  local_id: uuid('local_id').notNull().references(() => locais.id),
-  valor_inscricao_encontrista: numeric('valor_inscricao_encontrista', { precision: 10, scale: 2 }).notNull(),
-  valor_inscricao_servo: numeric('valor_inscricao_servo', { precision: 10, scale: 2 }).default('0'),
+  local_id: uuid('local_id').references(() => locais.id), // Made optional for Phase 2
   capacidade_maxima: integer('capacidade_maxima').notNull(),
-  status: varchar('status', { length: 20 }).notNull(), // 'rascunho', 'aberto', 'encerrado', 'realizado'
+  status: varchar('status', { length: 20 }).notNull().default('rascunho'), // 'rascunho', 'aberto', 'encerrado', 'realizado', 'cancelado'
   created_at: timestamp('created_at').defaultNow(),
   updated_at: timestamp('updated_at').defaultNow(),
 })
+
+export const configuracaoEvento = pgTable('configuracao_evento', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  evento_id: uuid('evento_id').notNull().references(() => eventos.id),
+  papel: varchar('papel', { length: 20 }).notNull(), // 'encontrista', 'servo'
+  valor: numeric('valor', { precision: 10, scale: 2 }).notNull(),
+  created_at: timestamp('created_at').defaultNow(),
+}, (table) => ({
+  eventoPapelUnique: uniqueIndex('configuracao_evento_evento_papel_unique').on(table.evento_id, table.papel),
+}))
 
 export const inscricoes = pgTable('inscricoes', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -86,13 +94,14 @@ export const inscricoes = pgTable('inscricoes', {
   pessoa_id: uuid('pessoa_id').notNull().references(() => pessoas.id),
   papel: varchar('papel', { length: 20 }).notNull(), // 'encontrista', 'servo'
   valor_total: numeric('valor_total', { precision: 10, scale: 2 }).notNull(),
-  valor_pago: numeric('valor_pago', { precision: 10, scale: 2 }).default('0'),
-  status_pagamento: varchar('status_pagamento', { length: 20 }),
+  status: varchar('status', { length: 20 }).notNull().default('PENDENTE'), // 'PENDENTE', 'PAGO_PARCIAL', 'PAGO_TOTAL', 'LISTA_ESPERA', 'CANCELADA'
   cama_id: uuid('cama_id').references(() => camas.id),
   observacoes: text('observacoes'),
   created_at: timestamp('created_at').defaultNow(),
   updated_at: timestamp('updated_at').defaultNow(),
-})
+}, (table) => ({
+  eventoPessoaUnique: uniqueIndex('inscricoes_evento_pessoa_unique').on(table.evento_id, table.pessoa_id),
+}))
 
 export const pagamentos = pgTable('pagamentos', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -101,7 +110,7 @@ export const pagamentos = pgTable('pagamentos', {
   forma_pagamento: varchar('forma_pagamento', { length: 20 }).notNull(), // 'pix', 'dinheiro', 'cartao', 'outro'
   data_pagamento: date('data_pagamento').notNull(),
   comprovante_url: text('comprovante_url'),
-  registrado_por: uuid('registrado_por'),
+  registrado_por: text('registrado_por'),
   created_at: timestamp('created_at').defaultNow(),
 })
 
@@ -113,7 +122,7 @@ export const despesas = pgTable('despesas', {
   valor: numeric('valor', { precision: 10, scale: 2 }).notNull(),
   data_despesa: date('data_despesa').notNull(),
   comprovante_url: text('comprovante_url'),
-  registrado_por: uuid('registrado_por'),
+  registrado_por: text('registrado_por'),
   created_at: timestamp('created_at').defaultNow(),
 })
 
@@ -154,8 +163,16 @@ export const eventosRelations = relations(eventos, ({ many, one }) => ({
     fields: [eventos.local_id],
     references: [locais.id],
   }),
+  configuracoes: many(configuracaoEvento),
   inscricoes: many(inscricoes),
   despesas: many(despesas),
+}))
+
+export const configuracaoEventoRelations = relations(configuracaoEvento, ({ one }) => ({
+  evento: one(eventos, {
+    fields: [configuracaoEvento.evento_id],
+    references: [eventos.id],
+  }),
 }))
 
 export const inscricoesRelations = relations(inscricoes, ({ many, one }) => ({
@@ -210,6 +227,8 @@ export type Cama = typeof camas.$inferSelect
 export type CreateCama = typeof camas.$inferInsert
 export type Evento = typeof eventos.$inferSelect
 export type CreateEvento = typeof eventos.$inferInsert
+export type ConfiguracaoEvento = typeof configuracaoEvento.$inferSelect
+export type CreateConfiguracaoEvento = typeof configuracaoEvento.$inferInsert
 export type Inscricao = typeof inscricoes.$inferSelect
 export type CreateInscricao = typeof inscricoes.$inferInsert
 export type Pagamento = typeof pagamentos.$inferSelect
