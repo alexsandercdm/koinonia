@@ -6,6 +6,7 @@ import { LoginPage } from './pages/login'
 import { RegisterPage } from './pages/register'
 import { DashboardPage } from './pages/dashboard'
 import { ParticipantsPage } from './pages/ParticipantsPage'
+import { AcomodacoesPage } from './pages/AcomodacoesPage'
 
 const queryClient = new QueryClient()
 
@@ -16,21 +17,29 @@ function App() {
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
-          <Route 
-            path="/dashboard" 
+          <Route
+            path="/dashboard"
             element={
               <ProtectedRoute>
                 <DashboardPage />
               </ProtectedRoute>
-            } 
+            }
           />
-          <Route 
-            path="/participantes" 
+          <Route
+            path="/participantes"
             element={
               <ProtectedRoute>
                 <ParticipantsPage />
               </ProtectedRoute>
-            } 
+            }
+          />
+          <Route
+            path="/acomodacoes"
+            element={
+              <ProtectedRoute>
+                <AcomodacoesPage />
+              </ProtectedRoute>
+            }
           />
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
         </Routes>

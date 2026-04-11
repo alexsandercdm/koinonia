@@ -1,10 +1,12 @@
 import React from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuthContext } from '../contexts/auth-context'
 import { Button } from '../components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card'
 
 export function DashboardPage() {
   const { user, logout } = useAuthContext()
+  const navigate = useNavigate()
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -65,7 +67,7 @@ export function DashboardPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <Button className="w-full">Ver Mapa</Button>
+                <Button className="w-full" onClick={() => navigate('/acomodacoes')}>Ver Mapa</Button>
               </CardContent>
             </Card>
 
