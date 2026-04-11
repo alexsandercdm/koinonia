@@ -2,6 +2,17 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { apiFetch } from '../lib/api'
 import type { Local, Quarto, Cama } from '@koinonia/shared'
 
+// --------------- Evento (for filter) ---------------
+
+export interface EventoListItem {
+  id: string
+  nome: string
+  local_id: string | null
+  status: string
+  data_inicio: string
+  data_fim: string
+}
+
 // --------------- Types ---------------
 
 export interface LocalPayload {
@@ -58,6 +69,17 @@ export const acomodacoesKeys = {
   quartos: (localId: string) => [...acomodacoesKeys.all, 'quartos', localId] as const,
   camas: (quartoId: string) => [...acomodacoesKeys.all, 'camas', quartoId] as const,
   mapa: (eventoId: string) => [...acomodacoesKeys.all, 'mapa', eventoId] as const,
+  eventos: () => ['eventos'] as const,
+}
+
+// --------------- Eventos Query (for filter) ---------------
+
+export function useEventos() {
+  return useQuery({
+    queryKey: acomodacoesKeys.eventos(),
+    queryFn: () => apiFetch<EventoListItem[]>('/api/v1/eventos'),
+    staleTime: 1000 * 60 * 5,
+  })
 }
 
 // --------------- Locais Queries ---------------
@@ -156,7 +178,7 @@ export function useUpdateQuarto() {
   return useMutation({
     mutationFn: ({
       id,
-      local_id,
+      local_id: _local_id,
       payload,
     }: {
       id: string
@@ -194,7 +216,7 @@ export function useUpdateCama() {
   return useMutation({
     mutationFn: ({
       id,
-      quarto_id,
+      quarto_id: _quarto_id,
       payload,
     }: {
       id: string
