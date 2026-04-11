@@ -22,18 +22,35 @@ const statusBadgeStyles: Record<CamaStatus, string> = {
 
 interface CamaCardProps {
   cama: CamaMapaItem
-  /** Placeholder callback — will be activated in plan 03-04 */
-  onAssign?: (camaId: string) => void
-  /** Placeholder callback — will be activated in plan 03-04 */
-  onRelease?: (inscricaoId: string) => void
+  onAssign?: (cama: CamaMapaItem) => void
+  onRelease?: (cama: CamaMapaItem) => void
 }
 
-export function CamaCard({ cama }: CamaCardProps) {
+export function CamaCard({ cama, onAssign, onRelease }: CamaCardProps) {
   const status = getStatus(cama)
+
+  const handleClick = () => {
+    if (cama.bloqueada) return
+    if (status === 'Disponivel' && onAssign) onAssign(cama)
+    if (status === 'Ocupado' && onRelease) onRelease(cama)
+  }
+
+  const isInteractive = !cama.bloqueada && (onAssign || onRelease)
 
   return (
     <div
-      className={`rounded-lg border-2 p-3 space-y-1 transition-colors min-h-[72px] ${statusStyles[status]}`}
+      className={`rounded-lg border-2 p-3 space-y-1 transition-colors min-h-[72px] ${statusStyles[status]} ${isInteractive ? 'cursor-pointer hover:opacity-80 active:scale-95' : ''}`}
+      onClick={isInteractive ? handleClick : undefined}
+      role={isInteractive ? 'button' : undefined}
+      tabIndex={isInteractive ? 0 : undefined}
+      onKeyDown={isInteractive ? (e) => e.key === 'Enter' && handleClick() : undefined}
+      aria-label={
+        isInteractive
+          ? status === 'Disponivel'
+            ? `Atribuir cama ${cama.identificacao}`
+            : `Liberar cama ${cama.identificacao}`
+          : undefined
+      }
     >
       <div className="flex items-center justify-between gap-2">
         <span className="font-semibold text-sm leading-tight">{cama.identificacao}</span>

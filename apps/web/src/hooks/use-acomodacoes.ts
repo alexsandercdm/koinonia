@@ -195,6 +195,70 @@ export function useUpdateQuarto() {
   })
 }
 
+// --------------- Candidatos sem cama ---------------
+
+export interface InscricaoSemCama {
+  id: string
+  participante_nome: string
+  participante_genero: string | null
+}
+
+export const inscricoesSemCamaKeys = {
+  list: (eventoId: string, q?: string) =>
+    ['inscricoes-sem-cama', eventoId, q ?? ''] as const,
+}
+
+export function useInscricoesSemCama(eventoId: string, q: string) {
+  return useQuery({
+    queryKey: inscricoesSemCamaKeys.list(eventoId, q),
+    queryFn: () => {
+      const params = q ? `?q=${encodeURIComponent(q)}` : ''
+      return apiFetch<InscricaoSemCama[]>(
+        `/api/v1/eventos/${eventoId}/inscricoes-sem-cama${params}`
+      )
+    },
+    enabled: !!eventoId,
+    staleTime: 0,
+  })
+}
+
+// --------------- Atribuir / Liberar cama ---------------
+
+export function useAtribuirCama(eventoId: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({
+      camaId,
+      inscricaoId,
+    }: {
+      camaId: string
+      inscricaoId: string
+    }) =>
+      apiFetch<void>(`/api/v1/acomodacoes/camas/${camaId}/atribuir`, {
+        method: 'POST',
+        body: JSON.stringify({ inscricao_id: inscricaoId }),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: acomodacoesKeys.mapa(eventoId) })
+      queryClient.invalidateQueries({ queryKey: inscricoesSemCamaKeys.list(eventoId) })
+    },
+  })
+}
+
+export function useliberarCama(eventoId: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ camaId }: { camaId: string }) =>
+      apiFetch<void>(`/api/v1/acomodacoes/camas/${camaId}/atribuir`, {
+        method: 'DELETE',
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: acomodacoesKeys.mapa(eventoId) })
+      queryClient.invalidateQueries({ queryKey: inscricoesSemCamaKeys.list(eventoId) })
+    },
+  })
+}
+
 // --------------- Cama Mutations ---------------
 
 export function useCreateCama() {

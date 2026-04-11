@@ -5,7 +5,10 @@ import { Button } from '../components/ui/button'
 import { AcomodacoesFilters } from '../components/acomodacoes/AcomodacoesFilters'
 import { EstruturaAcomodacaoPanel } from '../components/acomodacoes/EstruturaAcomodacaoPanel'
 import { MapaQuartosGrid } from '../components/acomodacoes/MapaQuartosGrid'
+import { AssignCamaSheet } from '../components/acomodacoes/AssignCamaSheet'
+import { ExportMapaPdfButton } from '../components/acomodacoes/ExportMapaPdfButton'
 import { useEventos, useMapaAcomodacao } from '../hooks/use-acomodacoes'
+import type { CamaMapaItem } from '../hooks/use-acomodacoes'
 
 type UserRole = 'admin' | 'lider' | 'servo'
 
@@ -17,6 +20,9 @@ export function AcomodacoesPage() {
 
   const [selectedEventoId, setSelectedEventoId] = useState<string>('')
   const [activeTab, setActiveTab] = useState<'mapa' | 'estrutura'>('mapa')
+
+  const [sheetOpen, setSheetOpen] = useState(false)
+  const [selectedCama, setSelectedCama] = useState<CamaMapaItem | null>(null)
 
   const { data: eventos = [], isLoading: eventosLoading } = useEventos()
 
@@ -31,6 +37,15 @@ export function AcomodacoesPage() {
     nome: e.nome,
     local_id: e.local_id,
   }))
+
+  const selectedEvento = eventos.find((e) => e.id === selectedEventoId)
+
+  const canWrite = userRole === 'admin' || userRole === 'lider'
+
+  function handleCamaAction(cama: CamaMapaItem) {
+    setSelectedCama(cama)
+    setSheetOpen(true)
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -126,12 +141,19 @@ export function AcomodacoesPage() {
                 </p>
               </div>
             ) : mapa ? (
-              <MapaQuartosGrid
-                mapa={mapa}
-                // Placeholder callbacks — will be activated in plan 03-04
-                onAssign={undefined}
-                onRelease={undefined}
-              />
+              <>
+                <div className="flex justify-end mb-3">
+                  <ExportMapaPdfButton
+                    mapa={mapa}
+                    eventoNome={selectedEvento?.nome ?? 'evento'}
+                  />
+                </div>
+                <MapaQuartosGrid
+                  mapa={mapa}
+                  onAssign={canWrite ? handleCamaAction : undefined}
+                  onRelease={canWrite ? handleCamaAction : undefined}
+                />
+              </>
             ) : null}
           </section>
         )}
@@ -148,6 +170,15 @@ export function AcomodacoesPage() {
           </section>
         )}
       </main>
+
+      {/* Assignment / release sheet */}
+      <AssignCamaSheet
+        open={sheetOpen}
+        onOpenChange={setSheetOpen}
+        cama={selectedCama}
+        eventoId={selectedEventoId}
+        userRole={userRole}
+      />
     </div>
   )
 }

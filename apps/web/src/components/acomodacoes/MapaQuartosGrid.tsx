@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card'
 import { CamaCard } from './CamaCard'
-import type { MapaAcomodacaoResponse, QuartoMapaItem } from '../../hooks/use-acomodacoes'
+import type { MapaAcomodacaoResponse, QuartoMapaItem, CamaMapaItem } from '../../hooks/use-acomodacoes'
 
 const generoLabel: Record<string, string> = {
   M: 'Masculino',
@@ -10,13 +10,13 @@ const generoLabel: Record<string, string> = {
 
 interface QuartoCardProps {
   quarto: QuartoMapaItem
-  onAssign?: (camaId: string) => void
-  onRelease?: (inscricaoId: string) => void
+  onAssign?: (cama: CamaMapaItem) => void
+  onRelease?: (cama: CamaMapaItem) => void
 }
 
 function QuartoCard({ quarto, onAssign, onRelease }: QuartoCardProps) {
   return (
-    <Card className="overflow-hidden">
+    <Card className="overflow-hidden" data-quarto-id={quarto.id}>
       <CardHeader className="pb-2 bg-gray-50">
         <div className="flex items-start justify-between gap-2">
           <CardTitle className="text-base leading-tight">{quarto.nome}</CardTitle>
@@ -52,9 +52,8 @@ function QuartoCard({ quarto, onAssign, onRelease }: QuartoCardProps) {
 
 interface MapaQuartosGridProps {
   mapa: MapaAcomodacaoResponse
-  /** Placeholder callbacks — will be activated in plan 03-04 */
-  onAssign?: (camaId: string) => void
-  onRelease?: (inscricaoId: string) => void
+  onAssign?: (cama: CamaMapaItem) => void
+  onRelease?: (cama: CamaMapaItem) => void
 }
 
 export function MapaQuartosGrid({ mapa, onAssign, onRelease }: MapaQuartosGridProps) {
@@ -81,7 +80,7 @@ export function MapaQuartosGrid({ mapa, onAssign, onRelease }: MapaQuartosGridPr
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" data-testid="mapa-quartos-grid">
       {mapa.quartos.map((quarto) => (
         <QuartoCard
           key={quarto.id}
