@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-03-31T04:35:58.649Z"
+last_updated: "2026-04-12T12:00:00.000Z"
 progress:
-  total_phases: 4
+  total_phases: 5
   completed_phases: 1
   total_plans: 4
   completed_plans: 4
@@ -18,7 +18,7 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-03-31)
 
 **Core value:** Gestão de participantes e alocação de quartos com regras estritas de gênero.
-**Current focus:** Phase 02 — core-business-inscricoes-eventos
+**Current focus:** Phase 05 — fase-0-frontend-revis-o-do-projeto-e-mapeamento-de-tarefas-do-roadmap
 
 ## Developer Preferences
 
@@ -33,3 +33,14 @@ See: `.planning/PROJECT.md` (updated 2026-03-31)
 
 - **Banco de Dados/ORM**: PostgreSQL com Drizzle ORM (Modular Monolith)
 - **Autenticação**: Better Auth selecionado sobre Supabase Auth.
+
+## Accumulated Context
+
+### Roadmap Evolution
+
+- Phase 5 added: Fase 0 frontend: revisão do projeto e mapeamento de tarefas do roadmap
+
+### Session Log
+
+- 2026-04-12: Phase 5 context gathered
+  - Resume file: `.planning/phases/05-fase-0-frontend-revis-o-do-projeto-e-mapeamento-de-tarefas-do-roadmap/05-CONTEXT.md`
