@@ -6,6 +6,7 @@ import multipart from '@fastify/multipart'
 import staticFiles from '@fastify/static'
 import path from 'path'
 import { env } from './config/env'
+import { acomodacaoRoutes } from './modules/acomodacoes/routes/acomodacoes'
 import { participanteRoutes } from './modules/pessoas/routes/participantes'
 import { inscricaoRoutes } from './modules/inscricoes/routes/inscricoes'
 import { authRoutes } from './routes/auth'
@@ -17,6 +18,10 @@ export const buildApp = () => {
       level: env.NODE_ENV === 'development' ? 'debug' : 'error',
     },
   })
+
+  // console.log('Ambiente:', env.NODE_ENV);
+  // console.log('CORS Origin:', env.CORS_ORIGIN);
+  // console.log('JWT Secret:', env.JWT_SECRET);
 
   // Register plugins
   app.register(cors, {
@@ -48,10 +53,11 @@ export const buildApp = () => {
   })
 
   // Register routes
-  app.register(authRoutes)
-  app.register(customAuthRoutes)
+  app.register(customAuthRoutes, { prefix: '/api/v1/auth' })
+  app.register(authRoutes, { prefix: '/api/v1/auth' })
   app.register(participanteRoutes, { prefix: '/api/v1' })
   app.register(inscricaoRoutes, { prefix: '/api/v1' })
+  app.register(acomodacaoRoutes, { prefix: '/api/v1' })
 
   return app
 }

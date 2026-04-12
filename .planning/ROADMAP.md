@@ -24,3 +24,13 @@
 **Requirements:** FIN-01, FIN-02, FIN-03, FIN-04, ADM-01.
 - Log de ações sensíveis (audit_log).
 - Dashboards com métricas chave (TanStack Query/Recharts).
+
+### Phase 5: Fase 0 frontend: revisão do projeto e mapeamento de tarefas do roadmap
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 4
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 5 to break down)

@@ -189,11 +189,11 @@ export function AssignCamaSheet({
                     <li key={c.id} className="flex items-center justify-between px-3 py-3 bg-white">
                       <div className="min-w-0">
                         <p className="text-sm font-medium text-gray-900 truncate">
-                          {c.participante_nome}
+                          {c.nome}
                         </p>
-                        {c.participante_genero && (
+                        {c.genero && (
                           <p className="text-xs text-gray-500">
-                            {c.participante_genero === 'M' ? 'Masculino' : c.participante_genero === 'F' ? 'Feminino' : c.participante_genero}
+                            {c.genero === 'M' ? 'Masculino' : c.genero === 'F' ? 'Feminino' : c.genero}
                           </p>
                         )}
                       </div>
