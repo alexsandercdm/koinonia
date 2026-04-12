@@ -1,3 +1,4 @@
+/// <reference types="vite/client" />
 import { authClient } from './auth'
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001'

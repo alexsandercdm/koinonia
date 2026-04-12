@@ -175,7 +175,7 @@ export function useUpdateQuarto() {
   return useMutation({
     mutationFn: ({
       id,
-      localId,
+      localId: _localId,
       payload,
     }: {
       id: string
@@ -186,7 +186,7 @@ export function useUpdateQuarto() {
         method: 'PATCH',
         body: JSON.stringify(payload),
       }),
-    onSuccess: (_data, { localId }) => {
+    onSuccess: (_data, { localId: _localId }) => {
       queryClient.invalidateQueries({ queryKey: acomodacoesKeys.locais() })
     },
   })
@@ -274,7 +274,7 @@ export function useUpdateCama() {
   return useMutation({
     mutationFn: ({
       id,
-      quartoId,
+      quartoId: _quartoId,
       payload,
     }: {
       id: string
@@ -285,7 +285,7 @@ export function useUpdateCama() {
         method: 'PATCH',
         body: JSON.stringify(payload),
       }),
-    onSuccess: (_data, { quartoId }) => {
+    onSuccess: (_data, { quartoId: _quartoId }) => {
       queryClient.invalidateQueries({ queryKey: acomodacoesKeys.locais() })
     },
   })
