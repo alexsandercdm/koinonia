@@ -117,12 +117,41 @@ export async function exportMapaAcomodacao(options: ExportOptions): Promise<void
   const imgWidth = pageWidth - margin * 2
   const imgHeight = (canvas.height / canvas.width) * imgWidth
 
-  if (yPos + imgHeight > pageHeight - margin) {
-    pdf.addPage()
-    yPos = margin
-  }
+  // Slice tall images across multiple pages
+  const contentHeight = pageHeight - margin * 2
+  const scale = imgHeight / canvas.height
+  let remainingImgHeight = imgHeight
+  let srcYPx = 0
 
-  pdf.addImage(imgData, 'PNG', margin, yPos, imgWidth, imgHeight)
+  while (remainingImgHeight > 0) {
+    const availableOnPage = contentHeight - (yPos - margin)
+    if (availableOnPage <= 0) {
+      pdf.addPage()
+      yPos = margin
+      continue
+    }
+    const sliceImgHeight = Math.min(remainingImgHeight, availableOnPage)
+    const sliceSrcHeightPx = sliceImgHeight / scale
+
+    // Crop canvas slice into a temporary canvas
+    const tmpCanvas = document.createElement('canvas')
+    tmpCanvas.width = canvas.width
+    tmpCanvas.height = sliceSrcHeightPx
+    const ctx = tmpCanvas.getContext('2d')!
+    ctx.drawImage(canvas, 0, srcYPx, canvas.width, sliceSrcHeightPx, 0, 0, canvas.width, sliceSrcHeightPx)
+    const sliceData = tmpCanvas.toDataURL('image/png')
+
+    pdf.addImage(sliceData, 'PNG', margin, yPos, imgWidth, sliceImgHeight)
+
+    remainingImgHeight -= sliceImgHeight
+    srcYPx += sliceSrcHeightPx
+    yPos += sliceImgHeight
+
+    if (remainingImgHeight > 0) {
+      pdf.addPage()
+      yPos = margin
+    }
+  }
 
   // Sanitize filename
   const safeNome = eventoNome.replace(/[^a-zA-Z0-9\-_\u00C0-\u017E ]/g, '').trim().replace(/\s+/g, '-')
