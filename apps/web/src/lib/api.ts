@@ -26,6 +26,11 @@ export async function apiFetch<T>(path: string, options?: RequestInit): Promise<
     },
   })
 
+  if (response.status === 401) {
+    window.location.replace('/login')
+    throw new Error('Unauthenticated')
+  }
+
   if (!response.ok) {
     const errorBody = await response.json().catch(() => ({}))
     const message =
