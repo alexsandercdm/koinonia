@@ -40,10 +40,11 @@ function LocalForm({ initial, onSave, onCancel, isSaving }: LocalFormProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    const parsedCapacidade = capacidadeTotal ? parseInt(capacidadeTotal, 10) : undefined
     onSave({
       nome,
       endereco: endereco || undefined,
-      capacidade_total: capacidadeTotal ? parseInt(capacidadeTotal, 10) : undefined,
+      capacidade_total: parsedCapacidade && !isNaN(parsedCapacidade) ? parsedCapacidade : undefined,
     })
   }
 
@@ -118,11 +119,12 @@ function QuartoForm({ localId, initial, onSave, onCancel, isSaving }: QuartoForm
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    const parsedCapacidade = capacidade ? parseInt(capacidade, 10) : 0
     onSave({
       local_id: localId,
       nome,
       genero_permitido: generoPermitido,
-      capacidade: parseInt(capacidade, 10),
+      capacidade: parsedCapacidade && !isNaN(parsedCapacidade) ? parsedCapacidade : 1,
     })
   }
 
@@ -425,11 +427,14 @@ export function EstruturaAcomodacaoPanel({ userRole }: EstruturaAcomodacaoPanelP
                     if (editingQuarto) {
                       await updateQuarto.mutateAsync({
                         id: editingQuarto.id!,
-                        local_id: selectedLocalId,
+                        localId: selectedLocalId,
                         payload: data,
                       })
                     } else {
-                      await createQuarto.mutateAsync(data)
+                      await createQuarto.mutateAsync({
+                        localId: selectedLocalId,
+                        payload: data,
+                      })
                     }
                     setShowQuartoForm(false)
                     setEditingQuarto(null)
@@ -522,11 +527,14 @@ export function EstruturaAcomodacaoPanel({ userRole }: EstruturaAcomodacaoPanelP
                     if (editingCama) {
                       await updateCama.mutateAsync({
                         id: editingCama.id!,
-                        quarto_id: selectedQuartoId,
+                        quartoId: selectedQuartoId,
                         payload: data,
                       })
                     } else {
-                      await createCama.mutateAsync(data)
+                      await createCama.mutateAsync({
+                        quartoId: selectedQuartoId,
+                        payload: data,
+                      })
                     }
                     setShowCamaForm(false)
                     setEditingCama(null)
