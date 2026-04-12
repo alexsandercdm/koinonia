@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { apiFetch } from '../lib/api'
-import type { Local, Quarto, Cama } from '@koinonia/shared'
+import type { Local, Quarto, Cama, MapaAcomodacao, InscricaoDisponivel } from '@koinonia/shared'
 
 // --------------- Evento (for filter) ---------------
 
@@ -54,11 +54,8 @@ export interface QuartoMapaItem {
   camas: CamaMapaItem[]
 }
 
-export interface MapaAcomodacaoResponse {
-  evento_id: string
-  local_id: string | null
-  quartos: QuartoMapaItem[]
-}
+// Nota: MapaAcomodacaoResponse foi removido — usar MapaAcomodacao do @koinonia/shared
+// O tipo do shared tem a estrutura correta: { evento, local, quartos[] }
 
 // --------------- Query Keys ---------------
 
@@ -120,7 +117,7 @@ export function useMapaAcomodacao(eventoId: string) {
   return useQuery({
     queryKey: acomodacoesKeys.mapa(eventoId),
     queryFn: () =>
-      apiFetch<MapaAcomodacaoResponse>(`/api/v1/eventos/${eventoId}/mapa-acomodacao`),
+      apiFetch<MapaAcomodacao>(`/api/v1/eventos/${eventoId}/mapa-acomodacao`),
     enabled: !!eventoId,
     staleTime: 1000 * 60 * 5, // 5 minutes — offline grace for field operations
   })
@@ -162,13 +159,13 @@ export function useUpdateLocal() {
 export function useCreateQuarto() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (payload: QuartoPayload) =>
-      apiFetch<Quarto>('/api/v1/acomodacoes/quartos', {
+    mutationFn: ({ localId, payload }: { localId: string; payload: Omit<QuartoPayload, 'local_id'> }) =>
+      apiFetch<Quarto>(`/api/v1/acomodacoes/locais/${localId}/quartos`, {
         method: 'POST',
         body: JSON.stringify(payload),
       }),
-    onSuccess: (_data, { local_id }) => {
-      queryClient.invalidateQueries({ queryKey: acomodacoesKeys.quartos(local_id) })
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: acomodacoesKeys.locais() })
     },
   })
 }
@@ -178,30 +175,27 @@ export function useUpdateQuarto() {
   return useMutation({
     mutationFn: ({
       id,
-      local_id: _local_id,
+      localId,
       payload,
     }: {
       id: string
-      local_id: string
-      payload: Partial<QuartoPayload>
+      localId: string
+      payload: Partial<Omit<QuartoPayload, 'local_id'>>
     }) =>
       apiFetch<Quarto>(`/api/v1/acomodacoes/quartos/${id}`, {
         method: 'PATCH',
         body: JSON.stringify(payload),
       }),
-    onSuccess: (_data, { local_id }) => {
-      queryClient.invalidateQueries({ queryKey: acomodacoesKeys.quartos(local_id) })
+    onSuccess: (_data, { localId }) => {
+      queryClient.invalidateQueries({ queryKey: acomodacoesKeys.locais() })
     },
   })
 }
 
 // --------------- Candidatos sem cama ---------------
 
-export interface InscricaoSemCama {
-  id: string
-  participante_nome: string
-  participante_genero: string | null
-}
+// Nota: InscricaoSemCama foi removido — usar InscricaoDisponivel do @koinonia/shared
+// O tipo do shared tem os campos corretos: { id, nome, genero, papel, status }
 
 export const inscricoesSemCamaKeys = {
   list: (eventoId: string, q?: string) =>
@@ -213,7 +207,7 @@ export function useInscricoesSemCama(eventoId: string, q: string, enabled = true
     queryKey: inscricoesSemCamaKeys.list(eventoId, q),
     queryFn: () => {
       const params = q ? `?q=${encodeURIComponent(q)}` : ''
-      return apiFetch<InscricaoSemCama[]>(
+      return apiFetch<InscricaoDisponivel[]>(
         `/api/v1/eventos/${eventoId}/inscricoes-sem-cama${params}`
       )
     },
@@ -249,7 +243,7 @@ export function useLiberarCama(eventoId: string) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: ({ camaId }: { camaId: string }) =>
-      apiFetch<void>(`/api/v1/acomodacoes/camas/${camaId}/atribuicao`, {
+      apiFetch<void>(`/api/v1/acomodacoes/camas/${camaId}/atribuir`, {
         method: 'DELETE',
       }),
     onSuccess: () => {
@@ -264,13 +258,13 @@ export function useLiberarCama(eventoId: string) {
 export function useCreateCama() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (payload: CamaPayload) =>
-      apiFetch<Cama>('/api/v1/acomodacoes/camas', {
+    mutationFn: ({ quartoId, payload }: { quartoId: string; payload: Omit<CamaPayload, 'quarto_id'> }) =>
+      apiFetch<Cama>(`/api/v1/acomodacoes/quartos/${quartoId}/camas`, {
         method: 'POST',
         body: JSON.stringify(payload),
       }),
-    onSuccess: (_data, { quarto_id }) => {
-      queryClient.invalidateQueries({ queryKey: acomodacoesKeys.camas(quarto_id) })
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: acomodacoesKeys.locais() })
     },
   })
 }
@@ -280,19 +274,19 @@ export function useUpdateCama() {
   return useMutation({
     mutationFn: ({
       id,
-      quarto_id: _quarto_id,
+      quartoId,
       payload,
     }: {
       id: string
-      quarto_id: string
-      payload: Partial<CamaPayload>
+      quartoId: string
+      payload: Partial<Omit<CamaPayload, 'quarto_id'>>
     }) =>
       apiFetch<Cama>(`/api/v1/acomodacoes/camas/${id}`, {
         method: 'PATCH',
         body: JSON.stringify(payload),
       }),
-    onSuccess: (_data, { quarto_id }) => {
-      queryClient.invalidateQueries({ queryKey: acomodacoesKeys.camas(quarto_id) })
+    onSuccess: (_data, { quartoId }) => {
+      queryClient.invalidateQueries({ queryKey: acomodacoesKeys.locais() })
     },
   })
 }
