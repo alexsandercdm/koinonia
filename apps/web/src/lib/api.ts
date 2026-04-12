@@ -4,13 +4,15 @@ const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001'
 
 async function getAuthHeaders(): Promise<Record<string, string>> {
   const session = await authClient.getSession()
-  if (session?.data?.session?.token) {
-    return {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${session.data.session.token}`,
-    }
+  const token = session?.data?.session?.token
+  if (!token) {
+    window.location.replace('/login')
+    throw new Error('Unauthenticated')
   }
-  return { 'Content-Type': 'application/json' }
+  return {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${token}`,
+  }
 }
 
 export async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
