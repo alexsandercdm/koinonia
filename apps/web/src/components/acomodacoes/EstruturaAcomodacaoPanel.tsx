@@ -6,6 +6,7 @@ import { Label } from '../ui/label'
 import {
   useLocais,
   useQuartos,
+  useCamas,
   useCreateLocal,
   useUpdateLocal,
   useCreateQuarto,
@@ -284,6 +285,8 @@ export function EstruturaAcomodacaoPanel({ userRole }: EstruturaAcomodacaoPanelP
   const createCama = useCreateCama()
   const updateCama = useUpdateCama()
 
+  const { data: camas = [], isLoading: camasLoading } = useCamas(selectedQuartoId)
+
   const generoLabel = (g: string) => ({ M: 'Masculino', F: 'Feminino', MISTO: 'Misto' }[g] ?? g)
 
   return (
@@ -532,9 +535,43 @@ export function EstruturaAcomodacaoPanel({ userRole }: EstruturaAcomodacaoPanelP
               </div>
             )}
 
-            <p className="text-sm text-gray-500 py-2">
-              Selecione um quarto para ver as camas no mapa abaixo.
-            </p>
+            {camasLoading ? (
+              <p className="text-sm text-gray-500 py-2">Carregando camas...</p>
+            ) : camas.length === 0 ? (
+              <p className="text-sm text-gray-500 py-2">Nenhuma cama cadastrada.</p>
+            ) : (
+              <div className="space-y-2">
+                {camas.map((cama) => (
+                  <div
+                    key={cama.id}
+                    className="flex items-center justify-between p-3 rounded-lg border border-gray-200"
+                  >
+                    <div>
+                      <p className="font-medium text-sm">{cama.identificacao}</p>
+                      <p className="text-xs text-gray-500">
+                        {cama.tipo}
+                        {cama.bloqueada && (
+                          <span className="ml-2 text-red-500">· Bloqueada</span>
+                        )}
+                      </p>
+                    </div>
+                    {canEdit && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-10 px-3 shrink-0"
+                        onClick={() => {
+                          setEditingCama(cama as Cama & { bloqueada?: boolean })
+                          setShowCamaForm(true)
+                        }}
+                      >
+                        Editar
+                      </Button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
       )}
