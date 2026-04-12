@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container": "#24162e",
+                        "secondary-fixed-dim": "#ffbf00",
+                        "on-primary-container": "#f0dbff",
+                        "on-tertiary": "#1b0f23",
+                        "surface-container-high": "#2d1345",
+                        "outline": "#978d9d",
+                        "surface-dim": "#160d1d",
+                        "inverse-surface": "#e9e0ea",
+                        "secondary-fixed": "#ffefc1",
+                        "on-secondary-container": "#caade1",
+                        "on-surface": "#f1eef4",
+                        "inverse-on-surface": "#342f37",
+                        "on-tertiary-fixed-variant": "#693b11",
+                        "surface-container-highest": "#3a1d56",
+                        "tertiary-fixed-dim": "#fcb883",
+                        "tertiary": "#ffbf00",
+                        "tertiary-fixed": "#ffdcc3",
+                        "on-secondary-fixed": "#281d00",
+                        "on-error-container": "#ffdad6",
+                        "surface-bright": "#2d1345",
+                        "surface": "#1b0f23",
+                        "inverse-primary": "#deb7ff",
+                        "error-container": "#93000a",
+                        "on-background": "#f1eef4",
+                        "on-tertiary-fixed": "#2f1500",
+                        "secondary": "#ffbf00",
+                        "on-primary-fixed-variant": "#63249a",
+                        "surface-variant": "#2d1345",
+                        "on-surface-variant": "#cec2d3",
+                        "on-primary-fixed": "#2c0050",
+                        "tertiary-container": "#512800",
+                        "background": "#1b0f23",
+                        "primary-container": "#4d0085",
+                        "on-primary": "#ffffff",
+                        "primary": "#4d0085",
+                        "error": "#ffb4ab",
+                        "surface-container-low": "#1b0f23",
+                        "on-tertiary-container": "#cb8e5c",
+                        "on-secondary-fixed-variant": "#5a4400",
+                        "outline-variant": "#4c4451",
+                        "primary-fixed-dim": "#deb7ff",
+                        "surface-tint": "#deb7ff",
+                        "primary-fixed": "#f0dbff",
+                        "surface-container-lowest": "#120a18",
+                        "on-secondary": "#1b0f23",
+                        "on-error": "#690005",
+                        "secondary-container": "#563f6c"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Inter"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .bg-radial-gradient {
+            background: radial-gradient(circle at center, #2d1345 0%, #1b0f23 100%);
+        }
+        .glass-panel {
+            background: rgba(45, 19, 69, 0.4);
+            backdrop-filter: blur(20px);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body selection:bg-tertiary selection:text-on-tertiary overflow-hidden">
+<!-- Environmental Radial Glows -->
+<div class="fixed top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/20 blur-[120px] rounded-full pointer-events-none"></div>
+<div class="fixed bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-tertiary/10 blur-[120px] rounded-full pointer-events-none"></div>
+<!-- Layout Container -->
+<div class="flex h-screen w-full relative">
+<!-- SideNavBar Anchor -->
+<aside class="flex flex-col h-full py-6 bg-[#1b0f23] dark:bg-[#1b0f23] h-screen w-64 fixed left-0 top-0 border-r border-[#4d0085]/20 shadow-2xl z-50">
+<div class="px-6 mb-8">
+<div class="text-xl font-black text-[#ffbf00] tracking-tighter italic">Midnight Koinonia</div>
+<div class="text-xs text-slate-400 mt-1 uppercase tracking-widest font-medium">Admin Sanctuary</div>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center px-6 py-3 text-slate-400 hover:text-slate-200 hover:bg-[#2d1345] transition-colors duration-200 group" href="#">
+<span class="material-symbols-outlined mr-3">dashboard</span>
+<span class="font-['Inter'] font-medium text-sm tracking-wide">Dashboard</span>
+</a>
+<a class="flex items-center px-6 py-3 text-[#ffbf00] border-r-2 border-[#ffbf00] bg-[#4d0085]/20 transition-colors duration-200 group" href="#">
+<span class="material-symbols-outlined mr-3" style="font-variation-settings: 'FILL' 1;">event_available</span>
+<span class="font-['Inter'] font-medium text-sm tracking-wide">Inscrições</span>
+</a>
+<a class="flex items-center px-6 py-3 text-slate-400 hover:text-slate-200 hover:bg-[#2d1345] transition-colors duration-200 group" href="#">
+<span class="material-symbols-outlined mr-3">payments</span>
+<span class="font-['Inter'] font-medium text-sm tracking-wide">Gestão Financeira</span>
+</a>
+<a class="flex items-center px-6 py-3 text-slate-400 hover:text-slate-200 hover:bg-[#2d1345] transition-colors duration-200 group" href="#">
+<span class="material-symbols-outlined mr-3">groups</span>
+<span class="font-['Inter'] font-medium text-sm tracking-wide">Escalas</span>
+</a>
+<a class="flex items-center px-6 py-3 text-slate-400 hover:text-slate-200 hover:bg-[#2d1345] transition-colors duration-200 group" href="#">
+<span class="material-symbols-outlined mr-3">settings</span>
+<span class="font-['Inter'] font-medium text-sm tracking-wide">Configurações</span>
+</a>
+</nav>
+<div class="px-6 mt-auto">
+<div class="flex items-center p-3 rounded-xl bg-surface-container-high border border-outline-variant/30">
+<img alt="User Profile Avatar" class="w-10 h-10 rounded-full border border-tertiary/30" data-alt="professional portrait of a church administrator with a warm smile in a modern office environment" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAz6I60FIuOH_pe4Mdqk40YOxnMVFbk8a3jOqrQE0ibLJOaNIHd9JNaiVdyPgO-QV0EK2Zq0MU2qQ0Wcdg_DY2GeCSQ2lwNkQgKspsE9Pow8toO9hsX_rmrGFufOuZcV05ICCeN9sKOjLI0vDaxXZKeVrvzVAtxyhnFYAn5CNe4hxliADHv32mO-Rh-qKBYMkKLdbxX3CZRZ5VEgNNYdoKFFwRdIfDTw6UN8M8sjO8b2G3Hc_4OANnepaJhnQ3XUeTWWOWDzhWOSuc"/>
+<div class="ml-3">
+<p class="text-xs font-bold text-on-surface">Admin Sanctuary</p>
+<p class="text-[10px] text-slate-400">ADMINISTRADOR</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Canvas -->
+<main class="ml-64 flex-1 flex flex-col min-h-screen relative overflow-y-auto">
+<!-- TopNavBar Anchor -->
+<header class="fixed top-0 right-0 left-64 h-16 bg-[#1b0f23]/40 backdrop-blur-xl flex justify-between items-center px-8 w-full z-40 shadow-lg">
+<div class="flex items-center">
+<div class="text-on-surface font-headline font-bold text-lg">Retiros Espirituais</div>
+</div>
+<div class="flex items-center space-x-6">
+<a class="text-slate-300 hover:text-[#ffbf00] font-['Inter'] text-sm uppercase tracking-widest transition-all" href="#">Ver Site</a>
+<div class="flex items-center space-x-4">
+<button class="text-slate-300 hover:text-[#ffbf00] transition-all">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="text-slate-300 hover:text-[#ffbf00] transition-all">
+<span class="material-symbols-outlined">help</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Content Area -->
+<div class="mt-16 p-10 max-w-6xl w-full mx-auto">
+<!-- Page Header -->
+<div class="mb-10">
+<h1 class="text-4xl font-extrabold tracking-tight text-on-surface mb-2">Cadastrar <span class="italic text-tertiary">Acomodação</span></h1>
+<p class="text-slate-400 text-lg">Gerencie os espaços de descanso para o próximo encontro.</p>
+</div>
+<!-- Bento Grid Layout for Form -->
+<div class="grid grid-cols-12 gap-6">
+<!-- Main Form Section -->
+<div class="col-span-12 lg:col-span-8 glass-panel border border-primary-container/30 rounded-2xl p-8 shadow-2xl">
+<form class="space-y-8">
+<!-- Section: Primary Details -->
+<div>
+<h2 class="text-xs uppercase tracking-[0.2em] text-tertiary font-bold mb-6 flex items-center">
+<span class="w-8 h-[1px] bg-tertiary mr-3"></span>
+                                    Informações Básicas
+                                </h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="space-y-2">
+<label class="block text-sm font-medium text-slate-300">Nome do Quarto / Suíte</label>
+<input class="w-full bg-primary/10 border border-primary/30 rounded-lg py-3 px-4 text-on-surface focus:ring-2 focus:ring-tertiary focus:border-tertiary transition-all outline-none" placeholder="Ex: Suíte das Oliveiras" type="text"/>
+</div>
+<div class="space-y-2">
+<label class="block text-sm font-medium text-slate-300">Bloco / Localização</label>
+<input class="w-full bg-primary/10 border border-primary/30 rounded-lg py-3 px-4 text-on-surface focus:ring-2 focus:ring-tertiary focus:border-tertiary transition-all outline-none" placeholder="Ex: Ala Norte - Bloco B" type="text"/>
+</div>
+</div>
+</div>
+<!-- Section: Specifics -->
+<div>
+<h2 class="text-xs uppercase tracking-[0.2em] text-tertiary font-bold mb-6 flex items-center">
+<span class="w-8 h-[1px] bg-tertiary mr-3"></span>
+                                    Configuração de Vagas
+                                </h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="space-y-2">
+<label class="block text-sm font-medium text-slate-300">Ala / Gênero</label>
+<div class="flex space-x-2">
+<button class="flex-1 py-3 px-4 rounded-lg bg-primary-container/40 border border-tertiary text-tertiary font-bold text-sm transition-all hover:bg-primary-container/60" type="button">Masculino</button>
+<button class="flex-1 py-3 px-4 rounded-lg bg-primary/10 border border-primary/30 text-slate-400 font-medium text-sm hover:border-tertiary/50 transition-all" type="button">Feminino</button>
+<button class="flex-1 py-3 px-4 rounded-lg bg-primary/10 border border-primary/30 text-slate-400 font-medium text-sm hover:border-tertiary/50 transition-all" type="button">Misto</button>
+</div>
+</div>
+<div class="space-y-2">
+<label class="block text-sm font-medium text-slate-300">Capacidade Total</label>
+<div class="flex items-center bg-primary/10 border border-primary/30 rounded-lg p-1">
+<button class="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-tertiary transition-colors" type="button">
+<span class="material-symbols-outlined">remove</span>
+</button>
+<input class="bg-transparent border-none text-center w-full focus:ring-0 text-on-surface font-bold text-lg" type="number" value="4"/>
+<button class="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-tertiary transition-colors" type="button">
+<span class="material-symbols-outlined">add</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Section: Observations -->
+<div class="space-y-2">
+<label class="block text-sm font-medium text-slate-300">Observações Adicionais</label>
+<textarea class="w-full bg-primary/10 border border-primary/30 rounded-lg py-3 px-4 text-on-surface focus:ring-2 focus:ring-tertiary focus:border-tertiary transition-all outline-none resize-none" placeholder="Detalhes sobre beliches, ar-condicionado, acessibilidade..." rows="4"></textarea>
+</div>
+<!-- Form Actions -->
+<div class="pt-6 flex justify-end">
+<button class="bg-tertiary text-on-tertiary px-10 py-4 rounded-xl font-black uppercase tracking-widest flex items-center group hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-tertiary/20" type="submit">
+                                    Salvar Acomodação
+                                    <span class="material-symbols-outlined ml-3 group-hover:translate-x-1 transition-transform">save</span>
+</button>
+</div>
+</form>
+</div>
+<!-- Sidebar Info / Visual Support -->
+<div class="col-span-12 lg:col-span-4 space-y-6">
+<!-- Summary Card -->
+<div class="glass-panel border border-primary-container/30 rounded-2xl overflow-hidden shadow-2xl">
+<div class="h-32 w-full relative">
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container via-surface-container/20 to-transparent z-10"></div>
+<img alt="Accommodation Preview" class="w-full h-full object-cover" data-alt="high-end minimalist bedroom with warm lighting and wooden accents, peaceful and sacred atmosphere" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAbzqrRU98fMoBuaHcjuo3nK_KRFY8P_WoynxA7bRsqy9lBeNywCdQg2HDvrh1mja8Spne-pG_9XI5W2BiUq4SpQOeiYcJ45Bjx_r3v34LTRj8L6wXIn5xVCtcR2TQiy2zyNnzDHnG4iFgeOMxmHpPwD-Dr8ZOXGKatr726Fmsrl1m75NSlOIJR0q-LM3Tf68-qInnQ29jSLLpsg5pIGkmaLhwrQpzseY6WlcgydTFkoAyk1g0lCgIKAksqzgZ59qjE2yymz0tNK90"/>
+<div class="absolute top-4 right-4 z-20">
+<span class="bg-tertiary text-on-tertiary text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full italic shadow-lg">Featured</span>
+</div>
+</div>
+<div class="p-6">
+<h3 class="text-lg font-bold mb-2">Visualização Rápida</h3>
+<p class="text-slate-400 text-sm leading-relaxed mb-6">Esta acomodação será listada imediatamente após o salvamento e ficará disponível para alocação de hóspedes.</p>
+<div class="space-y-4">
+<div class="flex items-center text-xs text-slate-300">
+<span class="material-symbols-outlined text-tertiary text-sm mr-2">check_circle</span>
+                                        Visível no Portal do Líder
+                                    </div>
+<div class="flex items-center text-xs text-slate-300">
+<span class="material-symbols-outlined text-tertiary text-sm mr-2">check_circle</span>
+                                        Sincronizado com Gestão Financeira
+                                    </div>
+<div class="flex items-center text-xs text-slate-300">
+<span class="material-symbols-outlined text-tertiary text-sm mr-2">check_circle</span>
+                                        Relatórios de Ocupação em Tempo Real
+                                    </div>
+</div>
+</div>
+</div>
+<!-- Help Widget -->
+<div class="bg-primary-container/20 border border-primary-container/30 rounded-2xl p-6 relative overflow-hidden group">
+<div class="absolute -right-6 -top-6 w-24 h-24 bg-tertiary/5 rounded-full blur-2xl group-hover:bg-tertiary/10 transition-all"></div>
+<h4 class="text-sm font-bold text-tertiary mb-2">Dica do Administrador</h4>
+<p class="text-xs text-slate-300 leading-relaxed">Para retiros com famílias, considere marcar a ala como "Misto" e adicionar detalhes sobre berços nas observações.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Decorative Elements -->
+<div class="mt-auto p-8 text-center text-[10px] uppercase tracking-[0.4em] text-slate-500 font-medium">
+                Midnight Koinonia © 2024 • Soli Deo Gloria
+            </div>
+</main>
+</div>
+</body></html>

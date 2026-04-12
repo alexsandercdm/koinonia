@@ -44,6 +44,7 @@ A Stack está explicitada e definida no arquivo de documentação entregue.
 
 - **Tech Stack**: Fastify + React Vite + Drizzle + Better Auth — Manter consistência tecnológica.
 - **Acessibilidade & UI**: Mobile-first, alvos de toque >= 48px, texto >= 16px (Inter).
+- **Design System**: 14 telas geradas via Stitch AI (`.planning/stitch-assets/`). Ver `design/UI-SPEC.md`.
 - **Offline Grace**: O TanStack Query deve reter cache por tempo estendido (connecção instável na chácara).
 - **Fluxo de Trabalho**: Usar estritamente a skill `tlc-spec-driven` para Especificação, Design, Tarefas e Execução, como solitado.
 
