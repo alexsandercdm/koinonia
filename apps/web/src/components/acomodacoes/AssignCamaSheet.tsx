@@ -59,7 +59,8 @@ export function AssignCamaSheet({
 
   const { data: candidatos = [], isLoading: candidatosLoading } = useInscricoesSemCama(
     eventoId,
-    searchQ
+    searchQ,
+    open && isDisponivel
   )
 
   const atribuir = useAtribuirCama(eventoId)

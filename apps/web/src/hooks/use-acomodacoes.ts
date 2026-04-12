@@ -208,7 +208,7 @@ export const inscricoesSemCamaKeys = {
     ['inscricoes-sem-cama', eventoId, q ?? ''] as const,
 }
 
-export function useInscricoesSemCama(eventoId: string, q: string) {
+export function useInscricoesSemCama(eventoId: string, q: string, enabled = true) {
   return useQuery({
     queryKey: inscricoesSemCamaKeys.list(eventoId, q),
     queryFn: () => {
@@ -217,7 +217,7 @@ export function useInscricoesSemCama(eventoId: string, q: string) {
         `/api/v1/eventos/${eventoId}/inscricoes-sem-cama${params}`
       )
     },
-    enabled: !!eventoId,
+    enabled: enabled && !!eventoId,
     staleTime: 0,
   })
 }
