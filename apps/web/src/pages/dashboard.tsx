@@ -1,4 +1,3 @@
-import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthContext } from '../contexts/auth-context'
 import { Button } from '../components/ui/button'
@@ -43,7 +42,7 @@ export function DashboardPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <Button className="w-full">Ver Participantes</Button>
+                <Button className="w-full" disabled title="Em breve">Ver Participantes</Button>
               </CardContent>
             </Card>
 
@@ -55,7 +54,7 @@ export function DashboardPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <Button className="w-full">Ver Eventos</Button>
+                <Button className="w-full" disabled title="Em breve">Ver Eventos</Button>
               </CardContent>
             </Card>
 
@@ -79,7 +78,7 @@ export function DashboardPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <Button className="w-full">Ver Financeiro</Button>
+                <Button className="w-full" disabled title="Em breve">Ver Financeiro</Button>
               </CardContent>
             </Card>
 
@@ -91,7 +90,7 @@ export function DashboardPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <Button className="w-full">Ver Inscrições</Button>
+                <Button className="w-full" disabled title="Em breve">Ver Inscrições</Button>
               </CardContent>
             </Card>
 
@@ -103,7 +102,7 @@ export function DashboardPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <Button className="w-full">Ver Relatórios</Button>
+                <Button className="w-full" disabled title="Em breve">Ver Relatórios</Button>
               </CardContent>
             </Card>
           </div>
