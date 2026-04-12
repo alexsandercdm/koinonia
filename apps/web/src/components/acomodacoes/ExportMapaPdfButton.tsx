@@ -1,10 +1,10 @@
 import { useRef, useState } from 'react'
 import { Button } from '../ui/button'
 import { exportMapaAcomodacao } from '../../lib/pdf/exportMapaAcomodacao'
-import type { MapaAcomodacaoResponse } from '../../hooks/use-acomodacoes'
+import type { MapaAcomodacao } from '@koinonia/shared'
 
 interface ExportMapaPdfButtonProps {
-  mapa: MapaAcomodacaoResponse
+  mapa: MapaAcomodacao
   eventoNome: string
   localNome?: string
 }
@@ -83,11 +83,14 @@ export function ExportMapaPdfButton({ mapa, eventoNome, localNome }: ExportMapaP
         className="absolute -left-[9999px] top-0 w-[900px] bg-white p-6 space-y-4"
         aria-hidden="true"
       >
-        {mapa.quartos.map((quarto) => (
+        {mapa.quartos.map((quarto) => {
+          const ocupados = quarto.camas.filter(c => c.ocupante !== null).length
+          const disponiveis = quarto.camas.filter(c => !c.bloqueada && c.ocupante === null).length
+          return (
           <div key={quarto.id} className="mb-6">
             <h2 className="text-base font-bold text-gray-900 mb-1">{quarto.nome}</h2>
             <p className="text-xs text-gray-500 mb-2">
-              {quarto.ocupados} ocupado(s) / {quarto.disponiveis} disponivel(s) / Cap.{' '}
+              {ocupados} ocupado(s) / {disponiveis} disponivel(s) / Cap.{' '}
               {quarto.capacidade}
             </p>
             <div className="grid grid-cols-4 gap-2">
@@ -115,17 +118,18 @@ export function ExportMapaPdfButton({ mapa, eventoNome, localNome }: ExportMapaP
                     style={{ backgroundColor: bgColor, color: textColor }}
                     className="rounded border p-2 text-xs"
                   >
-                    <div className="font-semibold">{cama.identificacao}</div>
+                    <div className="font-semibold">{cama.identificacao ?? cama.id}</div>
                     <div className="opacity-80">{status}</div>
                     {cama.ocupante && (
-                      <div className="truncate text-xs mt-0.5">{cama.ocupante}</div>
+                      <div className="truncate text-xs mt-0.5">{cama.ocupante.nome}</div>
                     )}
                   </div>
                 )
               })}
             </div>
           </div>
-        ))}
+          )
+        })}
       </div>
     </div>
   )

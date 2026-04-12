@@ -1,9 +1,9 @@
 import html2canvas from 'html2canvas'
 import jsPDF from 'jspdf'
-import type { MapaAcomodacaoResponse } from '../../hooks/use-acomodacoes'
+import type { MapaAcomodacao } from '@koinonia/shared'
 
 export interface ExportOptions {
-  mapa: MapaAcomodacaoResponse
+  mapa: MapaAcomodacao
   eventoNome: string
   localNome?: string
   containerEl: HTMLElement
@@ -31,7 +31,6 @@ export async function exportMapaAcomodacao(options: ExportOptions): Promise<void
     },
   })
 
-  const imgData = canvas.toDataURL('image/png')
   const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
 
   const pageWidth = pdf.internal.pageSize.getWidth()
@@ -72,7 +71,9 @@ export async function exportMapaAcomodacao(options: ExportOptions): Promise<void
   pdf.setFont('helvetica', 'normal')
   pdf.setFontSize(9)
   for (const quarto of mapa.quartos) {
-    const line = `${quarto.nome} — ${quarto.ocupados} ocupado(s) / ${quarto.disponiveis} disponivel(s) / Cap. ${quarto.capacidade}`
+    const ocupados = quarto.camas.filter(c => c.ocupante !== null).length
+    const disponiveis = quarto.camas.filter(c => !c.bloqueada && c.ocupante === null).length
+    const line = `${quarto.nome} — ${ocupados} ocupado(s) / ${disponiveis} disponivel(s) / Cap. ${quarto.capacidade}`
     pdf.text(line, margin, yPos)
     yPos += 5
     if (yPos > pageHeight - 60) {

@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card'
 import { CamaCard } from './CamaCard'
-import type { MapaAcomodacaoResponse, QuartoMapaItem, CamaMapaItem } from '../../hooks/use-acomodacoes'
+import type { MapaAcomodacao } from '@koinonia/shared'
+import type { CamaMapaItem } from '../../hooks/use-acomodacoes'
 
 const generoLabel: Record<string, string> = {
   M: 'Masculino',
@@ -8,8 +9,18 @@ const generoLabel: Record<string, string> = {
   MISTO: 'Misto',
 }
 
+interface QuartoMapaComContadores {
+  id: string
+  nome: string
+  genero_permitido: 'M' | 'F' | 'MISTO'
+  capacidade: number
+  camas: CamaMapaItem[]
+  ocupados: number
+  disponiveis: number
+}
+
 interface QuartoCardProps {
-  quarto: QuartoMapaItem
+  quarto: QuartoMapaComContadores
   onAssign?: (cama: CamaMapaItem) => void
   onRelease?: (cama: CamaMapaItem) => void
 }
@@ -51,13 +62,28 @@ function QuartoCard({ quarto, onAssign, onRelease }: QuartoCardProps) {
 }
 
 interface MapaQuartosGridProps {
-  mapa: MapaAcomodacaoResponse
+  mapa: MapaAcomodacao
   onAssign?: (cama: CamaMapaItem) => void
   onRelease?: (cama: CamaMapaItem) => void
 }
 
+function derivarContadores(quarto: MapaAcomodacao['quartos'][number]): QuartoMapaComContadores {
+  const camas = quarto.camas as unknown as CamaMapaItem[]
+  const ocupados = camas.filter(c => c.ocupante !== null).length
+  const disponiveis = camas.filter(c => !c.bloqueada && c.ocupante === null).length
+  return {
+    id: quarto.id,
+    nome: quarto.nome,
+    genero_permitido: quarto.genero_permitido,
+    capacidade: quarto.capacidade,
+    camas,
+    ocupados,
+    disponiveis,
+  }
+}
+
 export function MapaQuartosGrid({ mapa, onAssign, onRelease }: MapaQuartosGridProps) {
-  if (!mapa.local_id) {
+  if (!mapa.local?.id) {
     return (
       <div className="rounded-lg border border-dashed border-gray-300 p-8 text-center space-y-2">
         <p className="text-gray-500 font-medium">Evento sem local vinculado</p>
@@ -81,14 +107,17 @@ export function MapaQuartosGrid({ mapa, onAssign, onRelease }: MapaQuartosGridPr
 
   return (
     <div className="space-y-4" data-testid="mapa-quartos-grid">
-      {mapa.quartos.map((quarto) => (
-        <QuartoCard
-          key={quarto.id}
-          quarto={quarto}
-          onAssign={onAssign}
-          onRelease={onRelease}
-        />
-      ))}
+      {mapa.quartos.map((quarto) => {
+        const quartoComContadores = derivarContadores(quarto)
+        return (
+          <QuartoCard
+            key={quarto.id}
+            quarto={quartoComContadores}
+            onAssign={onAssign}
+            onRelease={onRelease}
+          />
+        )
+      })}
     </div>
   )
 }
