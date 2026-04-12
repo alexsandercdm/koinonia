@@ -7,7 +7,7 @@ import {
   SheetDescription,
 } from '../ui/sheet'
 import { Button } from '../ui/button'
-import { useInscricoesSemCama, useAtribuirCama, useliberarCama } from '../../hooks/use-acomodacoes'
+import { useInscricoesSemCama, useAtribuirCama, useLiberarCama } from '../../hooks/use-acomodacoes'
 import type { CamaMapaItem } from '../../hooks/use-acomodacoes'
 
 type UserRole = 'admin' | 'lider' | 'servo'
@@ -63,7 +63,7 @@ export function AssignCamaSheet({
   )
 
   const atribuir = useAtribuirCama(eventoId)
-  const liberar = useliberarCama(eventoId)
+  const liberar = useLiberarCama(eventoId)
 
   function handleClose() {
     setSearchQ('')

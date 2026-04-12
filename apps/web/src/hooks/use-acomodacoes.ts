@@ -245,11 +245,11 @@ export function useAtribuirCama(eventoId: string) {
   })
 }
 
-export function useliberarCama(eventoId: string) {
+export function useLiberarCama(eventoId: string) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: ({ camaId }: { camaId: string }) =>
-      apiFetch<void>(`/api/v1/acomodacoes/camas/${camaId}/atribuir`, {
+      apiFetch<void>(`/api/v1/acomodacoes/camas/${camaId}/atribuicao`, {
         method: 'DELETE',
       }),
     onSuccess: () => {
