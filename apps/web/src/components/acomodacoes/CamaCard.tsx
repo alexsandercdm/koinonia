@@ -8,16 +8,17 @@ function getStatus(cama: CamaMapaItem): CamaStatus {
   return 'Disponivel'
 }
 
+// Dark theme: available=green, occupied=purple/primary, blocked=gray
 const statusStyles: Record<CamaStatus, string> = {
-  Disponivel: 'bg-green-50 border-green-300 text-green-800',
-  Ocupado: 'bg-blue-50 border-blue-400 text-blue-900',
-  Bloqueado: 'bg-red-50 border-red-400 text-red-900',
+  Disponivel: 'bg-green-900/20 border-green-700/50 text-green-300',
+  Ocupado: 'bg-primary/20 border-primary/50 text-purple-300',
+  Bloqueado: 'bg-slate-800/60 border-slate-700/50 text-slate-500',
 }
 
 const statusBadgeStyles: Record<CamaStatus, string> = {
-  Disponivel: 'bg-green-100 text-green-700',
-  Ocupado: 'bg-blue-100 text-blue-700',
-  Bloqueado: 'bg-red-100 text-red-700',
+  Disponivel: 'bg-green-900/40 text-green-400',
+  Ocupado: 'bg-primary/30 text-purple-300',
+  Bloqueado: 'bg-slate-700/60 text-slate-500',
 }
 
 interface CamaCardProps {
@@ -39,7 +40,7 @@ export function CamaCard({ cama, onAssign, onRelease }: CamaCardProps) {
 
   return (
     <div
-      className={`rounded-lg border-2 p-3 space-y-1 transition-colors min-h-[72px] ${statusStyles[status]} ${isInteractive ? 'cursor-pointer hover:opacity-80 active:scale-95' : ''}`}
+      className={`rounded-lg border-2 p-3 space-y-1 transition-all min-h-[72px] ${statusStyles[status]} ${isInteractive ? 'cursor-pointer hover:opacity-80 active:scale-95' : ''}`}
       onClick={isInteractive ? handleClick : undefined}
       role={isInteractive ? 'button' : undefined}
       tabIndex={isInteractive ? 0 : undefined}
@@ -65,7 +66,7 @@ export function CamaCard({ cama, onAssign, onRelease }: CamaCardProps) {
           {cama.ocupante}
         </p>
       )}
-      <p className="text-xs opacity-60 capitalize">{cama.tipo.replace(/_/g, ' ')}</p>
+      <p className="text-xs opacity-50 capitalize">{cama.tipo.replace(/_/g, ' ')}</p>
     </div>
   )
 }

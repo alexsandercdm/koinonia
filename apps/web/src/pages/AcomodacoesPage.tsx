@@ -1,25 +1,24 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useAuthContext } from '../contexts/auth-context'
-import { Button } from '../components/ui/button'
-import { AcomodacoesFilters } from '../components/acomodacoes/AcomodacoesFilters'
+import { AppLayout } from '../components/layout/AppLayout'
 import { EstruturaAcomodacaoPanel } from '../components/acomodacoes/EstruturaAcomodacaoPanel'
 import { MapaQuartosGrid } from '../components/acomodacoes/MapaQuartosGrid'
 import { AssignCamaSheet } from '../components/acomodacoes/AssignCamaSheet'
 import { ExportMapaPdfButton } from '../components/acomodacoes/ExportMapaPdfButton'
 import { useEventos, useMapaAcomodacao } from '../hooks/use-acomodacoes'
+import { useAuthContext } from '../contexts/auth-context'
 import type { CamaMapaItem } from '../hooks/use-acomodacoes'
 
 type UserRole = 'admin' | 'lider' | 'servo'
+type GeneroFilter = 'todos' | 'M' | 'F'
 
 export function AcomodacoesPage() {
-  const { user, logout } = useAuthContext()
-  const navigate = useNavigate()
+  const { user } = useAuthContext()
   const userRole: UserRole =
     user?.role === 'admin' || user?.role === 'lider' ? (user.role as UserRole) : 'servo'
 
   const [selectedEventoId, setSelectedEventoId] = useState<string>('')
   const [activeTab, setActiveTab] = useState<'mapa' | 'estrutura'>('mapa')
+  const [generoFilter, setGeneroFilter] = useState<GeneroFilter>('todos')
 
   const [sheetOpen, setSheetOpen] = useState(false)
   const [selectedCama, setSelectedCama] = useState<CamaMapaItem | null>(null)
@@ -39,7 +38,6 @@ export function AcomodacoesPage() {
   }))
 
   const selectedEvento = eventos.find((e) => e.id === selectedEventoId)
-
   const canWrite = userRole === 'admin' || userRole === 'lider'
 
   function handleCamaAction(cama: CamaMapaItem) {
@@ -47,129 +45,131 @@ export function AcomodacoesPage() {
     setSheetOpen(true)
   }
 
+  // Event selector in the AppLayout header actions
+  const headerActions = (
+    <div className="flex items-center gap-3">
+      <select
+        value={selectedEventoId}
+        onChange={(e) => setSelectedEventoId(e.target.value)}
+        disabled={eventosLoading}
+        className="h-9 rounded-lg border border-border-dark bg-surface-elevated text-slate-200 text-sm px-3 pr-8 focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50"
+      >
+        <option value="">Selecione um evento...</option>
+        {eventoOptions.map((evento) => (
+          <option key={evento.id} value={evento.id}>
+            {evento.nome}
+          </option>
+        ))}
+      </select>
+      {mapa && selectedEvento && (
+        <ExportMapaPdfButton mapa={mapa} eventoNome={selectedEvento.nome ?? 'evento'} />
+      )}
+    </div>
+  )
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow sticky top-0 z-10">
-        <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+    <AppLayout title="Gestão de Acomodações" actions={headerActions}>
+      <div className="p-6 space-y-6">
+        {/* Tab + Gender filter row */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          {/* Page tabs */}
+          <div className="flex border-b border-border-dark gap-1">
             <button
-              onClick={() => navigate('/dashboard')}
-              className="flex items-center justify-center h-10 w-10 rounded-md hover:bg-gray-100 transition-colors"
-              aria-label="Voltar ao dashboard"
+              className={`px-4 py-2 text-sm font-medium transition-colors rounded-t-lg ${
+                activeTab === 'mapa'
+                  ? 'border-b-2 border-primary text-white'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+              onClick={() => setActiveTab('mapa')}
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M19 12H5M12 19l-7-7 7-7" />
-              </svg>
+              Mapa Visual
             </button>
-            <div>
-              <h1 className="text-xl font-bold text-gray-900">Acomodações</h1>
-              <p className="text-xs text-gray-500 capitalize">{userRole}</p>
-            </div>
+            <button
+              className={`px-4 py-2 text-sm font-medium transition-colors rounded-t-lg ${
+                activeTab === 'estrutura'
+                  ? 'border-b-2 border-primary text-white'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+              onClick={() => setActiveTab('estrutura')}
+            >
+              Estrutura
+              {userRole === 'servo' && (
+                <span className="ml-1 text-xs text-slate-500">(leitura)</span>
+              )}
+            </button>
           </div>
-          <Button variant="outline" size="sm" onClick={logout} className="h-10">
-            Sair
-          </Button>
-        </div>
-      </header>
 
-      <main className="max-w-3xl mx-auto px-4 py-6 space-y-5">
-        {/* Event filter */}
-        <AcomodacoesFilters
-          eventos={eventoOptions}
-          selectedEventoId={selectedEventoId}
-          onEventoChange={setSelectedEventoId}
-          isLoading={eventosLoading}
-        />
-
-        {/* Tab switcher — all roles see both tabs; servo gets read-only estrutura */}
-        <div className="flex border-b border-gray-200">
-          <button
-            className={`flex-1 py-3 text-sm font-medium transition-colors ${
-              activeTab === 'mapa'
-                ? 'border-b-2 border-blue-600 text-blue-600'
-                : 'text-gray-500 hover:text-gray-700'
-            }`}
-            onClick={() => setActiveTab('mapa')}
-          >
-            Mapa Visual
-          </button>
-          <button
-            className={`flex-1 py-3 text-sm font-medium transition-colors ${
-              activeTab === 'estrutura'
-                ? 'border-b-2 border-blue-600 text-blue-600'
-                : 'text-gray-500 hover:text-gray-700'
-            }`}
-            onClick={() => setActiveTab('estrutura')}
-          >
-            Estrutura
-            {userRole === 'servo' && (
-              <span className="ml-1 text-xs text-gray-400">(leitura)</span>
-            )}
-          </button>
+          {/* Gender filter pills — only visible on mapa tab */}
+          {activeTab === 'mapa' && (
+            <div className="flex bg-surface-dark p-1 rounded-xl border border-border-dark gap-1">
+              {(
+                [
+                  { value: 'todos', label: 'Todos' },
+                  { value: 'M', label: 'Masculino' },
+                  { value: 'F', label: 'Feminino' },
+                ] as { value: GeneroFilter; label: string }[]
+              ).map(({ value, label }) => (
+                <button
+                  key={value}
+                  onClick={() => setGeneroFilter(value)}
+                  className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                    generoFilter === value
+                      ? 'bg-primary text-white shadow-sm'
+                      : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Mapa tab */}
         {activeTab === 'mapa' && (
           <section>
             {!selectedEventoId ? (
-              <div className="rounded-lg border border-dashed border-gray-300 p-8 text-center space-y-2">
-                <p className="text-gray-500 font-medium">Nenhum evento selecionado</p>
-                <p className="text-sm text-gray-400">
+              <div className="rounded-xl border border-dashed border-border-dark p-12 text-center space-y-2">
+                <span className="material-symbols-outlined text-4xl text-slate-600">bed</span>
+                <p className="text-slate-300 font-medium">Nenhum evento selecionado</p>
+                <p className="text-sm text-slate-500">
                   Selecione um evento acima para ver o mapa de acomodações.
                 </p>
               </div>
             ) : mapaLoading ? (
-              <div className="flex items-center justify-center py-16">
-                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600" />
+              <div className="flex items-center justify-center py-20">
+                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary" />
               </div>
             ) : mapaError ? (
-              <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-center space-y-2">
-                <p className="text-red-700 font-medium">Erro ao carregar mapa</p>
+              <div className="rounded-xl border border-red-800/40 bg-red-900/20 p-6 text-center space-y-2">
+                <p className="text-red-400 font-medium">Erro ao carregar mapa</p>
                 <p className="text-sm text-red-500">
                   {(mapaError as Error).message || 'Tente novamente mais tarde.'}
                 </p>
               </div>
             ) : mapa ? (
-              <>
-                <div className="flex justify-end mb-3">
-                  <ExportMapaPdfButton
-                    mapa={mapa}
-                    eventoNome={selectedEvento?.nome ?? 'evento'}
-                  />
-                </div>
-                <MapaQuartosGrid
-                  mapa={mapa}
-                  onAssign={canWrite ? handleCamaAction : undefined}
-                  onRelease={canWrite ? handleCamaAction : undefined}
-                />
-              </>
+              <MapaQuartosGrid
+                mapa={mapa}
+                generoFilter={generoFilter}
+                onAssign={canWrite ? handleCamaAction : undefined}
+                onRelease={canWrite ? handleCamaAction : undefined}
+              />
             ) : null}
           </section>
         )}
 
-        {/* Estrutura tab — write for admin/lider, read-only for servo */}
+        {/* Estrutura tab */}
         {activeTab === 'estrutura' && (
           <section>
             {userRole === 'servo' && (
-              <div className="mb-3 rounded-md bg-amber-50 border border-amber-200 px-3 py-2 text-sm text-amber-700">
+              <div className="mb-4 rounded-xl bg-amber-900/20 border border-amber-700/40 px-4 py-3 text-sm text-amber-400">
                 Modo somente leitura. Apenas administradores e líderes podem editar a estrutura.
               </div>
             )}
             <EstruturaAcomodacaoPanel userRole={userRole} />
           </section>
         )}
-      </main>
+      </div>
 
       {/* Assignment / release sheet */}
       <AssignCamaSheet
@@ -179,6 +179,6 @@ export function AcomodacoesPage() {
         eventoId={selectedEventoId}
         userRole={userRole}
       />
-    </div>
+    </AppLayout>
   )
 }

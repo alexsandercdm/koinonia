@@ -8,6 +8,7 @@ import { DashboardPage } from './pages/dashboard'
 import { ParticipantsPage } from './pages/ParticipantsPage'
 import { AcomodacoesPage } from './pages/AcomodacoesPage'
 import { InscricoesPage } from './pages/InscricoesPage'
+import { FinanceiroPage } from './pages/FinanceiroPage'
 
 const queryClient = new QueryClient()
 
@@ -47,6 +48,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <InscricoesPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/financeiro"
+            element={
+              <ProtectedRoute>
+                <FinanceiroPage />
               </ProtectedRoute>
             }
           />
