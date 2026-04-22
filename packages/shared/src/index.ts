@@ -269,3 +269,25 @@ export type GeneroQuarto = z.infer<typeof GeneroQuartoEnum>
 export type TipoCama = z.infer<typeof TipoCamaEnum>
 export type StatusCama = z.infer<typeof StatusCamaEnum>
 export type UserRole = z.infer<typeof UserRoleEnum>
+
+// Phase 04 — Audit Log & Financeiro schemas
+
+export const AuditLogSchema = z.object({
+  id: z.string().uuid().optional(),
+  user_id: z.string(),
+  target_id: z.string().uuid(),
+  action: z.string().min(1).max(100),
+  changes: z.record(z.unknown()).nullable().optional(),
+  created_at: z.string().datetime().optional(),
+})
+
+export const FinanceiroMetricasSchema = z.object({
+  totalArrecadado: z.number(),
+  totalPrevisto: z.number(),
+  totalDespesas: z.number(),
+  breakEvenPct: z.number(),
+  porStatus: z.record(z.number()),
+})
+
+export type AuditLog = z.infer<typeof AuditLogSchema>
+export type FinanceiroMetricas = z.infer<typeof FinanceiroMetricasSchema>

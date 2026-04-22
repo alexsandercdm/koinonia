@@ -11,6 +11,8 @@ import { participanteRoutes } from './modules/pessoas/routes/participantes'
 import { inscricaoRoutes } from './modules/inscricoes/routes/inscricoes'
 import { authRoutes } from './routes/auth'
 import { customAuthRoutes } from './routes/custom-auth'
+import { adminRoutes } from './modules/admin/routes/admin'
+import { financeiroRoutes } from './modules/financeiro/routes/financeiro'
 
 export const buildApp = () => {
   const app = Fastify({
@@ -58,6 +60,8 @@ export const buildApp = () => {
   app.register(participanteRoutes, { prefix: '/api/v1' })
   app.register(inscricaoRoutes, { prefix: '/api/v1' })
   app.register(acomodacaoRoutes, { prefix: '/api/v1' })
+  app.register(adminRoutes, { prefix: '/api/v1' })
+  app.register(financeiroRoutes, { prefix: '/api/v1' })
 
   return app
 }
