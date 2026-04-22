@@ -13,17 +13,14 @@ export function DashboardPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Koinonia</h1>
-              <p className="text-gray-600">Gestão de Retiros Espirituais</p>
+              <h1 className="text-2xl font-bold text-gray-900">Koinonia</h1>
+              <p className="text-sm text-gray-500">Gestão de retiros</p>
             </div>
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-700">
-                Bem-vindo, {user?.name}
+            <div className="flex items-center gap-4">
+              <span className="text-sm text-gray-600">
+                Olá, {user?.name ?? 'Usuário'}
               </span>
-              <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                {user?.role}
-              </span>
-              <Button onClick={logout} variant="outline">
+              <Button variant="outline" size="sm" onClick={logout}>
                 Sair
               </Button>
             </div>
@@ -33,6 +30,7 @@ export function DashboardPage() {
 
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
+          <h2 className="text-xl font-semibold text-gray-800 mb-6">Painel Principal</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <Card>
               <CardHeader>
@@ -42,19 +40,23 @@ export function DashboardPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <Button className="w-full" disabled title="Em breve">Ver Participantes</Button>
+                <Button className="w-full" onClick={() => navigate('/participantes')}>
+                  Ver Participantes
+                </Button>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader>
-                <CardTitle>Eventos</CardTitle>
+                <CardTitle>Inscrições</CardTitle>
                 <CardDescription>
-                  Criar e gerenciar eventos
+                  Gerenciar inscrições e pagamentos
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <Button className="w-full" disabled title="Em breve">Ver Eventos</Button>
+                <Button className="w-full" onClick={() => navigate('/inscricoes')}>
+                  Ver Inscrições
+                </Button>
               </CardContent>
             </Card>
 
@@ -62,7 +64,7 @@ export function DashboardPage() {
               <CardHeader>
                 <CardTitle>Acomodações</CardTitle>
                 <CardDescription>
-                  Mapa de acomodações
+                  Mapa de acomodações e gestão de camas
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -74,23 +76,11 @@ export function DashboardPage() {
               <CardHeader>
                 <CardTitle>Financeiro</CardTitle>
                 <CardDescription>
-                  Dashboard financeiro
+                  Dashboard financeiro e relatórios
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <Button className="w-full" disabled title="Em breve">Ver Financeiro</Button>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Inscrições</CardTitle>
-                <CardDescription>
-                  Gerenciar inscrições
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button className="w-full" disabled title="Em breve">Ver Inscrições</Button>
               </CardContent>
             </Card>
 
@@ -103,6 +93,18 @@ export function DashboardPage() {
               </CardHeader>
               <CardContent>
                 <Button className="w-full" disabled title="Em breve">Ver Relatórios</Button>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Configurações</CardTitle>
+                <CardDescription>
+                  Configurações do sistema
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button className="w-full" disabled title="Em breve">Configurações</Button>
               </CardContent>
             </Card>
           </div>

@@ -7,6 +7,7 @@ import { RegisterPage } from './pages/register'
 import { DashboardPage } from './pages/dashboard'
 import { ParticipantsPage } from './pages/ParticipantsPage'
 import { AcomodacoesPage } from './pages/AcomodacoesPage'
+import { InscricoesPage } from './pages/InscricoesPage'
 
 const queryClient = new QueryClient()
 
@@ -38,6 +39,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <AcomodacoesPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/inscricoes"
+            element={
+              <ProtectedRoute>
+                <InscricoesPage />
               </ProtectedRoute>
             }
           />
