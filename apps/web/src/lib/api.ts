@@ -3,6 +3,17 @@ import { authClient } from './auth'
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001'
 
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    public readonly status: number,
+    public readonly body?: unknown,
+  ) {
+    super(message)
+    this.name = 'ApiError'
+  }
+}
+
 async function getAuthHeaders(): Promise<Record<string, string>> {
   const session = await authClient.getSession()
   const token = session?.data?.session?.token
@@ -37,7 +48,7 @@ export async function apiFetch<T>(path: string, options?: RequestInit): Promise<
     const message =
       (errorBody as { message?: string }).message ||
       `HTTP ${response.status}: ${response.statusText}`
-    throw new Error(message)
+    throw new ApiError(message, response.status, errorBody)
   }
 
   return response.json() as Promise<T>
