@@ -4,7 +4,7 @@ import { z } from 'zod'
 export const GeneroEnum = z.enum(['M', 'F'])
 export const PapelEnum = z.enum(['encontrista', 'servo'])
 export const StatusPagamentoEnum = z.enum(['PENDENTE', 'PAGO_PARCIAL', 'PAGO_TOTAL', 'LISTA_ESPERA', 'CANCELADA'])
-export const StatusEventoEnum = z.enum(['rascunho', 'aberto', 'encerrado', 'realizado'])
+export const StatusEventoEnum = z.enum(['rascunho', 'aberto', 'encerrado', 'realizado', 'cancelado'])
 export const FormaPagamentoEnum = z.enum(['pix', 'dinheiro', 'cartao', 'outro'])
 export const CategoriaDespesaEnum = z.enum(['alimentacao', 'transporte', 'material', 'hospedagem', 'outro'])
 export const GeneroQuartoEnum = z.enum(['M', 'F', 'MISTO'])
@@ -79,8 +79,8 @@ export const InscricaoSchema = z.object({
   pessoa_id: z.string().uuid(),
   papel: PapelEnum,
   status: StatusPagamentoEnum,
-  valor_total: z.number().min(0),
-  valor_pago: z.number().min(0),
+  valor_total: z.coerce.number().min(0),
+  valor_pago: z.coerce.number().min(0),
   cama_id: z.string().uuid().nullable().optional(),
   observacoes: z.string().optional(),
   created_at: z.string().datetime().optional(),
