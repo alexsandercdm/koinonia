@@ -328,17 +328,15 @@ Step 2.6: No new external services or CLI tools introduced by Phase 6. All chang
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Is `cancelado` a valid `StatusEvento` business value?**
    - What we know: Present in Fastify JSON schema for `PUT /eventos/:id`, absent from shared Zod enum
-   - What's unclear: Whether it was intentionally omitted from shared or added to Fastify by accident
-   - Recommendation: Ask user before writing INFRA-04 task — if yes, add to shared enum + types; if no, remove from Fastify schema
+   - **RESOLVED (2026-04-22, user):** YES — `cancelado` is a valid business state. Add `'cancelado'` to `StatusEventoEnum` in `packages/shared/src/index.ts` (or wherever the enum lives) and regenerate types. Do NOT remove from Fastify route.
 
 2. **react-day-picker v8 vs v9?**
    - What we know: v9.14.0 is current; v9 has breaking API vs v8
-   - What's unclear: Whether Phase 8 UI designs reference v8 or v9 component props
-   - Recommendation: Default to v9 (install latest); document migration guide ref in Phase 8 task
+   - **RESOLVED (2026-04-22, user):** Use v9 (latest). Document migration guide reference in Phase 8 task comments.
 
 ---
 
