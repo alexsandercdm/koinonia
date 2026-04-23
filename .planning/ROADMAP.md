@@ -42,12 +42,18 @@
 **Goal:** Corrigir as falhas de infraestrutura críticas que bloqueiam todas as telas de feature antes de começar qualquer UI de CRUD.
 **Requirements:** INFRA-01, INFRA-02, INFRA-03, INFRA-04, INFRA-05.
 **Depends on:** Phase 5.
+**Plans:** 3 plans
 **Success criteria:**
 1. `apiFetch` lança `ApiError` com `.status` numérico — `onError` consegue distinguir 409 de 400.
 2. `persistQueryClient` ativo — dados sobrevivem a navegação com WiFi desconectado por 24h.
 3. `GET /eventos/:id/inscricoes` retorna 200 com lista de inscrições no Postman/Thunder Client.
 4. `StatusEventoEnum` e coerção de `valor_total` alinhados entre shared Zod e rotas Fastify.
 5. `npm install` completo sem conflitos — todos os 11 pacotes disponíveis no projeto web.
+
+Plans:
+- [ ] 06-01-PLAN.md — Install 11 packages + ApiError class in apiFetch (INFRA-05, INFRA-01)
+- [ ] 06-02-PLAN.md — Backend route GET /eventos/:id/inscricoes + Zod schema drifts (INFRA-03, INFRA-04)
+- [ ] 06-03-PLAN.md — persistQueryClient with localStorage persister and session exclusion (INFRA-02)
 
 ## Phase 7: Participantes CRUD UI
 **Goal:** Conectar ParticipantsPage ao backend com CRUD completo — listar, buscar, criar, editar e inativar participantes.
