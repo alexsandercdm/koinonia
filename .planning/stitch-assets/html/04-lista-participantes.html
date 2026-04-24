@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="pt-br"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#4d0085",
+                        "amber-accent": "#f59e0b",
+                        "background-light": "#f7f5f8",
+                        "background-dark": "#1b0f23",
+                        "surface-dark": "#2a1a3a",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<title>Koinonia - Participantes</title>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 antialiased">
+<div class="flex flex-col min-h-screen max-w-md mx-auto bg-background-light dark:bg-background-dark shadow-2xl relative">
+<!-- Header -->
+<header class="sticky top-0 z-20 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md px-6 pt-8 pb-4">
+<div class="flex items-center justify-between mb-6">
+<div class="flex flex-col">
+<span class="text-primary dark:text-amber-accent text-xs font-bold tracking-widest uppercase">Koinonia</span>
+<h1 class="text-2xl font-bold tracking-tight">Participantes</h1>
+</div>
+<button class="size-10 flex items-center justify-center rounded-full bg-primary/10 dark:bg-primary/20 text-primary dark:text-slate-100">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+</div>
+<!-- Search Bar -->
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors">search</span>
+<input class="w-full h-12 pl-12 pr-4 rounded-xl border-none bg-slate-100 dark:bg-surface-dark focus:ring-2 focus:ring-primary text-sm transition-all outline-none" placeholder="Buscar por nome..." type="text"/>
+</div>
+<!-- Filter Chips -->
+<div class="flex gap-2 mt-4 overflow-x-auto pb-2 no-scrollbar">
+<button class="px-4 py-2 rounded-full bg-primary text-white text-xs font-semibold whitespace-nowrap">Todos</button>
+<button class="px-4 py-2 rounded-full bg-slate-100 dark:bg-surface-dark text-slate-600 dark:text-slate-300 text-xs font-semibold whitespace-nowrap hover:bg-primary/10 transition-colors">Encontristas</button>
+<button class="px-4 py-2 rounded-full bg-slate-100 dark:bg-surface-dark text-slate-600 dark:text-slate-300 text-xs font-semibold whitespace-nowrap hover:bg-primary/10 transition-colors">Servos</button>
+<button class="px-4 py-2 rounded-full bg-slate-100 dark:bg-surface-dark text-slate-600 dark:text-slate-300 text-xs font-semibold whitespace-nowrap hover:bg-primary/10 transition-colors">Masculino</button>
+<button class="px-4 py-2 rounded-full bg-slate-100 dark:bg-surface-dark text-slate-600 dark:text-slate-300 text-xs font-semibold whitespace-nowrap hover:bg-primary/10 transition-colors">Feminino</button>
+</div>
+</header>
+<!-- Participant List -->
+<main class="flex-1 px-6 py-2 space-y-3">
+<!-- Card 1 -->
+<div class="flex items-center gap-4 p-4 rounded-xl bg-white dark:bg-surface-dark border border-slate-100 dark:border-primary/10 shadow-sm active:scale-[0.98] transition-transform">
+<div class="size-12 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden shrink-0 border border-primary/20">
+<img class="w-full h-full object-cover" data-alt="Avatar portrait of a young man smiling" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDxfmmfrq8aJj7VmDrWoC1r2KVyuGp6xTLBssQeU1JYSl5wtzmymW60-NMR5nNaS7TFZO_wnbf_9eIriA09tCq__UCpYSfOHgXRHN4nTcEKahjcf-o1QxkjGMQXfThyApP-mu0b_c0d1x0s46KBRi1mRBQvjDZhGLugSCTp6VwBnByknzi_fUs-hqMJ6eovzd-fp2WdpmtEVajeFoyXhkdquZx54rC-mYs7KtoNnCmFxDX3YZuon_ElaFfVT48-Vqio-Y2FsWfblzM"/>
+</div>
+<div class="flex-1 min-w-0">
+<h3 class="font-semibold text-sm truncate">João Silva</h3>
+<div class="flex items-center gap-2 mt-1">
+<span class="px-2 py-0.5 rounded-md bg-primary/20 text-primary dark:text-primary-foreground text-[10px] font-bold uppercase tracking-wider">Encontrista</span>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-amber-accent text-xl" title="Restrição médica">warning</span>
+<span class="material-symbols-outlined text-slate-400">chevron_right</span>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="flex items-center gap-4 p-4 rounded-xl bg-white dark:bg-surface-dark border border-slate-100 dark:border-primary/10 shadow-sm active:scale-[0.98] transition-transform">
+<div class="size-12 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden shrink-0 border border-primary/20">
+<img class="w-full h-full object-cover" data-alt="Avatar portrait of a woman with glasses" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCJ9yW3JYgg62kfzRgNxsw9cHhVil3SGJC3wu2z0BoSAw2QK32VSE5FfPMbIdIryW_4KjVOPlezfNzQp2t2dt1TlUettFRyN5cNzTqFyfK49Xx5rYVNLuXY1flGwL_amt9q-oWLuJinihDyUrHsbGJT3g7WLVe5yUDv3UJM9HHjx8MOYVjREd7HatI6nJMIOPvCAm18N2K3bhAAIpIDOJ50RBd-EM73qKA6YEXoUYNxJ3tA5Z0hIFHfSSayLxQgQjoFdZ2wobeitOs"/>
+</div>
+<div class="flex-1 min-w-0">
+<h3 class="font-semibold text-sm truncate">Maria Clara Souza</h3>
+<div class="flex items-center gap-2 mt-1">
+<span class="px-2 py-0.5 rounded-md bg-amber-accent/20 text-amber-accent text-[10px] font-bold uppercase tracking-wider">Servo</span>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-slate-400">chevron_right</span>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="flex items-center gap-4 p-4 rounded-xl bg-white dark:bg-surface-dark border border-slate-100 dark:border-primary/10 shadow-sm active:scale-[0.98] transition-transform">
+<div class="size-12 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden shrink-0 border border-primary/20">
+<img class="w-full h-full object-cover" data-alt="Avatar portrait of a middle-aged man" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBvHx7TyBj4eBtRy1y4P1jbOt1ugPfwpE1_T44ZhowWIZOPrkSr_LUhwis8x6Ot-Jf6QspWKab5kohxETeHElaTMbn_IaGEiElCOIkLdnYBN8rqCHGOYfvAA7iMLIQtF3KNqfrVHIMrovyWssbDr_VkaYf0sh5sG6z0IDoaG40hCLh3ug93V5Aug6Ylwy8vXAaWEELbb1U3V4vdgoGG_OszTTlVuBhc5HH43YHJ8Hs5jVbpd5HSL-2VQ_xTN_Lhjzj1T5RuSF5ZBjM"/>
+</div>
+<div class="flex-1 min-w-0">
+<h3 class="font-semibold text-sm truncate">Ricardo Mendes</h3>
+<div class="flex items-center gap-2 mt-1">
+<span class="px-2 py-0.5 rounded-md bg-primary/20 text-primary dark:text-primary-foreground text-[10px] font-bold uppercase tracking-wider">Encontrista</span>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-slate-400">chevron_right</span>
+</div>
+</div>
+<!-- Card 4 (Alert state) -->
+<div class="flex items-center gap-4 p-4 rounded-xl bg-white dark:bg-surface-dark border border-slate-100 dark:border-primary/10 shadow-sm active:scale-[0.98] transition-transform">
+<div class="size-12 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden shrink-0 border border-primary/20">
+<img class="w-full h-full object-cover" data-alt="Avatar portrait of a young woman" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBPlKAlMiK8Kcv2Q0xdz1ocIhm5ka-enTU9gNmENhJw1_U3BxRhswlNqQylw8OsoF7nfJqdUbf4xnZTiVWZYeiZy7JH5Do6UoISvOWsUneF255B4azuQvAEsv3dl7-5SuuZ16NbSfHNGxSDq5J0-QUCQLmL5JJ3HmuQX6VWuLFfwyysG_N6IKuNriPQzZ13LRzjF641CQeHLmZfHYNkc3_X0Thhd3sp5NKhO3xwDYRY5oYrW7wyJ3GAGQV1neX3WjMEltEay28oaSI"/>
+</div>
+<div class="flex-1 min-w-0">
+<h3 class="font-semibold text-sm truncate">Beatriz Oliveira</h3>
+<div class="flex items-center gap-2 mt-1">
+<span class="px-2 py-0.5 rounded-md bg-primary/20 text-primary dark:text-primary-foreground text-[10px] font-bold uppercase tracking-wider">Encontrista</span>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-amber-accent text-xl">warning</span>
+<span class="material-symbols-outlined text-slate-400">chevron_right</span>
+</div>
+</div>
+<!-- Card 5 -->
+<div class="flex items-center gap-4 p-4 rounded-xl bg-white dark:bg-surface-dark border border-slate-100 dark:border-primary/10 shadow-sm active:scale-[0.98] transition-transform">
+<div class="size-12 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden shrink-0 border border-primary/20">
+<img class="w-full h-full object-cover" data-alt="Avatar portrait of a bearded man" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAtBkFiU5sd_eziHYNNHRX8X_Yiml81_P1_Z8YRfWloBtP0NZJcJ8LYSMaOJjNZ32UU2gP6EQLXSy9fbi8BwKeV0rrD8MOmn25BMSZ-tlMCLO5aeXzKb-V7GHXnCqQTHlh3T7Vc0E9KNFEOfrjLmFTTrArb0yfchmb7lEI0NY2-qu-QBkLCO9O0fgWl5uSfw2HTQMEEcW7Tp7_pzbNBX3Bg9xrfLdiLlGF-mN4hrRFAeJtSEJVOwByMRMHrMvmE-Cnh9FBAdDOeQrU"/>
+</div>
+<div class="flex-1 min-w-0">
+<h3 class="font-semibold text-sm truncate">Fernando Costa</h3>
+<div class="flex items-center gap-2 mt-1">
+<span class="px-2 py-0.5 rounded-md bg-amber-accent/20 text-amber-accent text-[10px] font-bold uppercase tracking-wider">Servo</span>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-slate-400">chevron_right</span>
+</div>
+</div>
+<div class="h-24"></div> <!-- Spacer for nav -->
+</main>
+<!-- Bottom Navigation -->
+<nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white/90 dark:bg-surface-dark/90 backdrop-blur-lg border-t border-slate-100 dark:border-primary/20 px-4 pb-6 pt-3 flex justify-around items-end z-30">
+<a class="flex flex-col items-center gap-1 group" href="#">
+<span class="material-symbols-outlined text-slate-400 group-hover:text-primary transition-colors">dashboard</span>
+<span class="text-[10px] font-medium text-slate-400 group-hover:text-primary">Dashboard</span>
+</a>
+<a class="flex flex-col items-center gap-1 group" href="#">
+<span class="material-symbols-outlined text-primary font-fill">group</span>
+<span class="text-[10px] font-bold text-primary">Pessoas</span>
+</a>
+<a class="flex flex-col items-center gap-1 group" href="#">
+<span class="material-symbols-outlined text-slate-400 group-hover:text-primary transition-colors">bed</span>
+<span class="text-[10px] font-medium text-slate-400 group-hover:text-primary">Acomodação</span>
+</a>
+<a class="flex flex-col items-center gap-1 group" href="#">
+<span class="material-symbols-outlined text-slate-400 group-hover:text-primary transition-colors">payments</span>
+<span class="text-[10px] font-medium text-slate-400 group-hover:text-primary">Financeiro</span>
+</a>
+<a class="flex flex-col items-center gap-1 group" href="#">
+<span class="material-symbols-outlined text-slate-400 group-hover:text-primary transition-colors">settings</span>
+<span class="text-[10px] font-medium text-slate-400 group-hover:text-primary">Config</span>
+</a>
+</nav>
+<!-- Floating Action Button -->
+<button class="fixed bottom-24 right-[calc(50%-180px)] size-14 rounded-full bg-primary text-white shadow-lg flex items-center justify-center z-20 hover:scale-110 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-2xl">person_add</span>
+</button>
+</div>
+<style>
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .font-fill {
+            font-variation-settings: 'FILL' 1;
+        }
+    </style>
+</body></html>

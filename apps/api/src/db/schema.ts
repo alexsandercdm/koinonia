@@ -62,6 +62,7 @@ export const camas = pgTable('camas', {
   quarto_id: uuid('quarto_id').notNull().references(() => quartos.id),
   identificacao: varchar('identificacao', { length: 50 }),
   tipo: varchar('tipo', { length: 20 }).notNull(), // 'solteiro', 'beliche_superior', 'beliche_inferior', 'casal'
+  bloqueada: boolean('bloqueada').notNull().default(false),
   created_at: timestamp('created_at').defaultNow(),
 })
 

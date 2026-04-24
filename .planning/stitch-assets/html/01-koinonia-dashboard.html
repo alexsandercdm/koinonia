@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="pt-br"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#4d0085",
+                        "accent": "#ffbf00",
+                        "background-light": "#f7f5f8",
+                        "background-dark": "#1b0f23",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen flex flex-col">
+<!-- Top Header -->
+<header class="flex items-center bg-background-light dark:bg-background-dark p-4 justify-between sticky top-0 z-10 border-b border-primary/10">
+<div class="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary dark:text-primary-light">
+<span class="material-symbols-outlined">menu</span>
+</div>
+<h1 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-tight flex-1 text-center font-display">Koinonia Management</h1>
+<div class="flex w-10 items-center justify-end">
+<button class="relative flex items-center justify-center rounded-full h-10 w-10 bg-primary/10 text-primary dark:text-slate-100">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2 flex h-2 w-2 rounded-full bg-accent"></span>
+</button>
+</div>
+</header>
+<main class="flex-1 overflow-y-auto pb-24">
+<!-- Next Event Card -->
+<div class="p-4">
+<div class="relative flex flex-col items-stretch justify-start rounded-xl overflow-hidden shadow-lg bg-primary text-white">
+<div class="absolute inset-0 opacity-20 bg-[url('https://images.unsplash.com/photo-1523580494863-6f3031224c94?q=80&amp;w=2070&amp;auto=format&amp;fit=crop')] bg-cover bg-center" data-alt="Abstract group of people in a spiritual retreat circle"></div>
+<div class="relative z-10 p-6 flex flex-col gap-4">
+<div>
+<p class="text-accent text-xs font-bold uppercase tracking-widest mb-1">PRÓXIMO EVENTO</p>
+<h2 class="text-2xl font-bold leading-tight">Retiro de Outono 2024</h2>
+<p class="text-slate-200 text-sm mt-1">Sítio das Águas • 25-27 de Outubro</p>
+</div>
+<!-- Countdown -->
+<div class="flex gap-3 py-2">
+<div class="flex flex-col items-center justify-center rounded-lg bg-white/10 backdrop-blur-md px-3 py-2 min-w-[64px]">
+<p class="text-xl font-bold leading-none">12</p>
+<p class="text-[10px] uppercase font-medium mt-1 opacity-80">Dias</p>
+</div>
+<div class="flex flex-col items-center justify-center rounded-lg bg-white/10 backdrop-blur-md px-3 py-2 min-w-[64px]">
+<p class="text-xl font-bold leading-none">08</p>
+<p class="text-[10px] uppercase font-medium mt-1 opacity-80">Horas</p>
+</div>
+<div class="flex flex-col items-center justify-center rounded-lg bg-white/10 backdrop-blur-md px-3 py-2 min-w-[64px]">
+<p class="text-xl font-bold leading-none">45</p>
+<p class="text-[10px] uppercase font-medium mt-1 opacity-80">Min</p>
+</div>
+</div>
+<div class="flex items-center justify-between mt-2">
+<div class="flex -space-x-2">
+<img alt="Participant 1" class="h-8 w-8 rounded-full border-2 border-primary" data-alt="User profile picture" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCjq497jafIZn_eGPCyQsxrnrGXCY7SDEoiITV7HqkAMgg2t75QM94X1qf1Ebg3QZJXEmkuSScx9lnEzNUIbA47-wb2uGJ9itMpaCYpOHvklksIGLplpNwusY429zRvw61Iqjdhs3ONSqLvnnFBy1r99XvPcM8ipzHudy8hCZPJKRH01JtI0ztxQXBpkq5YNX8NI4298C_7bo5wJswR8VnT6UH-eSMfickodZeCGUtWSOsh77eUDv7v1cp0QUYDaZr7ptcV-yIeJY0"/>
+<img alt="Participant 2" class="h-8 w-8 rounded-full border-2 border-primary" data-alt="User profile picture" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCpa9fIAx2q3y94Bk1PTZqC82ecemVak8LV8ogQvX-9340LZ5EYAnP6xA7HwxA0GjXDOhUyhUcJ1uVi_NRNt6IkDbdkNM3TPWtqq7BQIxnUC1kpMdycTNGoV8xdX193ExOSkKtczK-rK6xCmWC1Cy-obyflWpFhzQ303XU_HrOMT1RL4zRd7VuZWoggEdk4wrqP-WvIKCFnIRIzMe9JsLNMKCumX2dMWUBfpC6yeyAr3jVyAutfF9H9a9Y_Bmb-OD3mHgaanj2Z_os"/>
+<img alt="Participant 3" class="h-8 w-8 rounded-full border-2 border-primary" data-alt="User profile picture" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDty2VIYvwPthn7uP-TZOO66bDpmuZOrR-w5lFCQzi3SJGNBD6grcHHOdu4mA7-pjP2fzLpU6oG0FpBsdm_HHr18xJVmcfMmVu8_v3lB49K4Gc41KyjBb3_xNOYDu8QtRsb7rst3y0SFgKrNHxbe9CS_tOVG_XH89KevGlv24ZcCFopuiVm3n_XN3CElTfJ_8k4EHSZQhNi14v3LdoqZrHFLSuhzCDf4gBZB2V4BlffLmTSlxr4XuewwR9t28aDCUNGGwwwMzg-7G4"/>
+<div class="flex h-8 w-8 items-center justify-center rounded-full border-2 border-primary bg-accent text-primary text-[10px] font-bold">+42</div>
+</div>
+<button class="flex cursor-pointer items-center justify-center rounded-lg h-10 px-6 bg-accent text-primary text-sm font-bold shadow-sm transition-transform active:scale-95">
+                            Gerenciar
+                        </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Metrics Section -->
+<div class="px-4 py-2">
+<h3 class="text-slate-900 dark:text-slate-100 text-lg font-bold mb-4 px-1">Métricas em Tempo Real</h3>
+<div class="grid gap-4">
+<!-- Metric 1: Subscribers -->
+<div class="p-4 rounded-xl bg-white dark:bg-primary/10 border border-primary/5 shadow-sm">
+<div class="flex justify-between items-start mb-3">
+<div>
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Total de Inscritos</p>
+<h4 class="text-2xl font-bold text-slate-900 dark:text-slate-100">142<span class="text-sm font-normal text-slate-400 dark:text-slate-500 ml-1">/ 150</span></h4>
+</div>
+<div class="p-2 rounded-lg bg-primary/10 text-primary">
+<span class="material-symbols-outlined">group</span>
+</div>
+</div>
+<div class="w-full bg-slate-200 dark:bg-primary/20 rounded-full h-2">
+<div class="bg-primary h-2 rounded-full" style="width: 94.6%"></div>
+</div>
+<p class="text-[11px] text-slate-500 dark:text-slate-400 mt-2">95% da meta atingida</p>
+</div>
+<!-- Metric 2: Payments -->
+<div class="p-4 rounded-xl bg-white dark:bg-primary/10 border border-primary/5 shadow-sm">
+<div class="flex justify-between items-start mb-3">
+<div>
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Pagamentos Confirmados</p>
+<h4 class="text-2xl font-bold text-slate-900 dark:text-slate-100">88%</h4>
+</div>
+<div class="p-2 rounded-lg bg-green-500/10 text-green-600">
+<span class="material-symbols-outlined">payments</span>
+</div>
+</div>
+<div class="w-full bg-slate-200 dark:bg-primary/20 rounded-full h-2">
+<div class="bg-green-500 h-2 rounded-full" style="width: 88%"></div>
+</div>
+<p class="text-[11px] text-slate-500 dark:text-slate-400 mt-2">125 de 142 confirmados</p>
+</div>
+<!-- Metric 3: Beds -->
+<div class="p-4 rounded-xl bg-white dark:bg-primary/10 border border-primary/5 shadow-sm">
+<div class="flex justify-between items-start mb-3">
+<div>
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Ocupação de Leitos</p>
+<h4 class="text-2xl font-bold text-slate-900 dark:text-slate-100">118<span class="text-sm font-normal text-slate-400 dark:text-slate-500 ml-1">/ 160</span></h4>
+</div>
+<div class="p-2 rounded-lg bg-accent/10 text-accent">
+<span class="material-symbols-outlined">bed</span>
+</div>
+</div>
+<div class="w-full bg-slate-200 dark:bg-primary/20 rounded-full h-2">
+<div class="bg-accent h-2 rounded-full" style="width: 73%"></div>
+</div>
+<p class="text-[11px] text-slate-500 dark:text-slate-400 mt-2">Alojamento Masculino lotado</p>
+</div>
+</div>
+</div>
+<!-- Quick Actions or secondary info -->
+<div class="p-4 mt-2">
+<div class="flex items-center justify-between mb-4 px-1">
+<h3 class="text-slate-900 dark:text-slate-100 text-lg font-bold">Relatórios Rápidos</h3>
+<a class="text-primary text-sm font-semibold" href="#">Ver todos</a>
+</div>
+<div class="flex gap-4 overflow-x-auto pb-4 no-scrollbar">
+<div class="flex-shrink-0 w-32 h-32 rounded-xl bg-white dark:bg-primary/10 border border-primary/5 p-4 flex flex-col items-center justify-center text-center gap-2">
+<span class="material-symbols-outlined text-primary text-3xl">description</span>
+<span class="text-xs font-semibold">Lista de Presença</span>
+</div>
+<div class="flex-shrink-0 w-32 h-32 rounded-xl bg-white dark:bg-primary/10 border border-primary/5 p-4 flex flex-col items-center justify-center text-center gap-2">
+<span class="material-symbols-outlined text-primary text-3xl">restaurant</span>
+<span class="text-xs font-semibold">Restrições Alim.</span>
+</div>
+<div class="flex-shrink-0 w-32 h-32 rounded-xl bg-white dark:bg-primary/10 border border-primary/5 p-4 flex flex-col items-center justify-center text-center gap-2">
+<span class="material-symbols-outlined text-primary text-3xl">medical_services</span>
+<span class="text-xs font-semibold">Ficha Médica</span>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 left-0 right-0 bg-white/80 dark:bg-background-dark/80 backdrop-blur-lg border-t border-primary/10 px-4 pb-6 pt-2 z-20">
+<div class="flex justify-between items-center max-w-md mx-auto">
+<a class="flex flex-col items-center gap-1 text-primary" href="#">
+<span class="material-symbols-outlined font-fill" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+<p class="text-[10px] font-bold leading-normal uppercase">Início</p>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400 dark:text-slate-500" href="#">
+<span class="material-symbols-outlined">groups</span>
+<p class="text-[10px] font-medium leading-normal uppercase">Pessoas</p>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400 dark:text-slate-500" href="#">
+<span class="material-symbols-outlined">hotel</span>
+<p class="text-[10px] font-medium leading-normal uppercase">Quartos</p>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400 dark:text-slate-500" href="#">
+<span class="material-symbols-outlined">account_balance_wallet</span>
+<p class="text-[10px] font-medium leading-normal uppercase">Finanças</p>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400 dark:text-slate-500" href="#">
+<span class="material-symbols-outlined">settings</span>
+<p class="text-[10px] font-medium leading-normal uppercase">Config</p>
+</a>
+</div>
+</nav>
+<style>
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .font-fill {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</body></html>

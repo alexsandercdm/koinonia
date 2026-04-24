@@ -8,6 +8,18 @@ Sistema open-source de gestão para retiros espirituais, projetado para igrejas 
 
 Gestão de participantes e alocação de quartos com regras estritas de gênero e capacidade de forma eficiente, para que os organizadores focar no aspecto espiritual sem falhas burocráticas ou desorganização de infraestrutura.
 
+## Current Milestone: v1.1 Frontend Funcional & Primeiro Deploy
+
+**Goal:** Conectar o frontend ao backend com CRUD completo nas telas de Participantes, Eventos, Inscrições e Acomodações, e preparar o sistema para o primeiro teste com usuários reais.
+
+**Target features:**
+- CRUD de Participantes (formulário completo: saúde, contato de emergência, histórico)
+- Cadastro e gestão de Eventos (criar, editar, listar com período, local, capacidade)
+- Fluxo de Inscrições (inscrever participante em evento, registrar pagamentos, status automático)
+- Cadastro de Locais, Quartos e Camas (estrutura de acomodação com regras de gênero)
+- Mapa visual de acomodação com atribuição cama-a-cama
+- Infraestrutura de deploy (ambiente de teste para validação com usuários)
+
 ## Requirements
 
 ### Validated
@@ -44,6 +56,7 @@ A Stack está explicitada e definida no arquivo de documentação entregue.
 
 - **Tech Stack**: Fastify + React Vite + Drizzle + Better Auth — Manter consistência tecnológica.
 - **Acessibilidade & UI**: Mobile-first, alvos de toque >= 48px, texto >= 16px (Inter).
+- **Design System**: 14 telas geradas via Stitch AI (`.planning/stitch-assets/`). Ver `design/UI-SPEC.md`.
 - **Offline Grace**: O TanStack Query deve reter cache por tempo estendido (connecção instável na chácara).
 - **Fluxo de Trabalho**: Usar estritamente a skill `tlc-spec-driven` para Especificação, Design, Tarefas e Execução, como solitado.
 
@@ -73,4 +86,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-03-31 after new-project initialization*
+*Last updated: 2026-04-22 — Milestone v1.1 started*

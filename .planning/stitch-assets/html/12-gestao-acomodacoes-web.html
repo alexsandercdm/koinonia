@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="pt-br"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#4d0085",
+                        "accent-amber": "#f59e0b",
+                        "background-light": "#f7f5f8",
+                        "background-dark": "#1b0f23",
+                        "surface-dark": "#251631",
+                        "male-wing": "#3b82f6",
+                        "female-wing": "#ec4899",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<title>Koinonia - Gestão de Acomodações</title>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen flex">
+<!-- Sidebar Navigation -->
+<aside class="w-72 bg-surface-dark border-r border-primary/20 flex flex-col h-screen sticky top-0">
+<div class="p-6 flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white">
+<span class="material-symbols-outlined">night_shelter</span>
+</div>
+<div>
+<h1 class="text-xl font-bold tracking-tight text-white">Koinonia</h1>
+<p class="text-xs text-slate-400 uppercase tracking-widest">Executive PMS</p>
+</div>
+</div>
+<nav class="flex-1 px-4 mt-4 space-y-2">
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-primary/10 hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-medium">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-primary/10 hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="font-medium">Pessoas</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl bg-primary text-white shadow-lg shadow-primary/20" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">bed</span>
+<span class="font-medium">Acomodação</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-primary/10 hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined">account_balance_wallet</span>
+<span class="font-medium">Financeiro</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-primary/10 hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-medium">Configurações</span>
+</a>
+</nav>
+<div class="p-4 mt-auto">
+<div class="bg-primary/10 rounded-xl p-4 border border-primary/20">
+<p class="text-xs text-slate-400 mb-2">Usuário Logado</p>
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-accent-amber flex items-center justify-center text-background-dark font-bold text-xs">AD</div>
+<div class="flex flex-col">
+<span class="text-sm font-semibold text-white">Admin Koinonia</span>
+<span class="text-[10px] text-primary">Nível Master</span>
+</div>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 p-8 overflow-y-auto">
+<header class="flex justify-between items-end mb-8">
+<div>
+<h2 class="text-3xl font-black text-white tracking-tight mb-2">Gestão de Acomodações</h2>
+<p class="text-slate-400">Gerenciamento estratégico e alocação em tempo real de participantes.</p>
+</div>
+<div class="flex bg-surface-dark p-1 rounded-xl border border-primary/20">
+<button class="px-6 py-2 rounded-lg bg-primary text-white text-sm font-medium">Todos</button>
+<button class="px-6 py-2 rounded-lg text-slate-400 hover:text-white text-sm font-medium transition-colors">Masculino</button>
+<button class="px-6 py-2 rounded-lg text-slate-400 hover:text-white text-sm font-medium transition-colors">Feminino</button>
+</div>
+</header>
+<!-- Room Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-6">
+<!-- Room Card 1 (Male) -->
+<div class="bg-surface-dark border-l-4 border-male-wing rounded-xl overflow-hidden flex flex-col shadow-xl">
+<div class="relative h-48 w-full">
+<img alt="Modern shared bedroom with bunk beds" class="w-full h-full object-cover opacity-60" data-alt="Modern shared bedroom with minimalist design" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC9p4cNlcxEUKzwC605T3Rxt_ExXpT1muVLcVj84DtAqju_2dHrg53yAOP9FpV3v3ek8SgNzTeDzH3N0pX-tyrht4mllw9rWnHtrLlH5StcEvQDgpUl7Eq2t2jOd7h-MbSXrTWTCzrfky6T7HlpJ5-b5I411pbzMPjUyG4H_paOOxfodsRqMPjyWZJpsBXXAmYr2uqBauwqG0TX64zhfPshXx5LOyLbh7oMHXR4j88uGPmyB2ZsRae_f7wxwKiVbnqBkLOrIlVDrsA"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-dark to-transparent"></div>
+<div class="absolute bottom-4 left-4">
+<h3 class="text-xl font-bold text-white">Quarto 01 - Masc</h3>
+<div class="flex items-center gap-2 mt-1">
+<span class="flex items-center text-xs font-medium bg-male-wing/20 text-male-wing px-2 py-0.5 rounded-full border border-male-wing/30">
+                                Ala Masculina • Térreo
+                            </span>
+</div>
+</div>
+<div class="absolute top-4 right-4 bg-background-dark/80 backdrop-blur-md px-3 py-1 rounded-full border border-white/10">
+<span class="text-xs font-bold text-white">4 / 6 Ocupadas</span>
+</div>
+</div>
+<div class="p-6">
+<div class="grid grid-cols-3 gap-4">
+<!-- Bed 1 Occupied -->
+<div class="flex flex-col items-center gap-2 group">
+<div class="relative">
+<img alt="Participant avatar" class="w-12 h-12 rounded-full border-2 border-primary shadow-lg group-hover:scale-110 transition-transform" data-alt="Portrait of a young man smiling" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCwchJBnjrvYOM89brX5u33EqM5bEGUxd5AAcEdLUV7b2Cu1OrQqMP6UzORU-SfoZvmALlRe4tndfPuqQLPbCI_e7jVLbhcdEKAQulBz9S6ULARB28rlx3DIjW9ysisZ74e0w2NHU_BbivWjmVNDi-M-jd8wE8Hf3AKRccZ7c04hiTddSb8QTgvC0171ulhY8V4P-xMi1eDsd_dNLwQCo1qS2H6G1cqFeTDsCZ9fgdelS09d2Y61gCLzs_9oHbA0tzaeVgWdor7PMM"/>
+<div class="absolute -bottom-1 -right-1 bg-green-500 w-3 h-3 rounded-full border-2 border-surface-dark"></div>
+</div>
+<span class="text-[10px] font-medium text-slate-300">Marcos S.</span>
+</div>
+<!-- Bed 2 Occupied -->
+<div class="flex flex-col items-center gap-2 group">
+<div class="w-12 h-12 rounded-full bg-indigo-500 flex items-center justify-center text-white font-bold border-2 border-primary shadow-lg group-hover:scale-110 transition-transform">
+                                PL
+                            </div>
+<span class="text-[10px] font-medium text-slate-300">Paulo L.</span>
+</div>
+<!-- Bed 3 Empty -->
+<button class="flex flex-col items-center gap-2 group">
+<div class="w-12 h-12 rounded-full border-2 border-dashed border-slate-600 flex items-center justify-center text-slate-500 hover:border-primary hover:text-primary transition-all bg-white/5">
+<span class="material-symbols-outlined text-xl">add</span>
+</div>
+<span class="text-[10px] font-medium text-slate-500">Vago</span>
+</button>
+<!-- Bed 4 Occupied -->
+<div class="flex flex-col items-center gap-2 group">
+<div class="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold border-2 border-primary shadow-lg group-hover:scale-110 transition-transform">
+                                RF
+                            </div>
+<span class="text-[10px] font-medium text-slate-300">Rafael F.</span>
+</div>
+<!-- Bed 5 Occupied -->
+<div class="flex flex-col items-center gap-2 group">
+<div class="w-12 h-12 rounded-full bg-slate-700 flex items-center justify-center text-white font-bold border-2 border-primary shadow-lg group-hover:scale-110 transition-transform">
+                                AC
+                            </div>
+<span class="text-[10px] font-medium text-slate-300">André C.</span>
+</div>
+<!-- Bed 6 Empty -->
+<button class="flex flex-col items-center gap-2 group">
+<div class="w-12 h-12 rounded-full border-2 border-dashed border-slate-600 flex items-center justify-center text-slate-500 hover:border-primary hover:text-primary transition-all bg-white/5">
+<span class="material-symbols-outlined text-xl">add</span>
+</div>
+<span class="text-[10px] font-medium text-slate-500">Vago</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Room Card 2 (Female) -->
+<div class="bg-surface-dark border-l-4 border-female-wing rounded-xl overflow-hidden flex flex-col shadow-xl">
+<div class="relative h-48 w-full">
+<img alt="Elegant room with pink accents" class="w-full h-full object-cover opacity-60" data-alt="Cozy bedroom with soft pink and white decor" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCBwSSRSSg72iSTTa-ojnaSmjGILNKryyunlNfZ0vNhZkR72gn39uxkIVWeGakKhgGMKl23yWVNXL7dsFMzW_PcCHEwo5gxH6CjwhE6kgTyylEFyyv4-kwBq12CpWRAL0wBlmEg5z4u4r5N1bFtAb8rLyRscXwK_InlfiP_6NbeTgvU9YZqrzYWVCGwHkLvgc49yXoLP3fGSCGdq_xV0I3kL_S0cHAMjR-ymhzJSQiVR8sl8Kh_9s1kPQKatSvOTL7KiN6pzq-cFCI"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-dark to-transparent"></div>
+<div class="absolute bottom-4 left-4">
+<h3 class="text-xl font-bold text-white">Quarto 03 - Fem</h3>
+<div class="flex items-center gap-2 mt-1">
+<span class="flex items-center text-xs font-medium bg-female-wing/20 text-female-wing px-2 py-0.5 rounded-full border border-female-wing/30">
+                                Ala Feminina • Superior
+                            </span>
+</div>
+</div>
+<div class="absolute top-4 right-4 bg-background-dark/80 backdrop-blur-md px-3 py-1 rounded-full border border-white/10">
+<span class="text-xs font-bold text-white">6 / 6 Ocupadas</span>
+</div>
+</div>
+<div class="p-6">
+<div class="grid grid-cols-3 gap-4">
+<!-- All Beds Occupied -->
+<div class="flex flex-col items-center gap-2">
+<div class="w-12 h-12 rounded-full bg-pink-500 flex items-center justify-center text-white font-bold border-2 border-primary shadow-lg">AM</div>
+<span class="text-[10px] font-medium text-slate-300">Ana M.</span>
+</div>
+<div class="flex flex-col items-center gap-2">
+<img alt="User" class="w-12 h-12 rounded-full border-2 border-primary shadow-lg" data-alt="Portrait of a young woman with long hair" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBp5VAQ9aXGgMxSfbWVfPRybmV5R0ko3bTyK94z3rWRfDYOLkoXv4tcTflYeXEzT7xQQ3KngNYl5xg3ALZcIhEfaX2l9eOr3hrPeJKbcf52NOd4vzmhEp9i3VxpTYWMZbHvvji6amBJT_ckfqE9WSZD-IvgWSNrT4-2hEHrkBLJT6gBpkQlfUT0EoBDAUFmqiJf8rTYG3cnsp3-Ug6CdOdtZ0CCxlh2kT4iwskRV5M6KFvPUxPxNj3cGX1F9BhnRDMh0ckyx0Ayxqo"/>
+<span class="text-[10px] font-medium text-slate-300">Julia R.</span>
+</div>
+<div class="flex flex-col items-center gap-2">
+<div class="w-12 h-12 rounded-full bg-purple-500 flex items-center justify-center text-white font-bold border-2 border-primary shadow-lg">BE</div>
+<span class="text-[10px] font-medium text-slate-300">Bia E.</span>
+</div>
+<div class="flex flex-col items-center gap-2">
+<div class="w-12 h-12 rounded-full bg-rose-400 flex items-center justify-center text-white font-bold border-2 border-primary shadow-lg">CL</div>
+<span class="text-[10px] font-medium text-slate-300">Carla L.</span>
+</div>
+<div class="flex flex-col items-center gap-2">
+<div class="w-12 h-12 rounded-full bg-orange-400 flex items-center justify-center text-white font-bold border-2 border-primary shadow-lg">DN</div>
+<span class="text-[10px] font-medium text-slate-300">Dandara</span>
+</div>
+<div class="flex flex-col items-center gap-2">
+<div class="w-12 h-12 rounded-full bg-fuchsia-600 flex items-center justify-center text-white font-bold border-2 border-primary shadow-lg">SF</div>
+<span class="text-[10px] font-medium text-slate-300">Sofia</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Room Card 3 (Male) -->
+<div class="bg-surface-dark border-l-4 border-male-wing rounded-xl overflow-hidden flex flex-col shadow-xl">
+<div class="relative h-48 w-full">
+<img alt="Bright male dormitory" class="w-full h-full object-cover opacity-60" data-alt="Bright modern dormitory with minimalist furniture" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDx39ugW7erkNj8bvi-pRxQ4qH-23KdBjDs5AqDYGT5hqODz85AEUnp8yrpo0cjfjwbA_qz0_MSBwM4UHA2b7GSJ3teEB_dfJccBtTKXl-ZLAAim8w-twV5Sz-gxCdy1VOyBCBOx6Vq2x2y-l8FHofeNweYJEJbR56iGbxJQVwvaKITbmR0_5r_rRH-Ue4GdaLEV7T2gAXQYv23mcEonhc54_CB54NCK2L4QcAoD2j4vvDjvnNMBFqFbxhfwYB5bGFciOTIlBsGURY"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-dark to-transparent"></div>
+<div class="absolute bottom-4 left-4">
+<h3 class="text-xl font-bold text-white">Quarto 02 - Masc</h3>
+<div class="flex items-center gap-2 mt-1">
+<span class="flex items-center text-xs font-medium bg-male-wing/20 text-male-wing px-2 py-0.5 rounded-full border border-male-wing/30">
+                                Ala Masculina • Térreo
+                            </span>
+</div>
+</div>
+<div class="absolute top-4 right-4 bg-background-dark/80 backdrop-blur-md px-3 py-1 rounded-full border border-white/10">
+<span class="text-xs font-bold text-white">2 / 6 Ocupadas</span>
+</div>
+</div>
+<div class="p-6">
+<div class="grid grid-cols-3 gap-4">
+<div class="flex flex-col items-center gap-2">
+<div class="w-12 h-12 rounded-full bg-blue-900 flex items-center justify-center text-white font-bold border-2 border-primary shadow-lg">JG</div>
+<span class="text-[10px] font-medium text-slate-300">João G.</span>
+</div>
+<div class="flex flex-col items-center gap-2">
+<div class="w-12 h-12 rounded-full bg-cyan-600 flex items-center justify-center text-white font-bold border-2 border-primary shadow-lg">ML</div>
+<span class="text-[10px] font-medium text-slate-300">Murilo</span>
+</div>
+<!-- Empty slots -->
+<button class="flex flex-col items-center gap-2 group">
+<div class="w-12 h-12 rounded-full border-2 border-dashed border-slate-600 flex items-center justify-center text-slate-500 hover:border-primary hover:text-primary transition-all bg-white/5">
+<span class="material-symbols-outlined text-xl">add</span>
+</div>
+<span class="text-[10px] font-medium text-slate-500">Vago</span>
+</button>
+<button class="flex flex-col items-center gap-2 group">
+<div class="w-12 h-12 rounded-full border-2 border-dashed border-slate-600 flex items-center justify-center text-slate-500 hover:border-primary hover:text-primary transition-all bg-white/5">
+<span class="material-symbols-outlined text-xl">add</span>
+</div>
+<span class="text-[10px] font-medium text-slate-500">Vago</span>
+</button>
+<button class="flex flex-col items-center gap-2 group">
+<div class="w-12 h-12 rounded-full border-2 border-dashed border-slate-600 flex items-center justify-center text-slate-500 hover:border-primary hover:text-primary transition-all bg-white/5">
+<span class="material-symbols-outlined text-xl">add</span>
+</div>
+<span class="text-[10px] font-medium text-slate-500">Vago</span>
+</button>
+<button class="flex flex-col items-center gap-2 group">
+<div class="w-12 h-12 rounded-full border-2 border-dashed border-slate-600 flex items-center justify-center text-slate-500 hover:border-primary hover:text-primary transition-all bg-white/5">
+<span class="material-symbols-outlined text-xl">add</span>
+</div>
+<span class="text-[10px] font-medium text-slate-500">Vago</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Room Card 4 (Female - Empty) -->
+<div class="bg-surface-dark border-l-4 border-female-wing rounded-xl overflow-hidden flex flex-col shadow-xl">
+<div class="relative h-48 w-full">
+<img alt="Unoccupied room" class="w-full h-full object-cover opacity-60" data-alt="Quiet and tidy unoccupied shared bedroom" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDPpJLulbov670fHONF7eNLTG1dh7BamClfESOmvcLbR1P6sXbUTbEsnWzsrmfiy-bzfDMnP4bCRQYVmBxdHMXXPfD0V_c3QHpIa5b0WsLOOhK4W5S7mXWIWLbKBM4Cv2diAoe0l074vzsnZsXz0oY2_J7MpNmi-FR-3pv78mJFzycCiG8h-h8BUV48lUuV2ZVyHXYoIyff1ZH1oUGgPvpvwXnWmaCo4QdvOuOmQMYeVO4GUBS6oSNZF6HzZYI8euRHepSxCG_CRCE"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-dark to-transparent"></div>
+<div class="absolute bottom-4 left-4">
+<h3 class="text-xl font-bold text-white">Quarto 04 - Fem</h3>
+<div class="flex items-center gap-2 mt-1">
+<span class="flex items-center text-xs font-medium bg-female-wing/20 text-female-wing px-2 py-0.5 rounded-full border border-female-wing/30">
+                                Ala Feminina • Superior
+                            </span>
+</div>
+</div>
+<div class="absolute top-4 right-4 bg-background-dark/80 backdrop-blur-md px-3 py-1 rounded-full border border-white/10">
+<span class="text-xs font-bold text-white">0 / 6 Ocupadas</span>
+</div>
+</div>
+<div class="p-6 flex-1 flex items-center justify-center">
+<div class="text-center">
+<span class="material-symbols-outlined text-slate-600 text-4xl mb-2">hotel</span>
+<p class="text-slate-500 text-sm italic">Quarto totalmente disponível</p>
+<button class="mt-4 px-4 py-2 bg-primary/20 text-primary border border-primary/30 rounded-lg text-xs font-bold hover:bg-primary hover:text-white transition-all uppercase tracking-wider">
+                            Alocação Rápida
+                        </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Allocation Stats Summary -->
+<section class="mt-12 grid grid-cols-1 md:grid-cols-4 gap-6">
+<div class="bg-surface-dark p-6 rounded-xl border border-primary/10">
+<p class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-1">Capacidade Total</p>
+<div class="flex items-end gap-2">
+<h4 class="text-3xl font-black text-white">124</h4>
+<span class="text-slate-500 mb-1">Leitos</span>
+</div>
+</div>
+<div class="bg-surface-dark p-6 rounded-xl border border-primary/10">
+<p class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-1">Ocupação</p>
+<div class="flex items-end gap-2">
+<h4 class="text-3xl font-black text-accent-amber">86</h4>
+<span class="text-slate-500 mb-1">69%</span>
+</div>
+</div>
+<div class="bg-surface-dark p-6 rounded-xl border border-primary/10">
+<p class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-1">Alas Masc.</p>
+<div class="flex items-end gap-2">
+<h4 class="text-3xl font-black text-male-wing">42</h4>
+<span class="text-slate-500 mb-1">Ocupados</span>
+</div>
+</div>
+<div class="bg-surface-dark p-6 rounded-xl border border-primary/10">
+<p class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-1">Alas Fem.</p>
+<div class="flex items-end gap-2">
+<h4 class="text-3xl font-black text-female-wing">44</h4>
+<span class="text-slate-500 mb-1">Ocupados</span>
+</div>
+</div>
+</section>
+</main>
+</body></html>

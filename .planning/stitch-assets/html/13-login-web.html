@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="pt-br"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#4d0085",
+                        "accent-amber": "#ffbf00",
+                        "background-light": "#f7f5f8",
+                        "background-dark": "#1b0f23",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .bg-violet-gradient {
+            background: radial-gradient(circle at top left, #2d1345 0%, #1b0f23 100%);
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 antialiased">
+<div class="relative min-h-screen w-full flex flex-col items-center justify-center bg-violet-gradient overflow-hidden">
+<!-- Background Decorative Elements -->
+<div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/20 blur-[120px] rounded-full"></div>
+<div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-primary/10 blur-[120px] rounded-full"></div>
+<div class="layout-container flex h-full grow flex-col w-full max-w-[1200px] z-10 p-6 md:p-12">
+<!-- Header / Logo Area -->
+<header class="flex items-center justify-between w-full mb-12">
+<div class="flex items-center gap-3">
+<div class="flex items-center justify-center w-10 h-10 bg-primary rounded-lg text-slate-100">
+<span class="material-symbols-outlined text-3xl">diversity_3</span>
+</div>
+<h2 class="text-2xl font-black tracking-tight dark:text-slate-100">Koinonia</h2>
+</div>
+<div class="hidden md:block">
+<p class="text-sm text-slate-400">Novo por aqui? <a class="text-accent-amber font-semibold hover:underline" href="#">Crie uma conta</a></p>
+</div>
+</header>
+<main class="flex flex-1 items-center justify-center">
+<div class="grid grid-cols-1 lg:grid-cols-2 w-full gap-16 items-center">
+<!-- Left Side: Welcome Text & Image -->
+<div class="hidden lg:flex flex-col gap-8">
+<div class="space-y-4">
+<h1 class="text-5xl font-black leading-tight tracking-tight text-white">
+                            Gestão com excelência <br/>
+<span class="text-primary dark:text-primary/80 bg-accent-amber px-2 rounded-md italic">para o seu retiro</span>
+</h1>
+<p class="text-xl text-slate-400 max-w-md leading-relaxed">
+                            Organize inscrições, logística e espiritualidade em um só lugar. A ferramenta definitiva para comunidades e eventos religiosos.
+                        </p>
+</div>
+<div class="relative w-full aspect-video rounded-xl overflow-hidden border border-primary/20 shadow-2xl">
+<div class="absolute inset-0 bg-primary/20 mix-blend-multiply"></div>
+<img alt="People gathering in a spiritual retreat" class="w-full h-full object-cover" data-alt="People gathering in a spiritual retreat" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAdBUsu7bAcE7YvZK5Y1KTdnnvkWh4SgIhlKj0MTnDwRcBrTXT6d77zG1bzPlsg6dkwFG1ccktVY9Eep8rUbVjRbp1L4-s2mQD-En8nHZp31vL7_wHfBRENpyVB9QU5f-I1FL6KF9dMsKY4c7KbAjTiUUGNcDqooxcEaL235AQTFmNfB3IRVuSEIIWn7E1E9ROCziZkPXbyKMjWmgZCSn0tDRxIg-kaOe_vIpq7UEJ5vAsLqJlufTmbyzptg5rRZa-yxQTkRvs1Juc"/>
+</div>
+</div>
+<!-- Right Side: Login Form -->
+<div class="w-full max-w-md mx-auto lg:ml-auto">
+<div class="bg-background-dark/40 backdrop-blur-xl border border-primary/20 p-8 md:p-10 rounded-xl shadow-2xl">
+<div class="mb-8">
+<h3 class="text-2xl font-bold mb-2">Bem-vindo de volta</h3>
+<p class="text-slate-400">Acesse sua conta para continuar a gestão</p>
+</div>
+<form class="flex flex-col gap-6">
+<!-- Email Input -->
+<div class="flex flex-col gap-2">
+<label class="text-sm font-semibold text-slate-300 ml-1">Endereço de E-mail</label>
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-accent-amber transition-colors">mail</span>
+<input class="w-full bg-primary/10 border border-primary/30 rounded-lg py-4 pl-12 pr-4 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-accent-amber/50 focus:border-accent-amber transition-all" placeholder="seu@email.com" type="email"/>
+</div>
+</div>
+<!-- Password Input -->
+<div class="flex flex-col gap-2">
+<div class="flex justify-between items-center">
+<label class="text-sm font-semibold text-slate-300 ml-1">Sua Senha</label>
+<a class="text-xs text-accent-amber hover:underline" href="#">Esqueceu a senha?</a>
+</div>
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-accent-amber transition-colors">lock</span>
+<input class="w-full bg-primary/10 border border-primary/30 rounded-lg py-4 pl-12 pr-12 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-accent-amber/50 focus:border-accent-amber transition-all" placeholder="••••••••" type="password"/>
+<button class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300" type="button">
+<span class="material-symbols-outlined">visibility</span>
+</button>
+</div>
+</div>
+<!-- Remember Me -->
+<div class="flex items-center gap-2 px-1">
+<input class="w-4 h-4 rounded border-primary/30 bg-primary/10 text-accent-amber focus:ring-accent-amber focus:ring-offset-background-dark" id="remember" type="checkbox"/>
+<label class="text-sm text-slate-400 select-none" for="remember">Lembrar de mim por 30 dias</label>
+</div>
+<!-- Login Button -->
+<button class="w-full bg-accent-amber hover:bg-amber-400 text-primary font-black py-4 rounded-lg shadow-lg shadow-accent-amber/20 transition-all flex items-center justify-center gap-2 group" type="submit">
+<span>ENTRAR NO PAINEL</span>
+<span class="material-symbols-outlined text-xl group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</button>
+</form>
+<div class="mt-8 pt-8 border-t border-primary/20 flex flex-col items-center gap-4">
+<p class="text-xs text-slate-500 uppercase tracking-widest font-bold">Ou acesse com</p>
+<div class="flex gap-4 w-full">
+<button class="flex-1 flex items-center justify-center gap-2 bg-slate-100 dark:bg-slate-800 py-3 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+<svg class="w-5 h-5" viewbox="0 0 24 24">
+<path d="M5.266 9.765A7.077 7.077 0 0 1 12 4.909c1.69 0 3.218.6 4.418 1.582L19.91 3C17.782 1.145 15.055 0 12 0 7.27 0 3.198 2.698 1.24 6.65l4.026 3.115z" fill="#EA4335"></path>
+<path d="M16.04 18.013c-1.09.303-2.246.456-3.44.456-3.09 0-5.804-1.462-7.534-3.704L1.04 17.88c2.97 4.144 7.83 6.87 13.36 6.87 2.73 0 5.247-.643 7.456-1.782l-5.816-5.025z" fill="#FBBC05"></path>
+<path d="M19.855 3.158l-3.418 2.923c1.243.834 2.14 2.062 2.506 3.494H12v4.8h11.163c.244-.922.337-1.89.337-2.875 0-3.18-1.226-6.07-3.645-8.342z" fill="#4285F4"></path>
+<path d="M1.24 17.35l4.026-3.115A7.054 7.054 0 0 1 4.91 12c0-.776.124-1.523.356-2.235L1.24 6.65A11.934 11.934 0 0 0 0 12c0 1.934.464 3.763 1.24 5.35z" fill="#34A853"></path>
+</svg>
+<span class="text-sm font-bold">Google</span>
+</button>
+<button class="flex-1 flex items-center justify-center gap-2 bg-[#1877F2] py-3 rounded-lg hover:bg-[#166fe5] transition-colors text-white">
+<svg class="w-5 h-5 fill-current" viewbox="0 0 24 24">
+<path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"></path>
+</svg>
+<span class="text-sm font-bold">Facebook</span>
+</button>
+</div>
+</div>
+</div>
+<footer class="mt-8 text-center text-slate-500 text-xs">
+                        © 2024 Koinonia Sistemas. Todos os direitos reservados.
+                        <br/>
+<a class="hover:text-accent-amber transition-colors mt-2 inline-block" href="#">Termos de Uso</a> • <a class="hover:text-accent-amber transition-colors" href="#">Privacidade</a>
+</footer>
+</div>
+</div>
+</main>
+</div>
+</div>
+</body></html>

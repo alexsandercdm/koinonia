@@ -119,4 +119,14 @@ export class InscricaoController {
       return reply.status(500).send({ error: 'Internal server error' })
     }
   }
+
+  async listByEvento(request: FastifyRequest, reply: FastifyReply) {
+    try {
+      const { id } = request.params as any
+      const inscricoes = await this.repository.findByEventoId(id)
+      return reply.send(inscricoes)
+    } catch (error) {
+      return reply.status(500).send({ error: 'Internal server error' })
+    }
+  }
 }
