@@ -6,7 +6,7 @@ import { authMiddleware, AuthenticatedRequest } from '../middleware/auth'
 
 export async function customAuthRoutes(app: FastifyInstance) {
   // Get current user
-  app.get('/api/v1/auth/me', {
+  app.get('/me', {
     preHandler: authMiddleware
   }, async (request: FastifyRequest) => {
     const authenticatedRequest = request as AuthenticatedRequest
@@ -16,7 +16,7 @@ export async function customAuthRoutes(app: FastifyInstance) {
   })
 
   // Update user role (admin only)
-  app.patch('/api/v1/auth/users/:userId/role', {
+  app.patch('/users/:userId/role', {
     preHandler: [authMiddleware, async (request: FastifyRequest, reply) => {
       const authenticatedRequest = request as AuthenticatedRequest
       if (authenticatedRequest.user?.role !== 'admin') {
@@ -44,7 +44,7 @@ export async function customAuthRoutes(app: FastifyInstance) {
   })
 
   // List all users (admin only)
-  app.get('/api/v1/auth/users', {
+  app.get('/users', {
     preHandler: [authMiddleware, async (request: FastifyRequest, reply) => {
       const authenticatedRequest = request as AuthenticatedRequest
       if (authenticatedRequest.user?.role !== 'admin') {

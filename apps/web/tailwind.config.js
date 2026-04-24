@@ -51,11 +51,19 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        // Stitch design tokens
+        "surface-dark": "#1b0f23",
+        "surface-elevated": "#291736",
+        "border-dark": "#2d1b3d",
+        "background-dark": "#0f0814",
+        "amber-accent": "#ffbf00",
       },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+        xl: "1rem",
+        "2xl": "1.5rem",
       },
       keyframes: {
         "accordion-down": {

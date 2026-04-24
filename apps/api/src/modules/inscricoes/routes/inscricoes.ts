@@ -92,6 +92,9 @@ export async function inscricaoRoutes(fastify: FastifyInstance) {
 
   fastify.get('/inscricoes/:id', { ...requireAuth }, inscricaoController.getById.bind(inscricaoController))
 
+  fastify.get('/eventos/:id/inscricoes', { ...requireAuth },
+    inscricaoController.listByEvento.bind(inscricaoController))
+
   fastify.post('/inscricoes/:id/pagamentos', {
     ...requireLider,
     schema: {

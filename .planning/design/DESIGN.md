@@ -1,5 +1,15 @@
 # Design System: Midnight Koinonia
 **Project ID:** 6022596809973417466
+**Stitch Source:** 14 screens (Mobile + Desktop) via Google Stitch AI
+**UI Spec:** See `UI-SPEC.md` for complete screen inventory and implementation guidelines
+
+## 0. Quick Reference
+- **Stitch Assets**: `.planning/stitch-assets/` (screenshots + HTML prototypes)
+- **UI Specification**: `UI-SPEC.md`
+- **Primary Color**: `#4d0085` (Spiritual Violet)
+- **Accent Color**: `#ffbf00` (Sacred Amber) - *Team decision for CTAs*
+- **Font**: Inter
+- **Mode**: Dark
 
 ## 1. Visual Theme & Atmosphere
 **The Digital Sanctuary**: The design system blends spiritual solemnity with high-tech precision. It moves away from the clinical "SaaS" look by embracing deep, atmospheric gradients, high-contrast accents (Amber on Deep Violet), and an editorial layout that prioritizes focus and immersion. The system rejects the standard grid in favor of layered depth, where elements appear to float in a vast, dark space.

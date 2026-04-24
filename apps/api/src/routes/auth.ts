@@ -3,13 +3,22 @@ import { auth } from '../config/auth'
 import * as fs from 'fs'
 
 export async function authRoutes(app: FastifyInstance) {
-  // Mount Better Auth handler
-  app.all('/api/v1/auth/*', async (request, reply) => {
+  // Health check specific to auth module
+  app.get('/health', async () => {
+    return {
+      status: 'ok',
+      timestamp: new Date().toISOString(),
+      version: '1.0.0',
+    }
+  })
+
+  // Mount Better Auth handler as a wildcard
+  app.all('/*', async (request, reply) => {
     // Convert Fastify request to Web Request
     const protocol = request.protocol || 'http'
     const host = request.hostname || 'localhost'
     const url = new URL(request.url, `${protocol}://${host}`)
-    
+
     const webRequest = new Request(url.href, {
       method: request.method,
       headers: request.headers as any,
@@ -25,9 +34,9 @@ export async function authRoutes(app: FastifyInstance) {
       return response
     } catch (error) {
       console.error('Better Auth Handler Error:', error)
-      reply.status(500).send({ 
-        error: 'Internal Server Error', 
-        details: error instanceof Error ? error.message : String(error) 
+      reply.status(500).send({
+        error: 'Internal Server Error',
+        details: error instanceof Error ? error.message : String(error)
       })
     }
   })
