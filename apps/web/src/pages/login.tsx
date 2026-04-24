@@ -81,11 +81,13 @@ export function LoginPage() {
                   definitiva para comunidades e eventos religiosos.
                 </p>
               </div>
-              <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-[#4d0085]/20 shadow-2xl bg-[#4d0085]/20 flex items-center justify-center">
-                <div className="text-center text-slate-500">
-                  <Users className="w-16 h-16 mx-auto mb-3 opacity-30" />
-                  <p className="text-sm opacity-50">Comunidade em retiro espiritual</p>
-                </div>
+              <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-[#4d0085]/20 shadow-2xl">
+                <img
+                  src="https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?w=900&q=80"
+                  alt="Pessoas reunidas em retiro espiritual"
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#1b0f23]/60 to-transparent" />
               </div>
             </div>
 

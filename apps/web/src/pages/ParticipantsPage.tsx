@@ -10,6 +10,8 @@ import type { Pessoa } from '@koinonia/shared'
 interface ParticipanteListItem extends Pessoa {
   id: string
   papel?: 'encontrista' | 'servo'
+  quarto?: string
+  setor?: string
 }
 
 // ─── Query ───────────────────────────────────────────────────────────────────
@@ -123,8 +125,22 @@ function ParticipanteCard({ participante: p }: ParticipanteCardProps) {
 
       <div className="mt-4 pt-4 border-t border-border-dark flex justify-between items-center text-xs">
         <span className="flex items-center gap-1 text-slate-400">
-          <span className="material-symbols-outlined text-sm">person</span>
-          {p.genero === 'M' ? 'Masculino' : p.genero === 'F' ? 'Feminino' : '—'}
+          {p.quarto ? (
+            <>
+              <span className="material-symbols-outlined text-sm">room_service</span>
+              {p.quarto}
+            </>
+          ) : p.setor ? (
+            <>
+              <span className="material-symbols-outlined text-sm">meeting_room</span>
+              {p.setor}
+            </>
+          ) : (
+            <>
+              <span className="material-symbols-outlined text-sm">person</span>
+              {p.genero === 'M' ? 'Masculino' : p.genero === 'F' ? 'Feminino' : '—'}
+            </>
+          )}
         </span>
         <button className="text-primary font-semibold hover:underline transition-colors">
           Ver ficha

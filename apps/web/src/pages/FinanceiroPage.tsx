@@ -1,17 +1,20 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  Cell,
-} from 'recharts'
-import { TrendingUp, TrendingDown, Target, Plus, X } from 'lucide-react'
+  TrendingUp,
+  Target,
+  Plus,
+  X,
+  Wallet,
+  Clock,
+  Utensils,
+  Home,
+  Bus,
+  MoreHorizontal,
+} from 'lucide-react'
 import { AppLayout } from '../components/layout/AppLayout'
 import { apiFetch } from '../lib/api'
+import type { EventoListItem } from '../hooks/use-inscricoes'
 
 // ---- Types ----
 
@@ -39,6 +42,14 @@ interface DespesaPayload {
   status: 'pendente' | 'pago' | 'cancelado'
 }
 
+interface InscricaoResumo {
+  id: string
+  pessoa?: { nome: string }
+  valor_total: number
+  valor_pago: number
+  status: string
+}
+
 // ---- Helpers ----
 
 function formatCurrency(value: number): string {
@@ -49,19 +60,26 @@ function formatDate(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString('pt-BR')
 }
 
-const STATUS_COLORS: Record<string, string> = {
-  pago: '#10b981',
-  pendente: '#f59e0b',
-  cancelado: '#ef4444',
-  Pago: '#10b981',
-  Pendente: '#f59e0b',
-  Cancelado: '#ef4444',
+const DESPESA_STATUS: Record<string, { label: string; classes: string }> = {
+  pago: { label: 'Quitado', classes: 'bg-emerald-400/10 text-emerald-400 border border-emerald-400/20' },
+  pendente: { label: 'A Pagar', classes: 'bg-yellow-400/10 text-yellow-400 border border-yellow-400/20' },
+  cancelado: { label: 'Cancelado', classes: 'bg-red-400/10 text-red-400 border border-red-400/20' },
 }
 
-const STATUS_LABELS: Record<string, string> = {
-  pago: 'Pago',
-  pendente: 'Pendente',
-  cancelado: 'Cancelado',
+const INSCRICAO_STATUS: Record<string, { label: string; classes: string }> = {
+  PAGO_TOTAL: { label: 'Pago', classes: 'bg-emerald-400/10 text-emerald-400 border border-emerald-400/20' },
+  PAGO_PARCIAL: { label: 'Parcial', classes: 'bg-blue-400/10 text-blue-400 border border-blue-400/20' },
+  PENDENTE: { label: 'Pendente', classes: 'bg-yellow-400/10 text-yellow-400 border border-yellow-400/20' },
+  LISTA_ESPERA: { label: 'Espera', classes: 'bg-slate-400/10 text-slate-400 border border-slate-400/20' },
+  CANCELADA: { label: 'Cancelada', classes: 'bg-red-400/10 text-red-400 border border-red-400/20' },
+}
+
+function getCategoriaIcon(categoria: string) {
+  const lower = categoria.toLowerCase()
+  if (lower.includes('aliment') || lower.includes('buffet') || lower.includes('comida')) return Utensils
+  if (lower.includes('local') || lower.includes('chácara') || lower.includes('espaço')) return Home
+  if (lower.includes('transporte') || lower.includes('ônibus')) return Bus
+  return MoreHorizontal
 }
 
 // ---- Modal Nova Despesa ----
@@ -91,19 +109,14 @@ function NovaDespesaModal({ onClose, onSave, isLoading }: NovaDespesaModalProps)
       <div className="bg-surface-dark border border-border-dark rounded-2xl p-6 w-full max-w-md shadow-2xl">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-lg font-bold text-white">Nova Despesa</h3>
-          <button
-            onClick={onClose}
-            className="text-slate-400 hover:text-white transition-colors"
-          >
+          <button onClick={onClose} className="text-slate-400 hover:text-white transition-colors">
             <X size={20} />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-slate-400 mb-1.5">
-              Descrição
-            </label>
+            <label className="block text-sm font-medium text-slate-400 mb-1.5">Descrição</label>
             <input
               type="text"
               required
@@ -116,9 +129,7 @@ function NovaDespesaModal({ onClose, onSave, isLoading }: NovaDespesaModalProps)
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-400 mb-1.5">
-                Valor (R$)
-              </label>
+              <label className="block text-sm font-medium text-slate-400 mb-1.5">Valor (R$)</label>
               <input
                 type="number"
                 required
@@ -131,9 +142,7 @@ function NovaDespesaModal({ onClose, onSave, isLoading }: NovaDespesaModalProps)
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-400 mb-1.5">
-                Data
-              </label>
+              <label className="block text-sm font-medium text-slate-400 mb-1.5">Data</label>
               <input
                 type="date"
                 required
@@ -145,9 +154,7 @@ function NovaDespesaModal({ onClose, onSave, isLoading }: NovaDespesaModalProps)
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-400 mb-1.5">
-              Categoria
-            </label>
+            <label className="block text-sm font-medium text-slate-400 mb-1.5">Categoria</label>
             <input
               type="text"
               value={form.categoria}
@@ -158,9 +165,7 @@ function NovaDespesaModal({ onClose, onSave, isLoading }: NovaDespesaModalProps)
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-400 mb-1.5">
-              Status
-            </label>
+            <label className="block text-sm font-medium text-slate-400 mb-1.5">Status</label>
             <select
               value={form.status}
               onChange={(e) =>
@@ -214,6 +219,22 @@ export function FinanceiroPage() {
     retry: 1,
   })
 
+  const { data: eventos } = useQuery({
+    queryKey: ['eventos'],
+    queryFn: () => apiFetch<EventoListItem[]>('/api/v1/eventos'),
+    retry: 1,
+  })
+
+  const primeiroEvento = eventos?.[0]
+
+  const { data: inscricoes = [] } = useQuery({
+    queryKey: ['inscricoes-financeiro', primeiroEvento?.id],
+    queryFn: () =>
+      apiFetch<InscricaoResumo[]>(`/api/v1/inscricoes?evento_id=${primeiroEvento!.id}&limit=8`),
+    enabled: !!primeiroEvento?.id,
+    retry: 1,
+  })
+
   const createDespesa = useMutation({
     mutationFn: (payload: DespesaPayload) =>
       apiFetch<Despesa>('/api/v1/financeiro/despesas', {
@@ -227,41 +248,13 @@ export function FinanceiroPage() {
     },
   })
 
-  // Build chart data from porStatus
-  const chartData = metricas?.porStatus
-    ? Object.entries(metricas.porStatus).map(([key, value]) => ({
-        name: STATUS_LABELS[key] ?? key,
-        value,
-        color: STATUS_COLORS[key] ?? '#6366f1',
-      }))
-    : []
+  const saldoAtual = metricas
+    ? metricas.totalArrecadado - (despesas.filter((d) => d.status === 'pago').reduce((s, d) => s + d.valor, 0))
+    : 0
 
-  const kpiCards = [
-    {
-      label: 'Total Arrecadado',
-      value: metricas ? formatCurrency(metricas.totalArrecadado) : '—',
-      icon: TrendingUp,
-      color: 'text-emerald-400',
-      bg: 'bg-emerald-500/10',
-      border: 'border-emerald-500/20',
-    },
-    {
-      label: 'Total Previsto',
-      value: metricas ? formatCurrency(metricas.totalPrevisto) : '—',
-      icon: Target,
-      color: 'text-sky-400',
-      bg: 'bg-sky-500/10',
-      border: 'border-sky-500/20',
-    },
-    {
-      label: 'Break-even',
-      value: metricas ? `${metricas.breakEvenPct.toFixed(1)}%` : '—',
-      icon: TrendingDown,
-      color: 'text-amber-400',
-      bg: 'bg-amber-500/10',
-      border: 'border-amber-500/20',
-    },
-  ]
+  const totalPendente = metricas
+    ? metricas.totalPrevisto - metricas.totalArrecadado
+    : 0
 
   return (
     <AppLayout
@@ -272,26 +265,115 @@ export function FinanceiroPage() {
           className="flex items-center gap-2 bg-[#4d0085] hover:bg-[#4d0085]/90 text-white px-4 py-2 rounded-xl font-medium transition-colors text-sm"
         >
           <Plus size={16} />
-          Nova Despesa
+          Novo Lançamento
         </button>
       }
     >
       <div className="p-8 space-y-8 max-w-[1400px] mx-auto w-full">
-        {/* KPI Cards */}
-        <section className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-          {kpiCards.map(({ label, value, icon: Icon, color, bg, border }) => (
+
+        {/* Visão Geral */}
+        <section className="bg-surface-dark border border-border-dark rounded-xl p-6">
+          <h3 className="text-lg font-bold text-white mb-5">Visão Geral</h3>
+
+          {/* Breakeven row */}
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 mb-3">
+            <div>
+              <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">Ponto de Equilíbrio</p>
+              <div className="flex items-baseline gap-3">
+                <div>
+                  <p className="text-xs text-slate-400">Total Arrecadado</p>
+                  <p className="text-xl font-bold text-emerald-400">
+                    {metricasLoading ? '—' : formatCurrency(metricas?.totalArrecadado ?? 0)}
+                  </p>
+                </div>
+                <span className="text-slate-600">/</span>
+                <div>
+                  <p className="text-xs text-slate-400">Despesas Totais</p>
+                  <p className="text-xl font-bold text-rose-400">
+                    {metricasLoading ? '—' : formatCurrency(metricas?.totalPrevisto ?? 0)}
+                  </p>
+                </div>
+              </div>
+            </div>
+            <p className="text-sm text-slate-400">
+              Meta:{' '}
+              <span className="text-white font-semibold">
+                {metricas?.breakEvenPct.toFixed(0) ?? 0}% atingida
+              </span>
+            </p>
+          </div>
+
+          <div className="relative h-3 w-full bg-background-dark rounded-full overflow-hidden mb-4">
             <div
-              key={label}
-              className={`bg-surface-dark border ${border} rounded-xl p-6 flex items-center gap-4`}
-            >
-              <div className={`size-12 rounded-xl ${bg} flex items-center justify-center shrink-0`}>
-                <Icon size={22} className={color} />
+              className="absolute h-full bg-emerald-500 rounded-full shadow-[0_0_12px_rgba(16,185,129,0.4)] transition-all duration-700"
+              style={{ width: `${Math.min(metricas?.breakEvenPct ?? 0, 100)}%` }}
+            />
+          </div>
+
+          {/* Balance cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-5">
+            <div className="flex items-center gap-4 bg-background-dark rounded-xl p-4 border border-border-dark">
+              <div className="size-10 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0">
+                <Wallet size={20} className="text-emerald-400" />
               </div>
               <div>
-                <p className="text-sm text-slate-400">{label}</p>
-                <p className={`text-2xl font-bold ${color} mt-0.5`}>
+                <p className="text-xs text-slate-400">Saldo Atual</p>
+                <p className="text-xl font-bold text-emerald-400">
+                  {metricasLoading ? '—' : formatCurrency(Math.max(saldoAtual, 0))}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-4 bg-background-dark rounded-xl p-4 border border-border-dark">
+              <div className="size-10 rounded-xl bg-amber-500/10 flex items-center justify-center shrink-0">
+                <Clock size={20} className="text-amber-400" />
+              </div>
+              <div>
+                <p className="text-xs text-slate-400">Pendente</p>
+                <p className="text-xl font-bold text-amber-400">
+                  {metricasLoading ? '—' : formatCurrency(Math.max(totalPendente, 0))}
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* KPI Pills */}
+        <section className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {[
+            {
+              label: 'Total Arrecadado',
+              value: metricas ? formatCurrency(metricas.totalArrecadado) : '—',
+              icon: TrendingUp,
+              color: 'text-emerald-400',
+              bg: 'bg-emerald-500/10',
+            },
+            {
+              label: 'Total Previsto',
+              value: metricas ? formatCurrency(metricas.totalPrevisto) : '—',
+              icon: Target,
+              color: 'text-sky-400',
+              bg: 'bg-sky-500/10',
+            },
+            {
+              label: 'Break-even',
+              value: metricas ? `${metricas.breakEvenPct.toFixed(1)}%` : '—',
+              icon: Wallet,
+              color: 'text-amber-400',
+              bg: 'bg-amber-500/10',
+            },
+          ].map(({ label, value, icon: Icon, color, bg }) => (
+            <div
+              key={label}
+              className="bg-surface-dark border border-border-dark rounded-xl p-5 flex items-center gap-4"
+            >
+              <div className={`size-10 rounded-xl ${bg} flex items-center justify-center shrink-0`}>
+                <Icon size={20} className={color} />
+              </div>
+              <div>
+                <p className="text-xs text-slate-400">{label}</p>
+                <p className={`text-xl font-bold ${color} mt-0.5`}>
                   {metricasLoading ? (
-                    <span className="inline-block w-20 h-6 bg-surface-elevated rounded animate-pulse" />
+                    <span className="inline-block w-20 h-5 bg-surface-elevated rounded animate-pulse" />
                   ) : (
                     value
                   )}
@@ -301,82 +383,63 @@ export function FinanceiroPage() {
           ))}
         </section>
 
-        {/* Progress bar */}
-        {metricas && (
-          <section className="bg-surface-dark border border-border-dark rounded-xl p-6">
-            <div className="flex justify-between items-end mb-3">
-              <div>
-                <p className="text-sm text-slate-400">Total Arrecadado</p>
-                <p className="text-2xl font-bold text-emerald-400">
-                  {formatCurrency(metricas.totalArrecadado)}
-                </p>
-              </div>
-              <div className="text-right">
-                <p className="text-sm text-slate-400">Despesas Totais</p>
-                <p className="text-xl font-bold text-rose-400">
-                  {formatCurrency(metricas.totalPrevisto)}
-                </p>
-              </div>
-            </div>
-            <div className="relative h-4 w-full bg-background-dark rounded-full overflow-hidden">
-              <div
-                className="absolute h-full bg-emerald-500 rounded-full shadow-[0_0_15px_rgba(16,185,129,0.5)] transition-all duration-700"
-                style={{ width: `${Math.min(metricas.breakEvenPct, 100)}%` }}
-              />
-            </div>
-            <p className="text-xs text-slate-500 mt-2">
-              {metricas.breakEvenPct.toFixed(0)}% do previsto arrecadado
-            </p>
-          </section>
-        )}
-
-        {/* Chart + Despesas */}
+        {/* Receitas + Despesas */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Bar Chart */}
-          <section className="bg-surface-dark border border-border-dark rounded-xl p-6">
-            <h3 className="text-lg font-bold text-white mb-6">Distribuição por Status</h3>
-            {chartData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={220}>
-                <BarChart data={chartData} barSize={40}>
-                  <XAxis
-                    dataKey="name"
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fill: '#94a3b8', fontSize: 12 }}
-                  />
-                  <YAxis
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fill: '#94a3b8', fontSize: 11 }}
-                    tickFormatter={(v) => formatCurrency(v as number)}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      background: '#1b0f23',
-                      border: '1px solid #2d1b3d',
-                      borderRadius: '12px',
-                      color: '#fff',
-                    }}
-                    formatter={(value: number) => [formatCurrency(value), 'Valor']}
-                  />
-                  <Bar dataKey="value" radius={[6, 6, 0, 0]}>
-                    {chartData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+          {/* Receitas (Inscrições) */}
+          <section className="bg-surface-dark border border-border-dark rounded-xl overflow-hidden flex flex-col">
+            <div className="p-5 border-b border-border-dark flex items-center justify-between bg-emerald-500/5">
+              <h4 className="font-bold text-white">Receitas (Inscrições)</h4>
+              <button className="text-xs font-bold text-[#ffbf00] hover:underline">
+                Ver todas
+              </button>
+            </div>
+
+            {inscricoes.length === 0 ? (
+              <div className="flex items-center justify-center py-12 text-slate-500 text-sm">
+                {primeiroEvento ? 'Nenhuma inscrição encontrada' : 'Selecione um evento'}
+              </div>
             ) : (
-              <div className="flex items-center justify-center h-[220px] text-slate-500 text-sm">
-                Sem dados disponíveis
+              <div className="overflow-y-auto max-h-[300px]">
+                <table className="w-full text-sm">
+                  <thead className="text-xs uppercase text-slate-500 sticky top-0 bg-surface-dark">
+                    <tr>
+                      <th className="px-5 py-3 text-left">Participante</th>
+                      <th className="px-5 py-3 text-left">Valor</th>
+                      <th className="px-5 py-3 text-left">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border-dark">
+                    {inscricoes.map((i) => {
+                      const cfg = INSCRICAO_STATUS[i.status] ?? {
+                        label: i.status,
+                        classes: 'bg-slate-400/10 text-slate-400 border border-slate-400/20',
+                      }
+                      return (
+                        <tr key={i.id} className="hover:bg-background-dark/40 transition-colors">
+                          <td className="px-5 py-3 font-medium text-white truncate max-w-[160px]">
+                            {i.pessoa?.nome ?? '—'}
+                          </td>
+                          <td className="px-5 py-3 text-emerald-400">
+                            {formatCurrency(i.valor_total)}
+                          </td>
+                          <td className="px-5 py-3">
+                            <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold uppercase ${cfg.classes}`}>
+                              {cfg.label}
+                            </span>
+                          </td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
               </div>
             )}
           </section>
 
-          {/* Despesas Table */}
+          {/* Despesas Previstas */}
           <section className="bg-surface-dark border border-border-dark rounded-xl overflow-hidden flex flex-col">
             <div className="p-5 border-b border-border-dark flex items-center justify-between bg-rose-500/5">
-              <h4 className="font-bold text-lg text-white">Despesas Recentes</h4>
+              <h4 className="font-bold text-white">Despesas Previstas</h4>
               <button
                 onClick={() => setModalOpen(true)}
                 className="text-xs font-bold text-[#ffbf00] hover:underline"
@@ -394,47 +457,41 @@ export function FinanceiroPage() {
                 Nenhuma despesa registrada
               </div>
             ) : (
-              <div className="overflow-y-auto max-h-[260px]">
-                <table className="w-full text-sm">
-                  <thead className="text-xs uppercase text-slate-500 sticky top-0 bg-surface-dark">
-                    <tr>
-                      <th className="px-5 py-3 text-left">Descrição</th>
-                      <th className="px-5 py-3 text-left">Valor</th>
-                      <th className="px-5 py-3 text-left">Data</th>
-                      <th className="px-5 py-3 text-left">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border-dark">
-                    {despesas.map((d) => (
-                      <tr
-                        key={d.id}
-                        className="hover:bg-background-dark/40 transition-colors"
-                      >
-                        <td className="px-5 py-3 font-medium text-white">{d.descricao}</td>
-                        <td className="px-5 py-3 text-rose-400">{formatCurrency(d.valor)}</td>
-                        <td className="px-5 py-3 text-slate-400">{formatDate(d.data)}</td>
-                        <td className="px-5 py-3">
-                          <span
-                            className="px-2.5 py-1 rounded-full text-[11px] font-bold uppercase"
-                            style={{
-                              background: `${STATUS_COLORS[d.status]}1a`,
-                              color: STATUS_COLORS[d.status] ?? '#94a3b8',
-                            }}
-                          >
-                            {STATUS_LABELS[d.status] ?? d.status}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <div className="overflow-y-auto max-h-[300px] divide-y divide-border-dark">
+                {despesas.map((d) => {
+                  const CatIcon = getCategoriaIcon(d.categoria)
+                  const cfg = DESPESA_STATUS[d.status] ?? {
+                    label: d.status,
+                    classes: 'bg-slate-400/10 text-slate-400 border border-slate-400/20',
+                  }
+                  return (
+                    <div key={d.id} className="flex items-center gap-4 px-5 py-4 hover:bg-background-dark/40 transition-colors">
+                      <div className="size-9 rounded-xl bg-white/5 flex items-center justify-center shrink-0">
+                        <CatIcon size={16} className="text-slate-400" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-white truncate">{d.descricao}</p>
+                        <p className="text-xs text-slate-500">
+                          {d.status === 'pago' ? 'Pagamento Antecipado' : `Vencimento: ${formatDate(d.data)}`}
+                        </p>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <p className="text-sm font-semibold text-rose-400">
+                          {formatCurrency(d.valor)}
+                        </p>
+                        <span className={`mt-1 inline-block px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${cfg.classes}`}>
+                          {cfg.label}
+                        </span>
+                      </div>
+                    </div>
+                  )
+                })}
               </div>
             )}
           </section>
         </div>
       </div>
 
-      {/* Modal */}
       {modalOpen && (
         <NovaDespesaModal
           onClose={() => setModalOpen(false)}
