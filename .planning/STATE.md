@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Frontend Funcional & Primeiro Deploy
 status: completed
-last_updated: "2026-04-23T02:30:00.000Z"
+last_updated: "2026-04-25T00:00:00.000Z"
 progress:
-  total_phases: 6
+  total_phases: 7
   completed_phases: 1
   total_plans: 3
   completed_plans: 3
@@ -15,10 +15,9 @@ progress:
 
 ## Current Position
 
-Phase: 6 — Infrastructure Foundation ✓ COMPLETED
-Plan: 3 plans executed across 2 waves
-Status: All plans completed, verified, and committed
-Last activity: 2026-04-23 — Phase 6 execution complete (INFRA-01 through INFRA-05)
+Phase: 6.5 — Frontend Redesign (Hallowed Weight) — UI-SPEC approved
+Status: UI design contract approved, ready for planning
+Last activity: 2026-04-25 — Phase 6.5 UI-SPEC created and force-approved
 
 ## Project Reference
 
@@ -46,6 +45,7 @@ See: `.planning/PROJECT.md` (updated 2026-04-22)
 ### Roadmap Evolution
 
 - Phase 5 added: Fase 0 frontend: revisão do projeto e mapeamento de tarefas do roadmap
+- Phase 6.5 inserted after Phase 6: Frontend Redesign (Hallowed Weight) (URGENT) — substituição completa do design system Stitch pelo Hallowed Weight (cream/gold/black). Ref: `doc/Koinonia-redesign/HANDOFF.md`
 
 ### Session Log
 
@@ -55,6 +55,12 @@ See: `.planning/PROJECT.md` (updated 2026-04-22)
   - 06-03: TanStack Query cache persistence with localStorage (commit 50f7720)
   - All 5 INFRA requirements (INFRA-01 through INFRA-05) satisfied
   - Unblocks Phases 7–10 (Pessoas UI, Eventos UI, Inscrições UI, Quartos UI)
+
+- 2026-04-25: Phase 6.5 — UI-SPEC approved
+  - UI design contract: `.planning/phases/06.5-frontend-redesign-hallowed-weight/06.5-UI-SPEC.md`
+  - 453-line contract: tokens cream/gold/black, 12 primitivas, AppShell+EventPill, Event Selector Screen, Login two-column, 7 páginas migradas
+  - Checker issues (3 BLOCKs) identificados como heurísticas genéricas vs. decisões lockadas em HANDOFF.md — force-approved pelo usuário
+  - Resume file: `.planning/phases/06.5-frontend-redesign-hallowed-weight/06.5-UI-SPEC.md`
 
 - 2026-04-12: Phase 5 context gathered
   - Resume file: `.planning/phases/05-fase-0-frontend-revis-o-do-projeto-e-mapeamento-de-tarefas-do-roadmap/05-CONTEXT.md`

@@ -55,6 +55,34 @@ Plans:
 - [ ] 06-02-PLAN.md — Backend route GET /eventos/:id/inscricoes + Zod schema drifts (INFRA-03, INFRA-04)
 - [ ] 06-03-PLAN.md — persistQueryClient with localStorage persister and session exclusion (INFRA-02)
 
+## Phase 6.5: Frontend Redesign (Hallowed Weight) (INSERTED)
+**Goal:** Substituir o design system Stitch (dark/purple/amber) pelo Hallowed Weight (cream/gold/black). Implementar 12 primitivas, AppShell com EventPill, Event Selector Screen, e migrar todas as páginas existentes para o novo sistema.
+**Requirements:** UX-01, UX-02, UX-03, UX-04, UX-05, UX-06, UX-07.
+**Depends on:** Phase 6.
+**Reference:** `doc/Koinonia-redesign/HANDOFF.md`, `doc/Koinonia-redesign/UI-REVIEW.md`.
+**Success criteria:**
+1. Paleta cream/gold/black aplicada via tokens semânticos no `apps/web/tailwind.config.js` + `apps/web/src/index.css` (substitui Stitch).
+2. Tipografia única: DM Sans + Material Symbols — `font-black` e `lucide-react` removidos do projeto.
+3. 12 primitivas exportadas e usadas (Btn, Input, Card, Badge, Drawer, FormField, FilterTabs, EmptyState, SectionTitle, SelectInput, TextArea, QRCodeSVG).
+4. AppShell com Sidebar 232px + Header 56px contendo EventPill (switcher contextual) renderiza em todas as rotas autenticadas.
+5. Event Selector Screen funcional como rota intermediária pós-login.
+6. Login two-column (editorial left + form right) implementado.
+7. Páginas migradas e visualmente conformes ao mockup: Dashboard, Participantes, Inscrições, Acomodações, Financeiro, Register.
+
+**Plans:** 10 plans
+
+Plans:
+- [ ] 06.5-01-PLAN.md — Foundation: tailwind.config.js + index.css + index.html (UX-01, UX-02)
+- [ ] 06.5-02-PLAN.md — Form primitives: Btn, Input, SelectInput, TextArea, FormField (UX-03)
+- [ ] 06.5-03-PLAN.md — Display primitives: Card, Badge, EmptyState, SectionTitle (UX-03)
+- [ ] 06.5-04-PLAN.md — Utility primitives: Drawer, FilterTabs, Icon, QRCodeSVG (UX-03)
+- [ ] 06.5-05-PLAN.md — Barrel export index.ts (UX-03)
+- [ ] 06.5-06-PLAN.md — EventContext + ProtectedRoute redirect + App.tsx route (UX-05)
+- [ ] 06.5-07-PLAN.md — AppShell + Sidebar + EventPill (UX-04)
+- [ ] 06.5-08-PLAN.md — EventSelectorScreen (UX-05)
+- [ ] 06.5-09-PLAN.md — Login + Register two-column rewrite (UX-06, UX-07)
+- [ ] 06.5-10-PLAN.md — 5 page migrations + lucide-react removal (UX-07, UX-02)
+
 ## Phase 7: Participantes CRUD UI
 **Goal:** Conectar ParticipantsPage ao backend com CRUD completo — listar, buscar, criar, editar e inativar participantes.
 **Requirements:** UI-PES-01, UI-PES-02, UI-PES-03, UI-PES-04.
@@ -124,6 +152,13 @@ Plans:
 | INFRA-03 | Phase 6 | GET /eventos/:id/inscricoes backend route |
 | INFRA-04 | Phase 6 | Zod schema drift resolution |
 | INFRA-05 | Phase 6 | 11 packages installed |
+| UX-01 | Phase 6.5 | Paleta cream/gold/black via Tailwind tokens |
+| UX-02 | Phase 6.5 | Tipografia DM Sans + Material Symbols |
+| UX-03 | Phase 6.5 | 12 primitivas Hallowed Weight |
+| UX-04 | Phase 6.5 | AppShell com Sidebar + Header + EventPill |
+| UX-05 | Phase 6.5 | Event Selector Screen pós-login |
+| UX-06 | Phase 6.5 | Login two-column editorial |
+| UX-07 | Phase 6.5 | Migração de todas as páginas existentes |
 | UI-PES-01 | Phase 7 | Participant list + search |
 | UI-PES-02 | Phase 7 | Participant create/edit form |
 | UI-PES-03 | Phase 7 | Participant event history |
@@ -141,4 +176,4 @@ Plans:
 | DEPLOY-01 | Phase 11 | Production build + env config |
 | DEPLOY-02 | Phase 11 | Live deploy for user testing |
 
-**Total:** 21 requirements → 6 phases → 100% coverage ✓
+**Total:** 28 requirements → 7 phases → 100% coverage ✓
