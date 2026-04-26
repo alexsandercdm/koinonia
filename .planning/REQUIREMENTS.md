@@ -48,6 +48,13 @@
 - [ ] **INFRA-04**: Schemas Zod alinhados com rotas backend — `StatusEventoEnum` e coerção de `valor_total` corretos.
 - [ ] **INFRA-05**: 11 pacotes instalados (react-day-picker, react-imask, react-dropzone, Radix primitives, persist-client).
 
+### Frontend Redesign System (UI)
+- [x] **UI-RED-01**: Frontend usa os tokens visuais do novo redesign (`doc/Koinonia-redesign`) em vez do baseline Stitch/dark-violet.
+- [x] **UI-RED-02**: Shell autenticado (`AppLayout`) implementa navegação, header, ações e contexto de evento no novo layout responsivo.
+- [x] **UI-RED-03**: Primitives reutilizáveis (botões, badges, inputs, cards, drawers, tabs, empty states) existem no código React/Tailwind e substituem padrões inline do protótipo.
+- [x] **UI-RED-04**: Telas existentes migram para o novo design mantendo rotas, dados, loading/error/empty states e acessibilidade mobile-first.
+- [x] **UI-RED-05**: Login, sessão Better Auth, protected routes e TanStack Query persistido continuam funcionando após a migração visual.
+
 ### Gestão de Participantes (UI)
 - [ ] **UI-PES-01**: Usuário pode listar e buscar participantes por nome, telefone ou padrinho (funciona offline via cache).
 - [ ] **UI-PES-02**: Usuário pode criar/editar participante com formulário completo (dados pessoais + saúde + emergência em 3 abas).
@@ -79,6 +86,7 @@
 | REQ-ID | Phase | Status |
 |--------|-------|--------|
 | INFRA-01 to INFRA-05 | Phase 6 | — |
+| UI-RED-01 to UI-RED-05 | Phase 6.5 | — |
 | UI-PES-01 to UI-PES-04 | Phase 7 | — |
 | UI-EVT-01 to UI-EVT-02 | Phase 8 | — |
 | UI-INS-01 to UI-INS-05 | Phase 9 | — |
