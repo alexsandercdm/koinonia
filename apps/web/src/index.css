@@ -4,36 +4,51 @@
 
 @layer base {
   :root, .dark {
-    /* Midnight Koinonia Theme (The Digital Sanctuary) */
-    --background: 276 40% 10%; /* #1b0f23 */
-    --foreground: 270 20% 95%; /* #f1eef4 */
+    --background: 40 33% 95%;
+    --foreground: 30 19% 9%;
 
-    --card: 271 27% 12%; /* #24162e */
-    --card-foreground: 270 20% 95%; /* #f1eef4 */
+    --card: 0 0% 100%;
+    --card-foreground: 30 19% 9%;
 
-    --popover: 271 27% 12%; /* #24162e */
-    --popover-foreground: 270 20% 95%; /* #f1eef4 */
+    --popover: 36 43% 99%;
+    --popover-foreground: 30 19% 9%;
 
-    --primary: 275 100% 26%; /* #4d0085 */
-    --primary-foreground: 0 0% 100%; /* #ffffff */
+    --primary: 30 19% 9%;
+    --primary-foreground: 40 33% 95%;
 
-    --secondary: 45 100% 50%; /* #ffbf00 */
-    --secondary-foreground: 44 100% 8%; /* #281d00 */
+    --secondary: 38 53% 50%;
+    --secondary-foreground: 30 19% 9%;
 
-    --muted: 271 57% 17%; /* #2d1345 */
-    --muted-foreground: 283 15% 79%; /* #cec2d3 */
+    --muted: 36 21% 93%;
+    --muted-foreground: 35 10% 43%;
 
-    --accent: 271 57% 17%; /* #2d1345 */
-    --accent-foreground: 45 100% 50%; /* #ffbf00 */
+    --accent: 39 69% 91%;
+    --accent-foreground: 30 19% 9%;
 
-    --destructive: 6 100% 84%; /* #ffb4ab */
-    --destructive-foreground: 356 100% 21%; /* #690005 */
+    --destructive: 7 54% 39%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 277 9% 29%; /* #4c4451 */
-    --input: 277 9% 29%; /* #4c4451 */
-    --ring: 45 100% 50%; /* #ffbf00 */
+    --border: 37 25% 88%;
+    --input: 37 25% 88%;
+    --ring: 38 53% 50%;
 
     --radius: 0.5rem;
+
+    --surface: 0 0% 100%;
+    --surface-raised: 36 43% 99%;
+    --border-strong: 37 13% 77%;
+    --text-secondary: 35 10% 43%;
+    --text-tertiary: 37 6% 67%;
+    --gold: 38 53% 50%;
+    --gold-soft: 39 69% 91%;
+    --success: 139 33% 36%;
+    --success-bg: 143 35% 93%;
+    --warning: 29 57% 44%;
+    --warning-bg: 32 78% 94%;
+    --danger: 7 54% 39%;
+    --danger-bg: 0 71% 95%;
+    --info: 205 50% 36%;
+    --info-bg: 205 63% 95%;
   }
 }
 
