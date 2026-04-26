@@ -51,12 +51,30 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        // Stitch design tokens
-        "surface-dark": "#1b0f23",
-        "surface-elevated": "#291736",
-        "border-dark": "#2d1b3d",
-        "background-dark": "#0f0814",
-        "amber-accent": "#ffbf00",
+        surface: {
+          DEFAULT: "hsl(var(--surface))",
+          raised: "hsl(var(--surface-raised))",
+        },
+        warm: {
+          border: "hsl(var(--border))",
+          "border-strong": "hsl(var(--border-strong))",
+          gold: "hsl(var(--gold))",
+          "gold-soft": "hsl(var(--gold-soft))",
+        },
+        status: {
+          success: "hsl(var(--success))",
+          "success-bg": "hsl(var(--success-bg))",
+          warning: "hsl(var(--warning))",
+          "warning-bg": "hsl(var(--warning-bg))",
+          danger: "hsl(var(--danger))",
+          "danger-bg": "hsl(var(--danger-bg))",
+          info: "hsl(var(--info))",
+          "info-bg": "hsl(var(--info-bg))",
+        },
+        text: {
+          secondary: "hsl(var(--text-secondary))",
+          tertiary: "hsl(var(--text-tertiary))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
