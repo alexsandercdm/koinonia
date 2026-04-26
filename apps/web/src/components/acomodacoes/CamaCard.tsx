@@ -8,17 +8,16 @@ function getStatus(cama: CamaMapaItem): CamaStatus {
   return 'Disponivel'
 }
 
-// Dark theme: available=green, occupied=purple/primary, blocked=gray
 const statusStyles: Record<CamaStatus, string> = {
-  Disponivel: 'bg-green-900/20 border-green-700/50 text-green-300',
-  Ocupado: 'bg-primary/20 border-primary/50 text-purple-300',
-  Bloqueado: 'bg-slate-800/60 border-slate-700/50 text-slate-500',
+  Disponivel: 'bg-status-success-bg border-status-success/30 text-status-success',
+  Ocupado: 'bg-status-info-bg border-status-info/30 text-status-info',
+  Bloqueado: 'bg-status-danger-bg border-status-danger/25 text-status-danger',
 }
 
 const statusBadgeStyles: Record<CamaStatus, string> = {
-  Disponivel: 'bg-green-900/40 text-green-400',
-  Ocupado: 'bg-primary/30 text-purple-300',
-  Bloqueado: 'bg-slate-700/60 text-slate-500',
+  Disponivel: 'bg-card text-status-success',
+  Ocupado: 'bg-card text-status-info',
+  Bloqueado: 'bg-card text-status-danger',
 }
 
 interface CamaCardProps {

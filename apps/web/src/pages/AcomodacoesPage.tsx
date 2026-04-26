@@ -4,6 +4,9 @@ import { EstruturaAcomodacaoPanel } from '../components/acomodacoes/EstruturaAco
 import { MapaQuartosGrid } from '../components/acomodacoes/MapaQuartosGrid'
 import { AssignCamaSheet } from '../components/acomodacoes/AssignCamaSheet'
 import { ExportMapaPdfButton } from '../components/acomodacoes/ExportMapaPdfButton'
+import { EmptyState } from '../components/ui/empty-state'
+import { FilterTabs } from '../components/ui/filter-tabs'
+import { Select } from '../components/ui/select'
 import { useEventos, useMapaAcomodacao } from '../hooks/use-acomodacoes'
 import { useAuthContext } from '../contexts/auth-context'
 import type { CamaMapaItem } from '../hooks/use-acomodacoes'
@@ -48,11 +51,11 @@ export function AcomodacoesPage() {
   // Event selector in the AppLayout header actions
   const headerActions = (
     <div className="flex items-center gap-3">
-      <select
+      <Select
         value={selectedEventoId}
         onChange={(e) => setSelectedEventoId(e.target.value)}
         disabled={eventosLoading}
-        className="h-9 rounded-lg border border-border-dark bg-surface-elevated text-slate-200 text-sm px-3 pr-8 focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50"
+        className="h-10 min-w-[220px] text-sm"
       >
         <option value="">Selecione um evento...</option>
         {eventoOptions.map((evento) => (
@@ -60,7 +63,7 @@ export function AcomodacoesPage() {
             {evento.nome}
           </option>
         ))}
-      </select>
+      </Select>
       {mapa && selectedEvento && (
         <ExportMapaPdfButton mapa={mapa} eventoNome={selectedEvento.nome ?? 'evento'} />
       )}
@@ -69,59 +72,31 @@ export function AcomodacoesPage() {
 
   return (
     <AppLayout title="Gestão de Acomodações" actions={headerActions}>
-      <div className="p-6 space-y-6">
+      <div className="space-y-6 p-4 sm:p-6 lg:p-8">
         {/* Tab + Gender filter row */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          {/* Page tabs */}
-          <div className="flex border-b border-border-dark gap-1">
-            <button
-              className={`px-4 py-2 text-sm font-medium transition-colors rounded-t-lg ${
-                activeTab === 'mapa'
-                  ? 'border-b-2 border-primary text-white'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-              onClick={() => setActiveTab('mapa')}
-            >
-              Mapa Visual
-            </button>
-            <button
-              className={`px-4 py-2 text-sm font-medium transition-colors rounded-t-lg ${
-                activeTab === 'estrutura'
-                  ? 'border-b-2 border-primary text-white'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-              onClick={() => setActiveTab('estrutura')}
-            >
-              Estrutura
-              {userRole === 'servo' && (
-                <span className="ml-1 text-xs text-slate-500">(leitura)</span>
-              )}
-            </button>
-          </div>
+          <FilterTabs
+            ariaLabel="Visualização de acomodações"
+            value={activeTab}
+            onValueChange={(value) => setActiveTab(value as 'mapa' | 'estrutura')}
+            options={[
+              { value: 'mapa', label: 'Mapa Visual' },
+              { value: 'estrutura', label: userRole === 'servo' ? 'Estrutura (leitura)' : 'Estrutura' },
+            ]}
+          />
 
           {/* Gender filter pills — only visible on mapa tab */}
           {activeTab === 'mapa' && (
-            <div className="flex bg-surface-dark p-1 rounded-xl border border-border-dark gap-1">
-              {(
-                [
-                  { value: 'todos', label: 'Todos' },
-                  { value: 'M', label: 'Masculino' },
-                  { value: 'F', label: 'Feminino' },
-                ] as { value: GeneroFilter; label: string }[]
-              ).map(({ value, label }) => (
-                <button
-                  key={value}
-                  onClick={() => setGeneroFilter(value)}
-                  className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all ${
-                    generoFilter === value
-                      ? 'bg-primary text-white shadow-sm'
-                      : 'text-slate-400 hover:text-white'
-                  }`}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
+            <FilterTabs
+              ariaLabel="Filtro de gênero dos quartos"
+              value={generoFilter}
+              onValueChange={(value) => setGeneroFilter(value as GeneroFilter)}
+              options={[
+                { value: 'todos', label: 'Todos' },
+                { value: 'M', label: 'Masculino' },
+                { value: 'F', label: 'Feminino' },
+              ]}
+            />
           )}
         </div>
 
@@ -129,21 +104,18 @@ export function AcomodacoesPage() {
         {activeTab === 'mapa' && (
           <section>
             {!selectedEventoId ? (
-              <div className="rounded-xl border border-dashed border-border-dark p-12 text-center space-y-2">
-                <span className="material-symbols-outlined text-4xl text-slate-600">bed</span>
-                <p className="text-slate-300 font-medium">Nenhum evento selecionado</p>
-                <p className="text-sm text-slate-500">
-                  Selecione um evento acima para ver o mapa de acomodações.
-                </p>
-              </div>
+              <EmptyState
+                title="Nenhum evento selecionado"
+                description="Selecione um evento acima para ver o mapa de acomodações."
+              />
             ) : mapaLoading ? (
               <div className="flex items-center justify-center py-20">
                 <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary" />
               </div>
             ) : mapaError ? (
-              <div className="rounded-xl border border-red-800/40 bg-red-900/20 p-6 text-center space-y-2">
-                <p className="text-red-400 font-medium">Erro ao carregar mapa</p>
-                <p className="text-sm text-red-500">
+              <div className="rounded-lg border border-status-danger/25 bg-status-danger-bg p-6 text-center">
+                <p className="font-semibold text-status-danger">Erro ao carregar mapa</p>
+                <p className="mt-1 text-sm text-status-danger">
                   {(mapaError as Error).message || 'Tente novamente mais tarde.'}
                 </p>
               </div>
@@ -162,7 +134,7 @@ export function AcomodacoesPage() {
         {activeTab === 'estrutura' && (
           <section>
             {userRole === 'servo' && (
-              <div className="mb-4 rounded-xl bg-amber-900/20 border border-amber-700/40 px-4 py-3 text-sm text-amber-400">
+              <div className="mb-4 rounded-lg border border-status-warning/25 bg-status-warning-bg px-4 py-3 text-sm text-status-warning">
                 Modo somente leitura. Apenas administradores e líderes podem editar a estrutura.
               </div>
             )}

@@ -11,15 +11,15 @@ const generoLabel: Record<string, string> = {
 }
 
 const generoBorderColor: Record<string, string> = {
-  M: 'border-l-blue-500',
-  F: 'border-l-pink-500',
-  MISTO: 'border-l-purple-500',
+  M: 'border-l-status-info',
+  F: 'border-l-status-warning',
+  MISTO: 'border-l-warm-gold',
 }
 
 const generoTagStyle: Record<string, string> = {
-  M: 'bg-blue-500/20 text-blue-400 border border-blue-500/30',
-  F: 'bg-pink-500/20 text-pink-400 border border-pink-500/30',
-  MISTO: 'bg-purple-500/20 text-purple-400 border border-purple-500/30',
+  M: 'bg-status-info-bg text-status-info border border-status-info/25',
+  F: 'bg-status-warning-bg text-status-warning border border-status-warning/25',
+  MISTO: 'bg-warm-gold-soft text-primary border border-warm-gold/25',
 }
 
 interface QuartoMapaComContadores {
@@ -39,38 +39,38 @@ interface QuartoCardProps {
 }
 
 function QuartoCard({ quarto, onAssign, onRelease }: QuartoCardProps) {
-  const borderColor = generoBorderColor[quarto.genero_permitido] ?? 'border-l-primary'
-  const tagStyle = generoTagStyle[quarto.genero_permitido] ?? 'bg-primary/20 text-primary border border-primary/30'
+  const borderColor = generoBorderColor[quarto.genero_permitido] ?? 'border-l-warm-gold'
+  const tagStyle = generoTagStyle[quarto.genero_permitido] ?? 'bg-warm-gold-soft text-primary border border-warm-gold/25'
 
   return (
     <div
-      className={`bg-surface-dark border-l-4 ${borderColor} rounded-xl overflow-hidden flex flex-col shadow-xl border border-border-dark`}
+      className={`flex flex-col overflow-hidden rounded-lg border border-border border-l-4 bg-card shadow-sm ${borderColor}`}
       data-quarto-id={quarto.id}
     >
       {/* Card header */}
-      <div className="p-5 border-b border-border-dark">
+      <div className="border-b border-border p-5">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h3 className="text-base font-bold text-white leading-tight">{quarto.nome}</h3>
+            <h3 className="text-base font-semibold leading-tight text-foreground">{quarto.nome}</h3>
             <div className="flex items-center gap-2 mt-1.5">
               <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full ${tagStyle}`}>
                 {generoLabel[quarto.genero_permitido] ?? quarto.genero_permitido}
               </span>
             </div>
           </div>
-          <div className="bg-background-dark/80 px-3 py-1 rounded-full border border-white/10 shrink-0">
-            <span className="text-xs font-bold text-white whitespace-nowrap">
+          <div className="shrink-0 rounded-full border border-border bg-surface-raised px-3 py-1">
+            <span className="whitespace-nowrap text-xs font-semibold text-foreground">
               {quarto.ocupados} / {quarto.capacidade} Ocupadas
             </span>
           </div>
         </div>
-        <div className="flex gap-4 text-xs text-slate-400 mt-3">
+        <div className="mt-3 flex gap-4 text-xs text-text-secondary">
           <span className="flex items-center gap-1">
-            <span className="w-2 h-2 rounded-full bg-green-500 inline-block" />
+            <span className="inline-block size-2 rounded-full bg-status-success" />
             {quarto.disponiveis} disponível(is)
           </span>
           <span className="flex items-center gap-1">
-            <span className="w-2 h-2 rounded-full bg-primary inline-block" />
+            <span className="inline-block size-2 rounded-full bg-status-info" />
             {quarto.ocupados} ocupada(s)
           </span>
         </div>
@@ -80,8 +80,8 @@ function QuartoCard({ quarto, onAssign, onRelease }: QuartoCardProps) {
       <div className="p-5">
         {quarto.camas.length === 0 ? (
           <div className="text-center py-4">
-            <span className="material-symbols-outlined text-slate-600 text-3xl">hotel</span>
-            <p className="text-slate-500 text-sm mt-1 italic">Sem camas cadastradas</p>
+            <span className="material-symbols-outlined text-3xl text-text-tertiary">hotel</span>
+            <p className="mt-1 text-sm italic text-text-secondary">Sem camas cadastradas</p>
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -125,10 +125,10 @@ function derivarContadores(quarto: MapaAcomodacao['quartos'][number]): QuartoMap
 export function MapaQuartosGrid({ mapa, generoFilter = 'todos', onAssign, onRelease }: MapaQuartosGridProps) {
   if (!mapa.local?.id) {
     return (
-      <div className="rounded-xl border border-dashed border-border-dark p-12 text-center space-y-2">
-        <span className="material-symbols-outlined text-4xl text-slate-600">location_off</span>
-        <p className="text-slate-300 font-medium">Evento sem local vinculado</p>
-        <p className="text-sm text-slate-500">
+      <div className="space-y-2 rounded-lg border border-dashed border-border bg-surface-raised p-12 text-center">
+        <span className="material-symbols-outlined text-4xl text-text-tertiary">location_off</span>
+        <p className="font-semibold text-foreground">Evento sem local vinculado</p>
+        <p className="text-sm text-text-secondary">
           Para visualizar o mapa de acomodações, o evento precisa ter um local configurado.
         </p>
       </div>
@@ -144,10 +144,10 @@ export function MapaQuartosGrid({ mapa, generoFilter = 'todos', onAssign, onRele
 
   if (quartosFiltrados.length === 0) {
     return (
-      <div className="rounded-xl border border-dashed border-border-dark p-12 text-center space-y-2">
-        <span className="material-symbols-outlined text-4xl text-slate-600">bed</span>
-        <p className="text-slate-300 font-medium">Nenhum quarto encontrado</p>
-        <p className="text-sm text-slate-500">
+      <div className="space-y-2 rounded-lg border border-dashed border-border bg-surface-raised p-12 text-center">
+        <span className="material-symbols-outlined text-4xl text-text-tertiary">bed</span>
+        <p className="font-semibold text-foreground">Nenhum quarto encontrado</p>
+        <p className="text-sm text-text-secondary">
           {mapa.quartos.length === 0
             ? 'Adicione quartos na seção de estrutura para ver o mapa.'
             : 'Nenhum quarto corresponde ao filtro selecionado.'}
