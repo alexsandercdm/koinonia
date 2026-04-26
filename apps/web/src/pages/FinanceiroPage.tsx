@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { FormField } from '../components/ui/form-field'
 import { Input } from '../components/ui/input'
 import { Select } from '../components/ui/select'
-import { apiFetch } from '../lib/api'
+import { apiFetch, apiFetchList } from '../lib/api'
 import type { EventoListItem } from '../hooks/use-inscricoes'
 
 interface MetricasFinanceiro {
@@ -145,7 +145,7 @@ export function FinanceiroPage() {
 
   const { data: despesas = [], isLoading: despesasLoading } = useQuery({
     queryKey: ['financeiro-despesas'],
-    queryFn: () => apiFetch<Despesa[]>('/api/v1/financeiro/despesas'),
+    queryFn: () => apiFetchList<Despesa>('/api/v1/financeiro/despesas'),
     retry: 1,
   })
 

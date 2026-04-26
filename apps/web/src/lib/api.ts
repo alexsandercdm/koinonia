@@ -14,6 +14,28 @@ export class ApiError extends Error {
   }
 }
 
+export interface ApiListResponse<T> {
+  data: T[]
+  pagination?: {
+    page: number
+    pageSize: number
+    total: number
+    totalPages: number
+  }
+}
+
+export function unwrapApiList<T>(response: T[] | ApiListResponse<T>, label: string): T[] {
+  if (Array.isArray(response)) {
+    return response
+  }
+
+  if (Array.isArray(response.data)) {
+    return response.data
+  }
+
+  throw new ApiError(`Invalid ${label} response`, 500, response)
+}
+
 async function getAuthHeaders(): Promise<Record<string, string>> {
   const session = await authClient.getSession()
   const token = session?.data?.session?.token
@@ -52,4 +74,9 @@ export async function apiFetch<T>(path: string, options?: RequestInit): Promise<
   }
 
   return response.json() as Promise<T>
+}
+
+export async function apiFetchList<T>(path: string, options?: RequestInit): Promise<T[]> {
+  const response = await apiFetch<T[] | ApiListResponse<T>>(path, options)
+  return unwrapApiList(response, path)
 }

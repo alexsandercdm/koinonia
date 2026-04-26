@@ -7,7 +7,7 @@ import { Button } from '../components/ui/button'
 import { EmptyState } from '../components/ui/empty-state'
 import { FilterTabs } from '../components/ui/filter-tabs'
 import { Input } from '../components/ui/input'
-import { apiFetch } from '../lib/api'
+import { apiFetchList } from '../lib/api'
 import type { Pessoa } from '@koinonia/shared'
 
 interface ParticipanteListItem extends Pessoa {
@@ -20,7 +20,7 @@ interface ParticipanteListItem extends Pessoa {
 function useParticipantes() {
   return useQuery({
     queryKey: ['participantes'],
-    queryFn: () => apiFetch<ParticipanteListItem[]>('/api/v1/participantes'),
+    queryFn: () => apiFetchList<ParticipanteListItem>('/api/v1/participantes'),
     staleTime: 1000 * 60 * 2,
   })
 }
