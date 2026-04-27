@@ -64,7 +64,8 @@
   body {
     @apply bg-background font-sans text-foreground antialiased;
   }
-  .material-symbols-rounded {
+  .material-symbols-rounded,
+  .material-symbols-outlined {
     font-family: 'Material Symbols Rounded';
     font-size: 1.25em;
     font-style: normal;

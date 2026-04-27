@@ -1,17 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { apiFetch } from '../lib/api'
 import type { Local, Quarto, Cama, MapaAcomodacao, InscricaoDisponivel } from '@koinonia/shared'
-
-// --------------- Evento (for filter) ---------------
-
-export interface EventoListItem {
-  id: string
-  nome: string
-  local_id: string | null
-  status: string
-  data_inicio: string
-  data_fim: string
-}
+export { useEventos } from './use-eventos'
+export type { EventoListItem } from '@koinonia/shared'
 
 // --------------- Types ---------------
 
@@ -66,17 +57,6 @@ export const acomodacoesKeys = {
   quartos: (localId: string) => [...acomodacoesKeys.all, 'quartos', localId] as const,
   camas: (quartoId: string) => [...acomodacoesKeys.all, 'camas', quartoId] as const,
   mapa: (eventoId: string) => [...acomodacoesKeys.all, 'mapa', eventoId] as const,
-  eventos: () => ['eventos'] as const,
-}
-
-// --------------- Eventos Query (for filter) ---------------
-
-export function useEventos() {
-  return useQuery({
-    queryKey: acomodacoesKeys.eventos(),
-    queryFn: () => apiFetch<EventoListItem[]>('/api/v1/eventos'),
-    staleTime: 1000 * 60 * 5,
-  })
 }
 
 // --------------- Locais Queries ---------------

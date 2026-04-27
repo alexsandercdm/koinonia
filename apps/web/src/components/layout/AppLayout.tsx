@@ -1,7 +1,10 @@
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { CalendarDays, LogOut, Menu, X } from 'lucide-react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuthContext } from '../../contexts/auth-context'
+import { Badge } from '../ui/badge'
+import { useEventos } from '../../hooks/use-eventos'
+import type { EventoListItem } from '@koinonia/shared'
 
 const NAV_ITEMS = [
   { icon: 'dashboard', label: 'Dashboard', path: '/dashboard' },
@@ -17,11 +20,93 @@ interface AppLayoutProps {
   actions?: React.ReactNode
 }
 
+const SELECTED_EVENT_KEY = 'koinonia:selectedEventoId'
+
+const STATUS_META: Record<string, { label: string; variant: React.ComponentProps<typeof Badge>['variant'] }> = {
+  rascunho: { label: 'Rascunho', variant: 'neutral' },
+  aberto: { label: 'Aberto', variant: 'success' },
+  encerrado: { label: 'Encerrado', variant: 'warning' },
+  realizado: { label: 'Realizado', variant: 'info' },
+  cancelado: { label: 'Cancelado', variant: 'danger' },
+}
+
+function formatDateRange(evento: EventoListItem) {
+  const start = new Date(`${evento.data_inicio}T00:00:00`)
+  const end = new Date(`${evento.data_fim}T00:00:00`)
+  const formatter = new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short' })
+
+  return `${formatter.format(start)} - ${formatter.format(end)}`
+}
+
+function EventPill({
+  eventos,
+  selectedEventoId,
+  isLoading,
+  onSelect,
+}: {
+  eventos: EventoListItem[]
+  selectedEventoId: string
+  isLoading: boolean
+  onSelect: (eventoId: string) => void
+}) {
+  const selectedEvento = eventos.find((evento) => evento.id === selectedEventoId)
+  const statusMeta = selectedEvento ? STATUS_META[selectedEvento.status] ?? STATUS_META.rascunho : undefined
+
+  return (
+    <div className="mt-1 hidden max-w-full items-center gap-2 rounded-panel border border-border bg-surface-raised px-2.5 py-1 text-xs text-text-secondary sm:inline-flex">
+      <CalendarDays className="size-3.5 shrink-0 text-warm-gold" />
+      <span className="shrink-0 font-semibold text-foreground">Evento ativo</span>
+      {selectedEvento && statusMeta ? <Badge variant={statusMeta.variant}>{statusMeta.label}</Badge> : null}
+      <select
+        value={selectedEventoId}
+        onChange={(event) => onSelect(event.target.value)}
+        disabled={isLoading || eventos.length === 0}
+        className="min-w-0 max-w-[260px] bg-transparent font-semibold text-foreground outline-none disabled:text-text-secondary"
+        aria-label="Selecionar evento ativo"
+      >
+        {isLoading ? <option value="">Carregando eventos</option> : null}
+        {!isLoading && eventos.length === 0 ? <option value="">Nenhum evento</option> : null}
+        {eventos.map((evento) => (
+          <option key={evento.id} value={evento.id}>
+            {evento.nome} · {formatDateRange(evento)}
+          </option>
+        ))}
+      </select>
+    </div>
+  )
+}
+
 export function AppLayout({ children, title, actions }: AppLayoutProps) {
   const navigate = useNavigate()
   const location = useLocation()
   const { user, logout } = useAuthContext()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const { data: eventos = [], isLoading: eventosLoading } = useEventos()
+  const [selectedEventoId, setSelectedEventoId] = useState(() => {
+    if (typeof window === 'undefined') {
+      return ''
+    }
+
+    return window.localStorage.getItem(SELECTED_EVENT_KEY) ?? ''
+  })
+
+  const availableEventos = useMemo(
+    () => eventos.filter((evento): evento is EventoListItem & { id: string } => Boolean(evento.id)),
+    [eventos]
+  )
+
+  useEffect(() => {
+    if (availableEventos.length === 0) {
+      return
+    }
+
+    const selectedStillExists = availableEventos.some((evento) => evento.id === selectedEventoId)
+    if (!selectedEventoId || !selectedStillExists) {
+      const nextId = availableEventos[0].id
+      setSelectedEventoId(nextId)
+      window.localStorage.setItem(SELECTED_EVENT_KEY, nextId)
+    }
+  }, [availableEventos, selectedEventoId])
 
   const navigateTo = (path: string) => {
     navigate(path)
@@ -29,6 +114,11 @@ export function AppLayout({ children, title, actions }: AppLayoutProps) {
   }
 
   const initials = user?.name?.[0]?.toUpperCase() ?? 'U'
+
+  const handleEventoSelect = (eventoId: string) => {
+    setSelectedEventoId(eventoId)
+    window.localStorage.setItem(SELECTED_EVENT_KEY, eventoId)
+  }
 
   return (
     <div className="flex min-h-screen bg-background text-foreground">
@@ -105,12 +195,12 @@ export function AppLayout({ children, title, actions }: AppLayoutProps) {
             </button>
             <div className="min-w-0">
               <h2 className="truncate text-lg font-semibold text-foreground">{title ?? 'Koinonia'}</h2>
-              <div className="mt-1 hidden items-center gap-2 rounded-lg border border-border bg-surface-raised px-2.5 py-1 text-xs text-text-secondary sm:inline-flex">
-                <CalendarDays className="size-3.5 text-warm-gold" />
-                <span className="font-semibold text-foreground">Evento ativo</span>
-                <span>Retiro Koinonia</span>
-                <span className="text-warm-gold">Selecionar</span>
-              </div>
+              <EventPill
+                eventos={availableEventos}
+                selectedEventoId={selectedEventoId}
+                isLoading={eventosLoading}
+                onSelect={handleEventoSelect}
+              />
             </div>
           </div>
           {actions && <div className="flex shrink-0 items-center gap-3">{actions}</div>}
