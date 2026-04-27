@@ -10,9 +10,9 @@ export const Badge = React.forwardRef<HTMLSpanElement, BadgeProps>(
     <span
       ref={ref}
       className={cn(
-        'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold',
+        'inline-flex items-center rounded-pill border px-2 py-0.5 text-[11px] font-medium tracking-[0.02em]',
         {
-          'border-warm-gold/35 bg-warm-gold-soft text-primary': variant === 'gold',
+          'border-warm-gold-muted/70 bg-warm-gold-light text-warm-gold': variant === 'gold',
           'border-status-success/25 bg-status-success-bg text-status-success': variant === 'success',
           'border-status-warning/25 bg-status-warning-bg text-status-warning': variant === 'warning',
           'border-status-danger/25 bg-status-danger-bg text-status-danger': variant === 'danger',

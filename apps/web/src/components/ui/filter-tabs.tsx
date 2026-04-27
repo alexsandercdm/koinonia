@@ -25,7 +25,7 @@ export function FilterTabs({
     <div
       role="tablist"
       aria-label={ariaLabel}
-      className={cn('inline-flex max-w-full gap-1 overflow-x-auto rounded-lg border border-border bg-muted p-1', className)}
+      className={cn('inline-flex max-w-full gap-1 overflow-x-auto rounded-[8px] border border-border bg-surface p-[3px]', className)}
     >
       {options.map((option) => {
         const active = option.value === value
@@ -37,9 +37,9 @@ export function FilterTabs({
             role="tab"
             aria-selected={active}
             className={cn(
-              'inline-flex h-10 shrink-0 items-center gap-2 rounded-md px-3 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+              'inline-flex h-8 shrink-0 items-center gap-2 rounded-[6px] px-3 text-[12.5px] font-normal transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-warm-gold-light',
               active
-                ? 'bg-primary text-primary-foreground shadow-sm'
+                ? 'bg-primary text-primary-foreground font-semibold shadow-sm'
                 : 'text-text-secondary hover:bg-card hover:text-foreground'
             )}
             onClick={() => onValueChange(option.value)}

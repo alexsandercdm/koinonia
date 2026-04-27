@@ -13,7 +13,7 @@ const SheetOverlay = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Overlay
     className={cn(
-      'fixed inset-0 z-50 bg-black/40 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
+      'fixed inset-0 z-50 bg-[rgba(26,22,18,0.28)] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
       className
     )}
     {...props}
@@ -40,13 +40,13 @@ const SheetContent = React.forwardRef<
         side === 'bottom' &&
           'inset-x-0 bottom-0 rounded-t-2xl data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom max-h-[85vh] overflow-y-auto',
         side === 'right' &&
-          'right-0 top-0 h-full w-full max-w-sm border-l data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right',
+          'right-0 top-0 h-full w-full max-w-[520px] border-l data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right',
         className
       )}
       {...props}
     >
       {children}
-      <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring disabled:pointer-events-none">
+      <DialogPrimitive.Close className="absolute right-4 top-4 inline-flex h-[30px] w-[30px] items-center justify-center rounded-[6px] bg-muted text-text-secondary transition-colors hover:bg-accent hover:text-foreground focus:outline-none focus:ring-2 focus:ring-warm-gold-light disabled:pointer-events-none">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="20"
@@ -69,7 +69,7 @@ const SheetContent = React.forwardRef<
 SheetContent.displayName = 'SheetContent'
 
 const SheetHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div className={cn('flex flex-col space-y-1.5 px-4 pt-4 pb-2', className)} {...props} />
+  <div className={cn('flex flex-col space-y-1.5 px-6 pb-3 pt-[18px]', className)} {...props} />
 )
 SheetHeader.displayName = 'SheetHeader'
 
@@ -79,7 +79,7 @@ const SheetTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Title
     ref={ref}
-    className={cn('text-lg font-semibold text-foreground', className)}
+    className={cn('text-base font-semibold text-foreground', className)}
     {...props}
   />
 ))

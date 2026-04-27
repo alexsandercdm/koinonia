@@ -1,3 +1,6 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -40,7 +43,9 @@
     --text-secondary: 35 10% 43%;
     --text-tertiary: 37 6% 67%;
     --gold: 38 53% 50%;
+    --gold-muted: 39 63% 80%;
     --gold-soft: 39 69% 91%;
+    --gold-light: 39 69% 91%;
     --success: 139 33% 36%;
     --success-bg: 143 35% 93%;
     --warning: 29 57% 44%;
@@ -57,6 +62,21 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground antialiased;
+    @apply bg-background font-sans text-foreground antialiased;
+  }
+  .material-symbols-rounded {
+    font-family: 'Material Symbols Rounded';
+    font-size: 1.25em;
+    font-style: normal;
+    font-weight: normal;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+    -webkit-font-feature-settings: 'liga';
+    -webkit-font-smoothing: antialiased;
   }
 }

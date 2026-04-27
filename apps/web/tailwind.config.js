@@ -17,6 +17,9 @@ export default {
       },
     },
     extend: {
+      fontFamily: {
+        sans: ["DM Sans", "sans-serif"],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -59,7 +62,9 @@ export default {
           border: "hsl(var(--border))",
           "border-strong": "hsl(var(--border-strong))",
           gold: "hsl(var(--gold))",
+          "gold-muted": "hsl(var(--gold-muted))",
           "gold-soft": "hsl(var(--gold-soft))",
+          "gold-light": "hsl(var(--gold-light))",
         },
         status: {
           success: "hsl(var(--success))",
@@ -80,6 +85,10 @@ export default {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+        control: "7px",
+        tabs: "8px",
+        panel: "10px",
+        pill: "9999px",
         xl: "1rem",
         "2xl": "1.5rem",
       },
