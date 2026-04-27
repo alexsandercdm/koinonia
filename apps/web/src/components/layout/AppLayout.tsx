@@ -8,6 +8,7 @@ import type { EventoListItem } from '@koinonia/shared'
 
 const NAV_ITEMS = [
   { icon: 'dashboard', label: 'Dashboard', path: '/dashboard' },
+  { icon: 'event', label: 'Eventos', path: '/eventos' },
   { icon: 'group', label: 'Pessoas', path: '/participantes' },
   { icon: 'assignment', label: 'Inscrições', path: '/inscricoes' },
   { icon: 'bed', label: 'Acomodações', path: '/acomodacoes' },
