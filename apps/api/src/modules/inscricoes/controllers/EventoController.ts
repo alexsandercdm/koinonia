@@ -2,16 +2,19 @@ import { FastifyRequest, FastifyReply } from 'fastify'
 import { db } from '../../../db'
 import { EventoRepository } from '../repositories/EventoRepository'
 import { CreateEventoUseCase } from '../usecases/CreateEventoUseCase'
+import { ListEventosUseCase } from '../usecases/ListEventosUseCase'
 import { UpdateEventoUseCase } from '../usecases/UpdateEventoUseCase'
 
 export class EventoController {
   private createUseCase: CreateEventoUseCase
+  private listUseCase: ListEventosUseCase
   private updateUseCase: UpdateEventoUseCase
   private repository: EventoRepository
 
   constructor() {
     this.repository = new EventoRepository(db)
     this.createUseCase = new CreateEventoUseCase(this.repository)
+    this.listUseCase = new ListEventosUseCase(this.repository)
     this.updateUseCase = new UpdateEventoUseCase(this.repository)
   }
 
@@ -29,7 +32,7 @@ export class EventoController {
 
   async list(request: FastifyRequest, reply: FastifyReply) {
     try {
-      const eventos = await this.repository.list()
+      const eventos = await this.listUseCase.execute()
       return reply.send(eventos)
     } catch (error) {
       return reply.status(500).send({ error: 'Internal server error' })

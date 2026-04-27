@@ -1,6 +1,6 @@
-import { eq } from 'drizzle-orm'
+import { and, count, eq, ne } from 'drizzle-orm'
 import { Database } from '../../../db'
-import { eventos, configuracaoEvento, CreateEvento, CreateConfiguracaoEvento } from '../../../db/schema'
+import { eventos, inscricoes, configuracaoEvento, CreateEvento, CreateConfiguracaoEvento } from '../../../db/schema'
 
 export class EventoRepository {
   constructor(private db: Database) {}
@@ -48,5 +48,30 @@ export class EventoRepository {
     return await this.db.query.eventos.findMany({
       orderBy: (eventos, { desc }) => [desc(eventos.created_at)],
     })
+  }
+
+  async listWithStats() {
+    const eventRows = await this.db.query.eventos.findMany({
+      orderBy: (eventos, { desc }) => [desc(eventos.created_at)],
+    })
+
+    return await Promise.all(
+      eventRows.map(async (evento) => {
+        const [result] = await this.db
+          .select({ value: count() })
+          .from(inscricoes)
+          .where(
+            and(
+              eq(inscricoes.evento_id, evento.id),
+              ne(inscricoes.status, 'CANCELADA'),
+            ),
+          )
+
+        return {
+          ...evento,
+          inscritos_count: result?.value ?? 0,
+        }
+      }),
+    )
   }
 }
