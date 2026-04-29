@@ -1,20 +1,17 @@
 import { useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card'
+import { Building2, ChevronDown, ChevronUp, Pencil, Plus } from 'lucide-react'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { Label } from '../ui/label'
 import {
   useLocais,
-  useQuartos,
-  useCamas,
   useCreateLocal,
   useUpdateLocal,
   useCreateQuarto,
   useUpdateQuarto,
-  useCreateCama,
-  useUpdateCama,
+  useDeleteQuarto,
 } from '../../hooks/use-acomodacoes'
-import type { Local, Quarto, Cama } from '@koinonia/shared'
+import type { Local, Quarto } from '@koinonia/shared'
 
 type UserRole = 'admin' | 'lider' | 'servo'
 
@@ -49,45 +46,47 @@ function LocalForm({ initial, onSave, onCancel, isSaving }: LocalFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-3">
-      <div className="space-y-1.5">
-        <Label htmlFor="local-nome">Nome *</Label>
-        <Input
-          id="local-nome"
-          value={nome}
-          onChange={(e) => setNome(e.target.value)}
-          placeholder="Nome do local"
-          required
-          className="h-12 text-base"
-        />
-      </div>
-      <div className="space-y-1.5">
-        <Label htmlFor="local-endereco">Endereço</Label>
-        <Input
-          id="local-endereco"
-          value={endereco}
-          onChange={(e) => setEndereco(e.target.value)}
-          placeholder="Endereço completo"
-          className="h-12 text-base"
-        />
-      </div>
-      <div className="space-y-1.5">
-        <Label htmlFor="local-capacidade">Capacidade Total</Label>
-        <Input
-          id="local-capacidade"
-          type="number"
-          min={1}
-          value={capacidadeTotal}
-          onChange={(e) => setCapacidadeTotal(e.target.value)}
-          placeholder="Ex: 50"
-          className="h-12 text-base"
-        />
+    <form onSubmit={handleSubmit} className="space-y-3 rounded-lg border border-border bg-surface-raised p-4">
+      <p className="text-sm font-semibold text-foreground">
+        {initial?.nome ? 'Editar chácara' : 'Nova chácara'}
+      </p>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div className="space-y-1.5">
+          <Label htmlFor="local-nome">Nome *</Label>
+          <Input
+            id="local-nome"
+            value={nome}
+            onChange={(e) => setNome(e.target.value)}
+            placeholder="Ex: Chácara Paz e Amor"
+            required
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="local-endereco">Cidade / Endereço</Label>
+          <Input
+            id="local-endereco"
+            value={endereco}
+            onChange={(e) => setEndereco(e.target.value)}
+            placeholder="Ex: Juiz de Fora, MG"
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="local-capacidade">Capacidade Total</Label>
+          <Input
+            id="local-capacidade"
+            type="number"
+            min={1}
+            value={capacidadeTotal}
+            onChange={(e) => setCapacidadeTotal(e.target.value)}
+            placeholder="Ex: 120"
+          />
+        </div>
       </div>
       <div className="flex gap-2">
-        <Button type="submit" disabled={isSaving} className="flex-1 h-12">
+        <Button type="submit" size="sm" disabled={isSaving}>
           {isSaving ? 'Salvando...' : 'Salvar'}
         </Button>
-        <Button type="button" variant="outline" onClick={onCancel} className="h-12 px-6">
+        <Button type="button" size="sm" variant="outline" onClick={onCancel}>
           Cancelar
         </Button>
       </div>
@@ -129,49 +128,52 @@ function QuartoForm({ localId, initial, onSave, onCancel, isSaving }: QuartoForm
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-3">
-      <div className="space-y-1.5">
-        <Label htmlFor="quarto-nome">Nome *</Label>
-        <Input
-          id="quarto-nome"
-          value={nome}
-          onChange={(e) => setNome(e.target.value)}
-          placeholder="Ex: Quarto 1A"
-          required
-          className="h-12 text-base"
-        />
-      </div>
-      <div className="space-y-1.5">
-        <Label htmlFor="quarto-genero">Gênero Permitido *</Label>
-        <select
-          id="quarto-genero"
-          value={generoPermitido}
-          onChange={(e) => setGeneroPermitido(e.target.value as 'M' | 'F' | 'MISTO')}
-          className="flex h-12 w-full rounded-md border border-input bg-background px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-        >
-          <option value="M">Masculino</option>
-          <option value="F">Feminino</option>
-          <option value="MISTO">Misto</option>
-        </select>
-      </div>
-      <div className="space-y-1.5">
-        <Label htmlFor="quarto-capacidade">Capacidade *</Label>
-        <Input
-          id="quarto-capacidade"
-          type="number"
-          min={1}
-          value={capacidade}
-          onChange={(e) => setCapacidade(e.target.value)}
-          placeholder="Ex: 4"
-          required
-          className="h-12 text-base"
-        />
+    <form onSubmit={handleSubmit} className="space-y-3 rounded-lg border border-dashed border-border bg-surface-raised p-4">
+      <p className="text-sm font-semibold text-foreground">
+        {initial?.nome ? 'Editar quarto' : 'Novo quarto'}
+      </p>
+      <div className="grid gap-3 sm:grid-cols-3">
+        <div className="space-y-1.5">
+          <Label htmlFor="quarto-nome">Nome *</Label>
+          <Input
+            id="quarto-nome"
+            value={nome}
+            onChange={(e) => setNome(e.target.value)}
+            placeholder="Ex: Quarto 01"
+            required
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="quarto-genero">Gênero *</Label>
+          <select
+            id="quarto-genero"
+            value={generoPermitido}
+            onChange={(e) => setGeneroPermitido(e.target.value as 'M' | 'F' | 'MISTO')}
+            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <option value="M">Masculino</option>
+            <option value="F">Feminino</option>
+            <option value="MISTO">Misto</option>
+          </select>
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="quarto-capacidade">Camas *</Label>
+          <Input
+            id="quarto-capacidade"
+            type="number"
+            min={1}
+            value={capacidade}
+            onChange={(e) => setCapacidade(e.target.value)}
+            placeholder="4"
+            required
+          />
+        </div>
       </div>
       <div className="flex gap-2">
-        <Button type="submit" disabled={isSaving} className="flex-1 h-12">
+        <Button type="submit" size="sm" disabled={isSaving}>
           {isSaving ? 'Salvando...' : 'Salvar'}
         </Button>
-        <Button type="button" variant="outline" onClick={onCancel} className="h-12 px-6">
+        <Button type="button" size="sm" variant="outline" onClick={onCancel}>
           Cancelar
         </Button>
       </div>
@@ -179,83 +181,233 @@ function QuartoForm({ localId, initial, onSave, onCancel, isSaving }: QuartoForm
   )
 }
 
-// -------- Cama Form --------
+// -------- Quarto Row --------
 
-interface CamaFormProps {
-  quartoId: string
-  initial?: Partial<Cama> & { bloqueada?: boolean }
-  onSave: (data: {
-    quarto_id: string
-    identificacao: string
-    tipo: 'solteiro' | 'beliche_superior' | 'beliche_inferior' | 'casal'
-    bloqueada: boolean
-  }) => void
-  onCancel: () => void
-  isSaving: boolean
+interface QuartoRowProps {
+  quarto: Quarto & { camas?: unknown[] }
+  localId: string
+  canEdit: boolean
+  onEdit: (quarto: Quarto) => void
 }
 
-function CamaForm({ quartoId, initial, onSave, onCancel, isSaving }: CamaFormProps) {
-  const [identificacao, setIdentificacao] = useState(initial?.identificacao ?? '')
-  const [tipo, setTipo] = useState<'solteiro' | 'beliche_superior' | 'beliche_inferior' | 'casal'>(
-    (initial?.tipo as 'solteiro' | 'beliche_superior' | 'beliche_inferior' | 'casal') ?? 'solteiro'
-  )
-  const [bloqueada, setBloqueada] = useState(initial?.bloqueada ?? false)
+function QuartoRow({ quarto, localId, canEdit, onEdit }: QuartoRowProps) {
+  const generoLabel = ({ M: 'Masculino', F: 'Feminino', MISTO: 'Misto' } as Record<string, string>)[quarto.genero_permitido] ?? quarto.genero_permitido
+  const deleteQuarto = useDeleteQuarto(localId)
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    onSave({ quarto_id: quartoId, identificacao, tipo, bloqueada })
-  }
+  const generoSymbol = quarto.genero_permitido === 'F' ? '♀' : quarto.genero_permitido === 'M' ? '♂' : null
+  const iconStyle = quarto.genero_permitido === 'F'
+    ? 'bg-status-warning-bg text-status-warning'
+    : 'bg-status-info-bg text-status-info'
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-3">
-      <div className="space-y-1.5">
-        <Label htmlFor="cama-id">Identificação *</Label>
-        <Input
-          id="cama-id"
-          value={identificacao}
-          onChange={(e) => setIdentificacao(e.target.value)}
-          placeholder="Ex: C01"
-          required
-          className="h-12 text-base"
-        />
+    <div className="flex items-center justify-between gap-3 px-4 py-3">
+      <div className="flex items-center gap-3">
+        {generoSymbol ? (
+          <div className={`flex size-7 items-center justify-center rounded-full text-sm ${iconStyle}`}>
+            {generoSymbol}
+          </div>
+        ) : (
+          <div className="size-7" />
+        )}
+        <div>
+          <span className="text-sm font-semibold text-foreground">{quarto.nome}</span>
+          <span className="ml-2 text-xs text-text-secondary">
+            {generoLabel} · {quarto.capacidade} camas
+          </span>
+        </div>
       </div>
-      <div className="space-y-1.5">
-        <Label htmlFor="cama-tipo">Tipo *</Label>
-        <select
-          id="cama-tipo"
-          value={tipo}
-          onChange={(e) =>
-            setTipo(e.target.value as 'solteiro' | 'beliche_superior' | 'beliche_inferior' | 'casal')
-          }
-          className="flex h-12 w-full rounded-md border border-input bg-background px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-        >
-          <option value="solteiro">Solteiro</option>
-          <option value="beliche_superior">Beliche Superior</option>
-          <option value="beliche_inferior">Beliche Inferior</option>
-          <option value="casal">Casal</option>
-        </select>
+      {canEdit && (
+        <div className="flex items-center gap-3 text-xs font-semibold">
+          <button
+            type="button"
+            className="text-warm-gold hover:underline"
+            onClick={() => onEdit(quarto)}
+          >
+            Editar
+          </button>
+          <button
+            type="button"
+            className="text-status-danger hover:underline disabled:opacity-50"
+            disabled={deleteQuarto.isPending}
+            onClick={() => {
+              if (confirm(`Remover "${quarto.nome}" e todas as suas camas?`)) {
+                deleteQuarto.mutate(quarto.id!)
+              }
+            }}
+          >
+            Remover
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// -------- Local Row --------
+
+interface LocalWithQuartos extends Local {
+  quartos?: (Quarto & { camas?: unknown[] })[]
+}
+
+interface LocalRowProps {
+  local: LocalWithQuartos
+  canEdit: boolean
+}
+
+function LocalRow({ local, canEdit }: LocalRowProps) {
+  const [expanded, setExpanded] = useState(true)
+  const [showQuartoForm, setShowQuartoForm] = useState(false)
+  const [editingQuarto, setEditingQuarto] = useState<Quarto | null>(null)
+  const [editingLocal, setEditingLocal] = useState(false)
+
+  const createQuarto = useCreateQuarto()
+  const updateQuarto = useUpdateQuarto()
+  const updateLocal = useUpdateLocal()
+
+  const quartos = local.quartos ?? []
+  const quartoCount = quartos.length
+
+  return (
+    <div className="overflow-hidden rounded-lg border border-border bg-card">
+      {/* Local header */}
+      <div className="flex items-center justify-between gap-3 p-4">
+        <div className="flex items-center gap-3">
+          <div className="flex size-10 items-center justify-center rounded-lg bg-warm-gold-soft text-warm-gold">
+            <Building2 className="size-5" />
+          </div>
+          <div>
+            <p className="font-semibold text-foreground">{local.nome}</p>
+            <p className="text-xs text-text-secondary">
+              {local.endereco ? `${local.endereco}` : ''}
+              {local.capacidade_total ? ` · Cap. ${local.capacidade_total} pessoas` : ''}
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-text-secondary">{quartoCount} quarto{quartoCount !== 1 ? 's' : ''}</span>
+          {canEdit && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-8 gap-1 px-3 text-xs"
+              onClick={() => {
+                setShowQuartoForm(true)
+                setEditingQuarto(null)
+                setExpanded(true)
+              }}
+            >
+              <Plus className="size-3.5" />
+              Quarto
+            </Button>
+          )}
+          {canEdit && (
+            <button
+              type="button"
+              className="flex size-8 items-center justify-center rounded-md border border-border text-text-secondary hover:bg-surface-raised"
+              onClick={() => setEditingLocal((v) => !v)}
+              title="Editar chácara"
+            >
+              <Pencil className="size-3.5" />
+            </button>
+          )}
+          <button
+            type="button"
+            className="flex size-8 items-center justify-center rounded-md border border-border text-text-secondary hover:bg-surface-raised"
+            onClick={() => setExpanded((v) => !v)}
+          >
+            {expanded ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
+          </button>
+        </div>
       </div>
-      <div className="flex items-center gap-3 py-1">
-        <input
-          id="cama-bloqueada"
-          type="checkbox"
-          checked={bloqueada}
-          onChange={(e) => setBloqueada(e.target.checked)}
-          className="h-5 w-5 rounded border-gray-300"
-        />
-        <Label htmlFor="cama-bloqueada" className="text-base cursor-pointer">
-          Cama bloqueada
-        </Label>
-      </div>
-      <div className="flex gap-2">
-        <Button type="submit" disabled={isSaving} className="flex-1 h-12">
-          {isSaving ? 'Salvando...' : 'Salvar'}
-        </Button>
-        <Button type="button" variant="outline" onClick={onCancel} className="h-12 px-6">
-          Cancelar
-        </Button>
-      </div>
-    </form>
+
+      {/* Edit local form */}
+      {editingLocal && canEdit && (
+        <div className="border-t border-border p-4">
+          <LocalForm
+            initial={local}
+            isSaving={updateLocal.isPending}
+            onCancel={() => setEditingLocal(false)}
+            onSave={async (data) => {
+              await updateLocal.mutateAsync({ id: local.id!, payload: data })
+              setEditingLocal(false)
+            }}
+          />
+        </div>
+      )}
+
+      {/* Quartos list */}
+      {expanded && (
+        <div className="border-t border-border">
+          {quartos.length > 0 && (
+            <div className="divide-y divide-border">
+              <div className="px-4 py-2">
+                <p className="text-xs font-semibold uppercase tracking-wide text-text-tertiary">Quartos</p>
+              </div>
+              {quartos.map((quarto) => (
+                <div key={quarto.id}>
+                  {editingQuarto?.id === quarto.id && editingQuarto ? (
+                    <div className="p-4">
+                      <QuartoForm
+                        localId={local.id!}
+                        initial={editingQuarto}
+                        isSaving={updateQuarto.isPending}
+                        onCancel={() => setEditingQuarto(null)}
+                        onSave={async (data) => {
+                          await updateQuarto.mutateAsync({
+                            id: editingQuarto.id!,
+                            localId: local.id!,
+                            payload: data,
+                          })
+                          setEditingQuarto(null)
+                        }}
+                      />
+                    </div>
+                  ) : (
+                    <QuartoRow
+                      quarto={quarto}
+                      localId={local.id!}
+                      canEdit={canEdit}
+                      onEdit={(q) => {
+                        setEditingQuarto(q)
+                        setShowQuartoForm(false)
+                      }}
+                    />
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {showQuartoForm && canEdit && (
+            <div className="p-4">
+              <QuartoForm
+                localId={local.id!}
+                isSaving={createQuarto.isPending}
+                onCancel={() => setShowQuartoForm(false)}
+                onSave={async (data) => {
+                  await createQuarto.mutateAsync({ localId: local.id!, payload: data })
+                  setShowQuartoForm(false)
+                }}
+              />
+            </div>
+          )}
+
+          {!showQuartoForm && canEdit && (
+            <button
+              type="button"
+              className="flex w-full items-center gap-2 border-t border-dashed border-border px-4 py-3 text-sm text-text-tertiary transition-colors hover:bg-surface-raised hover:text-text-secondary"
+              onClick={() => {
+                setShowQuartoForm(true)
+                setEditingQuarto(null)
+              }}
+            >
+              <Plus className="size-4" />
+              Adicionar quarto
+            </button>
+          )}
+        </div>
+      )}
+    </div>
   )
 }
 
@@ -264,324 +416,63 @@ function CamaForm({ quartoId, initial, onSave, onCancel, isSaving }: CamaFormPro
 export function EstruturaAcomodacaoPanel({ userRole }: EstruturaAcomodacaoPanelProps) {
   const canEdit = userRole === 'admin' || userRole === 'lider'
 
-  const { data: locais = [], isLoading: locaisLoading } = useLocais()
-
-  const [selectedLocalId, setSelectedLocalId] = useState<string>('')
-  const [selectedQuartoId, setSelectedQuartoId] = useState<string>('')
-
-  const { data: quartos = [], isLoading: quartosLoading } = useQuartos(selectedLocalId)
+  const { data: locais = [], isLoading } = useLocais()
+  const createLocal = useCreateLocal()
 
   const [showLocalForm, setShowLocalForm] = useState(false)
-  const [editingLocal, setEditingLocal] = useState<Local | null>(null)
-
-  const [showQuartoForm, setShowQuartoForm] = useState(false)
-  const [editingQuarto, setEditingQuarto] = useState<Quarto | null>(null)
-
-  const [showCamaForm, setShowCamaForm] = useState(false)
-  const [editingCama, setEditingCama] = useState<(Cama & { bloqueada?: boolean }) | null>(null)
-
-  const createLocal = useCreateLocal()
-  const updateLocal = useUpdateLocal()
-  const createQuarto = useCreateQuarto()
-  const updateQuarto = useUpdateQuarto()
-  const createCama = useCreateCama()
-  const updateCama = useUpdateCama()
-
-  const { data: camas = [], isLoading: camasLoading } = useCamas(selectedQuartoId)
-
-  const generoLabel = (g: string) => ({ M: 'Masculino', F: 'Feminino', MISTO: 'Misto' }[g] ?? g)
 
   return (
     <div className="space-y-4">
-      {/* ---- Locais ---- */}
-      <Card>
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-lg">Locais</CardTitle>
-            {canEdit && !showLocalForm && (
-              <Button
-                size="sm"
-                className="h-10 px-4"
-                onClick={() => {
-                  setEditingLocal(null)
-                  setShowLocalForm(true)
-                }}
-              >
-                + Novo Local
-              </Button>
-            )}
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {showLocalForm && canEdit && (
-            <div className="border rounded-lg p-4 bg-gray-50">
-              <h3 className="font-medium mb-3">
-                {editingLocal ? 'Editar Local' : 'Novo Local'}
-              </h3>
-              <LocalForm
-                initial={editingLocal ?? undefined}
-                isSaving={createLocal.isPending || updateLocal.isPending}
-                onCancel={() => {
-                  setShowLocalForm(false)
-                  setEditingLocal(null)
-                }}
-                onSave={async (data) => {
-                  if (editingLocal) {
-                    await updateLocal.mutateAsync({ id: editingLocal.id!, payload: data })
-                  } else {
-                    await createLocal.mutateAsync(data)
-                  }
-                  setShowLocalForm(false)
-                  setEditingLocal(null)
-                }}
-              />
-            </div>
-          )}
+      {/* Header */}
+      <div className="flex items-center justify-end">
+        {canEdit && !showLocalForm && (
+          <Button size="sm" variant="gold" onClick={() => setShowLocalForm(true)}>
+            <Plus className="size-4" />
+            Nova chácara
+          </Button>
+        )}
+      </div>
 
-          {locaisLoading ? (
-            <p className="text-sm text-gray-500 py-2">Carregando locais...</p>
-          ) : locais.length === 0 ? (
-            <p className="text-sm text-gray-500 py-2">Nenhum local cadastrado.</p>
-          ) : (
-            <div className="space-y-2">
-              {locais.map((local) => (
-                <div
-                  key={local.id}
-                  className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-colors ${
-                    selectedLocalId === local.id
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-200 hover:border-gray-300'
-                  }`}
-                  onClick={() => {
-                    setSelectedLocalId(local.id === selectedLocalId ? '' : (local.id ?? ''))
-                    setSelectedQuartoId('')
-                  }}
-                >
-                  <div>
-                    <p className="font-medium text-sm">{local.nome}</p>
-                    {local.endereco && (
-                      <p className="text-xs text-gray-500">{local.endereco}</p>
-                    )}
-                    {local.capacidade_total && (
-                      <p className="text-xs text-gray-500">
-                        Capacidade: {local.capacidade_total}
-                      </p>
-                    )}
-                  </div>
-                  {canEdit && (
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="h-10 px-3 shrink-0"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        setEditingLocal(local)
-                        setShowLocalForm(true)
-                      }}
-                    >
-                      Editar
-                    </Button>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* ---- Quartos ---- */}
-      {selectedLocalId && (
-        <Card>
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-lg">Quartos</CardTitle>
-              {canEdit && !showQuartoForm && (
-                <Button
-                  size="sm"
-                  className="h-10 px-4"
-                  onClick={() => {
-                    setEditingQuarto(null)
-                    setShowQuartoForm(true)
-                  }}
-                >
-                  + Novo Quarto
-                </Button>
-              )}
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {showQuartoForm && canEdit && (
-              <div className="border rounded-lg p-4 bg-gray-50">
-                <h3 className="font-medium mb-3">
-                  {editingQuarto ? 'Editar Quarto' : 'Novo Quarto'}
-                </h3>
-                <QuartoForm
-                  localId={selectedLocalId}
-                  initial={editingQuarto ?? undefined}
-                  isSaving={createQuarto.isPending || updateQuarto.isPending}
-                  onCancel={() => {
-                    setShowQuartoForm(false)
-                    setEditingQuarto(null)
-                  }}
-                  onSave={async (data) => {
-                    if (editingQuarto) {
-                      await updateQuarto.mutateAsync({
-                        id: editingQuarto.id!,
-                        localId: selectedLocalId,
-                        payload: data,
-                      })
-                    } else {
-                      await createQuarto.mutateAsync({
-                        localId: selectedLocalId,
-                        payload: data,
-                      })
-                    }
-                    setShowQuartoForm(false)
-                    setEditingQuarto(null)
-                  }}
-                />
-              </div>
-            )}
-
-            {quartosLoading ? (
-              <p className="text-sm text-gray-500 py-2">Carregando quartos...</p>
-            ) : quartos.length === 0 ? (
-              <p className="text-sm text-gray-500 py-2">Nenhum quarto cadastrado.</p>
-            ) : (
-              <div className="space-y-2">
-                {quartos.map((quarto) => (
-                  <div
-                    key={quarto.id}
-                    className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-colors ${
-                      selectedQuartoId === quarto.id
-                        ? 'border-blue-500 bg-blue-50'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                    onClick={() =>
-                      setSelectedQuartoId(quarto.id === selectedQuartoId ? '' : (quarto.id ?? ''))
-                    }
-                  >
-                    <div>
-                      <p className="font-medium text-sm">{quarto.nome}</p>
-                      <p className="text-xs text-gray-500">
-                        {generoLabel(quarto.genero_permitido)} · Cap. {quarto.capacidade}
-                      </p>
-                    </div>
-                    {canEdit && (
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="h-10 px-3 shrink-0"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          setEditingQuarto(quarto)
-                          setShowQuartoForm(true)
-                        }}
-                      >
-                        Editar
-                      </Button>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+      {showLocalForm && canEdit && (
+        <LocalForm
+          isSaving={createLocal.isPending}
+          onCancel={() => setShowLocalForm(false)}
+          onSave={async (data) => {
+            await createLocal.mutateAsync(data)
+            setShowLocalForm(false)
+          }}
+        />
       )}
 
-      {/* ---- Camas ---- */}
-      {selectedQuartoId && (
-        <Card>
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-lg">Camas</CardTitle>
-              {canEdit && !showCamaForm && (
-                <Button
-                  size="sm"
-                  className="h-10 px-4"
-                  onClick={() => {
-                    setEditingCama(null)
-                    setShowCamaForm(true)
-                  }}
-                >
-                  + Nova Cama
-                </Button>
-              )}
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {showCamaForm && canEdit && (
-              <div className="border rounded-lg p-4 bg-gray-50">
-                <h3 className="font-medium mb-3">
-                  {editingCama ? 'Editar Cama' : 'Nova Cama'}
-                </h3>
-                <CamaForm
-                  quartoId={selectedQuartoId}
-                  initial={editingCama ?? undefined}
-                  isSaving={createCama.isPending || updateCama.isPending}
-                  onCancel={() => {
-                    setShowCamaForm(false)
-                    setEditingCama(null)
-                  }}
-                  onSave={async (data) => {
-                    if (editingCama) {
-                      await updateCama.mutateAsync({
-                        id: editingCama.id!,
-                        quartoId: selectedQuartoId,
-                        payload: data,
-                      })
-                    } else {
-                      await createCama.mutateAsync({
-                        quartoId: selectedQuartoId,
-                        payload: data,
-                      })
-                    }
-                    setShowCamaForm(false)
-                    setEditingCama(null)
-                  }}
-                />
-              </div>
-            )}
+      {isLoading ? (
+        <div className="space-y-3">
+          {Array.from({ length: 2 }).map((_, i) => (
+            <div key={i} className="h-20 animate-pulse rounded-lg bg-muted" />
+          ))}
+        </div>
+      ) : locais.length === 0 ? (
+        <div className="rounded-lg border border-dashed border-border p-10 text-center">
+          <p className="font-semibold text-text-secondary">Nenhuma chácara cadastrada</p>
+          <p className="mt-1 text-sm text-text-tertiary">Clique em "Nova chácara" para começar.</p>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {(locais as LocalWithQuartos[]).map((local) => (
+            <LocalRow key={local.id} local={local} canEdit={canEdit} />
+          ))}
+        </div>
+      )}
 
-            {camasLoading ? (
-              <p className="text-sm text-gray-500 py-2">Carregando camas...</p>
-            ) : camas.length === 0 ? (
-              <p className="text-sm text-gray-500 py-2">Nenhuma cama cadastrada.</p>
-            ) : (
-              <div className="space-y-2">
-                {camas.map((cama) => (
-                  <div
-                    key={cama.id}
-                    className="flex items-center justify-between p-3 rounded-lg border border-gray-200"
-                  >
-                    <div>
-                      <p className="font-medium text-sm">{cama.identificacao}</p>
-                      <p className="text-xs text-gray-500">
-                        {cama.tipo}
-                        {cama.bloqueada && (
-                          <span className="ml-2 text-red-500">· Bloqueada</span>
-                        )}
-                      </p>
-                    </div>
-                    {canEdit && (
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="h-10 px-3 shrink-0"
-                        onClick={() => {
-                          setEditingCama(cama as Cama & { bloqueada?: boolean })
-                          setShowCamaForm(true)
-                        }}
-                      >
-                        Editar
-                      </Button>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+      {/* Footer add link */}
+      {!showLocalForm && canEdit && locais.length > 0 && (
+        <button
+          type="button"
+          className="flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-border py-3 text-sm text-text-tertiary transition-colors hover:border-warm-gold/50 hover:text-warm-gold"
+          onClick={() => setShowLocalForm(true)}
+        >
+          <Building2 className="size-4" />
+          Adicionar nova chácara
+        </button>
       )}
     </div>
   )

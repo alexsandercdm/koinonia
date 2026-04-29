@@ -29,10 +29,10 @@
 - Dashboards com métricas chave (TanStack Query/Recharts).
 
 ## Phase 5: Fase 0 Frontend — Redesign & Scaffold ✓
-**Goal:** Redesign visual completo do frontend seguindo protótipos Stitch e criação de páginas shell com navegação ativa.
+**Goal:** Redesign visual completo do frontend seguindo protótipos Stitch — baseline inicial substituído pelo redesign "Hallowed Weight" na Phase 6.5.
 **Requirements:** (UI scaffolding — pre-v1.1)
 - Todas as rotas principais navegáveis no dashboard.
-- Design system aplicado (dark mode, violet #4d0085, Inter, 48px touch targets).
+- ⚠️ Design system Stitch (dark mode, violet #4d0085, Inter) foi descartado e substituído na Phase 6.5 pelo design atual em `doc/Koinonia-redesign` (DM Sans, paleta creme/ouro).
 
 ---
 
@@ -78,12 +78,19 @@ Plans:
 **Requirements:** UI-PES-01, UI-PES-02, UI-PES-03, UI-PES-04.
 **Depends on:** Phase 6.5.
 **Process:** Usar o design contract da Phase 6.5 como baseline visual antes da codificação funcional.
+**Plans:** 4 plans
 **Success criteria:**
 1. Usuário busca "João" e vê resultado filtrado instantâneo (dados do cache, sem nova requisição se offline).
 2. Usuário cria participante preenchendo 3 abas (Dados / Saúde / Emergência) — registro aparece na lista.
 3. Usuário edita alergias de um participante — campo atualizado persiste após reload da página.
 4. Usuário inativa participante — sumirá da lista ativa mas permanece em histórico de inscrições.
 5. Formulário exibe erro inline por campo sem necessidade de submit (validação on blur).
+
+Plans:
+- [x] 07-01-PLAN.md — Backend participant full-update contract (UI-PES-02, UI-PES-04)
+- [x] 07-02-PLAN.md — Participant hooks and record sheet components (UI-PES-01, UI-PES-02, UI-PES-03, UI-PES-04)
+- [x] 07-03-PLAN.md — Participants page CRUD integration and final verification (UI-PES-01, UI-PES-02, UI-PES-03, UI-PES-04)
+- [x] 07-04-PLAN.md — Accent-insensitive participant search gap closure (UI-PES-01)
 
 ## Phase 8: Eventos CRUD UI
 **Goal:** Criar EventosPage com listagem, criação e edição de eventos — rota `/eventos` acessível via navegação.

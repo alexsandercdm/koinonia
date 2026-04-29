@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { CalendarDays, LogOut, Menu, X } from 'lucide-react'
+import { LogOut, Menu, X } from 'lucide-react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuthContext } from '../../contexts/auth-context'
 import { Badge } from '../ui/badge'
@@ -54,15 +54,14 @@ function EventPill({
   const statusMeta = selectedEvento ? STATUS_META[selectedEvento.status] ?? STATUS_META.rascunho : undefined
 
   return (
-    <div className="mt-1 hidden max-w-full items-center gap-2 rounded-panel border border-border bg-surface-raised px-2.5 py-1 text-xs text-text-secondary sm:inline-flex">
-      <CalendarDays className="size-3.5 shrink-0 text-warm-gold" />
-      <span className="shrink-0 font-semibold text-foreground">Evento ativo</span>
+    <div className="hidden max-w-full items-center gap-1.5 rounded-[8px] border border-border bg-surface-raised px-2 py-1 text-xs text-text-secondary ring-warm-gold-light focus-within:ring-[3px] sm:inline-flex">
+      <span className="material-symbols-rounded text-[13px] text-warm-gold">calendar_month</span>
       {selectedEvento && statusMeta ? <Badge variant={statusMeta.variant}>{statusMeta.label}</Badge> : null}
       <select
         value={selectedEventoId}
         onChange={(event) => onSelect(event.target.value)}
         disabled={isLoading || eventos.length === 0}
-        className="min-w-0 max-w-[260px] bg-transparent font-semibold text-foreground outline-none disabled:text-text-secondary"
+        className="min-w-0 max-w-[260px] bg-transparent text-[12px] font-medium text-foreground outline-none disabled:text-text-secondary"
         aria-label="Selecionar evento ativo"
       >
         {isLoading ? <option value="">Carregando eventos</option> : null}
@@ -73,6 +72,7 @@ function EventPill({
           </option>
         ))}
       </select>
+      <span className="material-symbols-rounded text-[14px] text-text-tertiary">expand_more</span>
     </div>
   )
 }
@@ -123,20 +123,20 @@ export function AppLayout({ children, title, actions }: AppLayoutProps) {
 
   return (
     <div className="flex min-h-screen bg-background text-foreground">
-      <aside className="hidden w-64 shrink-0 flex-col border-r border-border bg-card lg:flex">
-        <div className="flex items-center gap-3 p-6">
-          <div className="flex size-10 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <span className="material-symbols-outlined text-2xl">diversity_3</span>
+      <aside className="hidden w-56 shrink-0 flex-col border-r border-border bg-surface lg:flex">
+        <div className="flex h-14 items-center gap-3 border-b border-border px-4">
+          <div className="flex size-8 items-center justify-center rounded-[7px] bg-primary text-primary-foreground">
+            <span className="material-symbols-rounded text-[16px]">diversity_3</span>
           </div>
           <div>
-            <h1 className="text-base font-bold leading-tight text-foreground">Koinonia</h1>
+            <h1 className="text-sm font-bold leading-tight text-foreground">Koinonia</h1>
             <p className="text-[10px] font-semibold uppercase text-text-secondary">
               Gestão de Retiros
             </p>
           </div>
         </div>
 
-        <nav className="flex-1 space-y-1 px-3 py-2">
+        <nav className="flex-1 space-y-0.5 px-2 py-2">
           {NAV_ITEMS.map((item) => {
             const isActive = location.pathname === item.path
             return (
@@ -144,15 +144,14 @@ export function AppLayout({ children, title, actions }: AppLayoutProps) {
                 key={item.path}
                 onClick={() => navigateTo(item.path)}
                 className={[
-                  'relative flex h-11 w-full items-center gap-3 rounded-lg px-3 text-left text-sm font-semibold transition-colors',
+                  'relative flex h-9 w-full items-center gap-3 rounded-[7px] border-l-2 px-2.5 text-left text-[13.5px] transition-colors',
                   isActive
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-text-secondary hover:bg-accent hover:text-foreground',
+                    ? 'border-warm-gold bg-warm-gold-light font-semibold text-warm-gold'
+                    : 'border-transparent font-normal text-text-secondary hover:bg-background hover:text-foreground',
                 ].join(' ')}
               >
-                {isActive ? <span className="absolute left-0 h-5 w-1 rounded-r-full bg-warm-gold" /> : null}
                 <span
-                  className="material-symbols-outlined text-[20px]"
+                  className="material-symbols-rounded text-[18px]"
                   style={isActive ? { fontVariationSettings: "'FILL' 1" } : undefined}
                 >
                   {item.icon}
@@ -163,9 +162,9 @@ export function AppLayout({ children, title, actions }: AppLayoutProps) {
           })}
         </nav>
 
-        <div className="border-t border-border p-4">
-          <div className="flex items-center gap-3 rounded-lg bg-surface-raised p-2">
-            <div className="flex size-9 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
+        <div className="border-t border-border p-3">
+          <div className="flex items-center gap-3 rounded-[8px] bg-surface-raised p-2">
+            <div className="flex size-8 items-center justify-center rounded-full bg-warm-gold-light text-xs font-bold text-warm-gold">
               {initials}
             </div>
             <div className="min-w-0 flex-1">
@@ -184,31 +183,30 @@ export function AppLayout({ children, title, actions }: AppLayoutProps) {
       </aside>
 
       <main className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-40 flex min-h-16 shrink-0 items-center justify-between gap-3 border-b border-border bg-card/95 px-4 backdrop-blur lg:px-8">
-          <div className="flex min-w-0 items-center gap-3">
+        <header className="sticky top-0 z-40 flex h-14 shrink-0 items-center justify-between gap-4 border-b border-border bg-surface px-4 lg:px-6">
+          <div className="flex min-w-0 items-center gap-4">
             <button
               type="button"
               aria-label={mobileMenuOpen ? 'Fechar menu' : 'Abrir menu'}
-              className="inline-flex size-11 items-center justify-center rounded-lg border border-border text-foreground lg:hidden"
+              className="inline-flex size-9 items-center justify-center rounded-[7px] border border-warm-gold-muted bg-warm-gold-light text-warm-gold lg:hidden"
               onClick={() => setMobileMenuOpen((open) => !open)}
             >
               {mobileMenuOpen ? <X className="size-5" /> : <Menu className="size-5" />}
             </button>
-            <div className="min-w-0">
-              <h2 className="truncate text-lg font-semibold text-foreground">{title ?? 'Koinonia'}</h2>
-              <EventPill
-                eventos={availableEventos}
-                selectedEventoId={selectedEventoId}
-                isLoading={eventosLoading}
-                onSelect={handleEventoSelect}
-              />
-            </div>
+            <h2 className="truncate text-[15px] font-semibold text-foreground">{title ?? 'Koinonia'}</h2>
+            <div className="hidden h-[18px] w-px bg-border sm:block" />
+            <EventPill
+              eventos={availableEventos}
+              selectedEventoId={selectedEventoId}
+              isLoading={eventosLoading}
+              onSelect={handleEventoSelect}
+            />
           </div>
           {actions && <div className="flex shrink-0 items-center gap-3">{actions}</div>}
         </header>
 
         {mobileMenuOpen ? (
-          <div className="border-b border-border bg-card px-4 py-3 lg:hidden">
+          <div className="border-b border-border bg-surface px-4 py-3 lg:hidden">
             <nav className="grid gap-2">
               {NAV_ITEMS.map((item) => {
                 const isActive = location.pathname === item.path
@@ -218,13 +216,13 @@ export function AppLayout({ children, title, actions }: AppLayoutProps) {
                     type="button"
                     onClick={() => navigateTo(item.path)}
                     className={[
-                      'flex h-12 items-center gap-3 rounded-lg px-3 text-left text-sm font-semibold transition-colors',
+                      'flex h-11 items-center gap-3 rounded-[7px] border-l-2 px-3 text-left text-sm transition-colors',
                       isActive
-                        ? 'bg-primary text-primary-foreground'
-                        : 'text-text-secondary hover:bg-accent hover:text-foreground',
+                        ? 'border-warm-gold bg-warm-gold-light font-semibold text-warm-gold'
+                        : 'border-transparent font-normal text-text-secondary hover:bg-background hover:text-foreground',
                     ].join(' ')}
                   >
-                    <span className="material-symbols-outlined text-[20px]">{item.icon}</span>
+                    <span className="material-symbols-rounded text-[20px]">{item.icon}</span>
                     <span>{item.label}</span>
                   </button>
                 )

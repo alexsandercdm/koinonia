@@ -7,8 +7,8 @@
 
 @layer base {
   :root, .dark {
-    --background: 40 33% 95%;
-    --foreground: 30 19% 9%;
+    --background: 38 33% 95%;
+    --foreground: 30 18% 9%;
 
     --card: 0 0% 100%;
     --card-foreground: 30 19% 9%;
@@ -31,29 +31,30 @@
     --destructive: 7 54% 39%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 37 25% 88%;
-    --input: 37 25% 88%;
-    --ring: 38 53% 50%;
+    --border: 40 25% 88%;
+    --input: 40 25% 88%;
+    --ring: 38 54% 50%;
 
     --radius: 0.5rem;
 
     --surface: 0 0% 100%;
     --surface-raised: 36 43% 99%;
-    --border-strong: 37 13% 77%;
-    --text-secondary: 35 10% 43%;
-    --text-tertiary: 37 6% 67%;
-    --gold: 38 53% 50%;
-    --gold-muted: 39 63% 80%;
-    --gold-soft: 39 69% 91%;
-    --gold-light: 39 69% 91%;
-    --success: 139 33% 36%;
-    --success-bg: 143 35% 93%;
-    --warning: 29 57% 44%;
-    --warning-bg: 32 78% 94%;
+    --border-strong: 39 17% 77%;
+    --text-secondary: 37 12% 43%;
+    --text-tertiary: 40 13% 64%;
+    --gold: 38 54% 50%;
+    --gold-muted: 40 64% 80%;
+    --gold-soft: 41 58% 91%;
+    --gold-light: 41 58% 91%;
+    --neutral-soft: 38 21% 93%;
+    --success: 141 33% 36%;
+    --success-bg: 145 35% 93%;
+    --warning: 30 57% 44%;
+    --warning-bg: 34 76% 94%;
     --danger: 7 54% 39%;
-    --danger-bg: 0 71% 95%;
-    --info: 205 50% 36%;
-    --info-bg: 205 63% 95%;
+    --danger-bg: 0 65% 95%;
+    --info: 206 50% 36%;
+    --info-bg: 207 64% 95%;
   }
 }
 

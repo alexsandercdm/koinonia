@@ -233,6 +233,20 @@ export function useLiberarCama(eventoId: string) {
   })
 }
 
+// --------------- Quarto Delete ---------------
+
+export function useDeleteQuarto(localId: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (quartoId: string) =>
+      apiFetch<void>(`/api/v1/acomodacoes/quartos/${quartoId}`, { method: 'DELETE' }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: acomodacoesKeys.locais() })
+      queryClient.invalidateQueries({ queryKey: acomodacoesKeys.quartos(localId) })
+    },
+  })
+}
+
 // --------------- Cama Mutations ---------------
 
 export function useCreateCama() {

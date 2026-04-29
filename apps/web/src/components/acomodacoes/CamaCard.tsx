@@ -1,71 +1,59 @@
+import { BedDouble, Plus } from 'lucide-react'
 import type { CamaMapaItem } from '../../hooks/use-acomodacoes'
 
-type CamaStatus = 'Disponivel' | 'Ocupado' | 'Bloqueado'
-
-function getStatus(cama: CamaMapaItem): CamaStatus {
-  if (cama.bloqueada) return 'Bloqueado'
-  if (cama.ocupante) return 'Ocupado'
-  return 'Disponivel'
-}
-
-const statusStyles: Record<CamaStatus, string> = {
-  Disponivel: 'bg-status-success-bg border-status-success/30 text-status-success',
-  Ocupado: 'bg-status-info-bg border-status-info/30 text-status-info',
-  Bloqueado: 'bg-status-danger-bg border-status-danger/25 text-status-danger',
-}
-
-const statusBadgeStyles: Record<CamaStatus, string> = {
-  Disponivel: 'bg-card text-status-success',
-  Ocupado: 'bg-card text-status-info',
-  Bloqueado: 'bg-card text-status-danger',
+const quartoGeneroSlotStyle: Record<string, string> = {
+  F: 'bg-[#fdf4e7] border-[#f0d9a8] text-[#7a5d1e]',
+  M: 'bg-[#e8f0fb] border-[#b8d0f0] text-[#1e4a7a]',
+  MISTO: 'bg-[#f3f0fa] border-[#c8b8e8] text-[#4a1e7a]',
 }
 
 interface CamaCardProps {
   cama: CamaMapaItem
+  quartoGenero?: 'M' | 'F' | 'MISTO'
   onAssign?: (cama: CamaMapaItem) => void
   onRelease?: (cama: CamaMapaItem) => void
 }
 
-export function CamaCard({ cama, onAssign, onRelease }: CamaCardProps) {
-  const status = getStatus(cama)
+export function CamaCard({ cama, quartoGenero = 'MISTO', onAssign, onRelease }: CamaCardProps) {
+  const isOcupada = !!cama.ocupante && !cama.bloqueada
+  const isBloqueada = cama.bloqueada
 
-  const handleClick = () => {
-    if (cama.bloqueada) return
-    if (status === 'Disponivel' && onAssign) onAssign(cama)
-    if (status === 'Ocupado' && onRelease) onRelease(cama)
+  const slotStyle = quartoGeneroSlotStyle[quartoGenero] ?? quartoGeneroSlotStyle.MISTO
+
+  if (isBloqueada) {
+    return (
+      <div className="flex h-11 items-center gap-2 rounded-lg border border-dashed border-border bg-muted/40 px-3 text-xs text-text-tertiary">
+        <BedDouble className="size-3.5 shrink-0" />
+        <span className="truncate">Bloqueada</span>
+      </div>
+    )
   }
 
-  const isInteractive = !cama.bloqueada && (onAssign || onRelease)
+  if (isOcupada) {
+    return (
+      <button
+        type="button"
+        className={`flex h-11 w-full items-center gap-2 rounded-lg border px-3 text-xs font-medium transition-opacity hover:opacity-80 ${slotStyle}`}
+        onClick={() => onRelease?.(cama)}
+        title={`Liberar: ${cama.ocupante}`}
+      >
+        <BedDouble className="size-3.5 shrink-0" />
+        <span className="truncate">{cama.ocupante}</span>
+      </button>
+    )
+  }
 
   return (
-    <div
-      className={`rounded-lg border-2 p-3 space-y-1 transition-all min-h-[72px] ${statusStyles[status]} ${isInteractive ? 'cursor-pointer hover:opacity-80 active:scale-95' : ''}`}
-      onClick={isInteractive ? handleClick : undefined}
-      role={isInteractive ? 'button' : undefined}
-      tabIndex={isInteractive ? 0 : undefined}
-      onKeyDown={isInteractive ? (e) => e.key === 'Enter' && handleClick() : undefined}
-      aria-label={
-        isInteractive
-          ? status === 'Disponivel'
-            ? `Atribuir cama ${cama.identificacao}`
-            : `Liberar cama ${cama.identificacao}`
-          : undefined
-      }
+    <button
+      type="button"
+      className="flex h-11 w-full items-center justify-between gap-2 rounded-lg border border-dashed border-border bg-transparent px-3 text-xs text-text-tertiary transition-colors hover:border-warm-gold/50 hover:text-warm-gold"
+      onClick={() => onAssign?.(cama)}
     >
-      <div className="flex items-center justify-between gap-2">
-        <span className="font-semibold text-sm leading-tight">{cama.identificacao}</span>
-        <span
-          className={`text-xs font-medium px-2 py-0.5 rounded-full shrink-0 ${statusBadgeStyles[status]}`}
-        >
-          {status}
-        </span>
+      <div className="flex items-center gap-2">
+        <BedDouble className="size-3.5 shrink-0" />
+        <span>Livre</span>
       </div>
-      {cama.ocupante && (
-        <p className="text-xs leading-tight truncate" title={cama.ocupante}>
-          {cama.ocupante}
-        </p>
-      )}
-      <p className="text-xs opacity-50 capitalize">{cama.tipo.replace(/_/g, ' ')}</p>
-    </div>
+      {onAssign && <Plus className="size-3.5 shrink-0" />}
+    </button>
   )
 }

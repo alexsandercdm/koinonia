@@ -6,6 +6,7 @@ import { Input } from '../ui/input'
 import { Select } from '../ui/select'
 import { TextArea } from '../ui/textarea'
 import { EVENTO_STATUS_OPTIONS } from './evento-status'
+import { useLocais } from '../../hooks/use-acomodacoes'
 
 interface EventoFormValues {
   nome: string
@@ -97,6 +98,8 @@ export function EventoForm({
   onSubmit,
   onCancel,
 }: EventoFormProps) {
+  const locaisQuery = useLocais()
+  const locais = locaisQuery.data ?? []
   const [values, setValues] = useState<EventoFormValues>(() => valuesFromEvento(initialValue))
   const [errors, setErrors] = useState<Partial<Record<keyof EventoFormValues, string>>>({})
 
@@ -191,13 +194,20 @@ export function EventoForm({
         </FormField>
       </div>
 
-      <FormField label="Local" htmlFor="evento-local" hint="Informe o UUID do local quando houver um cadastro vinculado.">
-        <Input
+      <FormField label="Local" htmlFor="evento-local">
+        <Select
           id="evento-local"
           value={values.local_id}
-          disabled={isDisabled}
+          disabled={isDisabled || locaisQuery.isLoading}
           onChange={(event) => updateValue('local_id', event.target.value)}
-        />
+        >
+          <option value="">Sem local vinculado</option>
+          {locais.map((local) => (
+            <option key={local.id} value={local.id ?? ''}>
+              {local.nome}
+            </option>
+          ))}
+        </Select>
       </FormField>
 
       <div className="flex flex-col-reverse gap-3 border-t border-border pt-4 sm:flex-row sm:justify-end">

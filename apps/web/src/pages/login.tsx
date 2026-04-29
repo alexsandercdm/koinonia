@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Link, useNavigate } from 'react-router-dom'
 import { Alert, AlertDescription } from '../components/ui/alert'
-import { Loader2, Mail, Lock, Eye, EyeOff, Users } from 'lucide-react'
+import { Loader2, Mail, Lock, Eye, EyeOff } from 'lucide-react'
 import { useAuthContext } from '../contexts/auth-context'
 import { Button } from '../components/ui/button'
 import { FormField } from '../components/ui/form-field'
@@ -43,19 +43,19 @@ export function LoginPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <div className="mx-auto grid min-h-screen w-full max-w-6xl grid-cols-1 lg:grid-cols-[1fr_460px]">
-        <section className="hidden border-r border-border bg-card px-10 py-10 lg:flex lg:flex-col lg:justify-between">
+      <div className="mx-auto grid min-h-screen w-full max-w-6xl grid-cols-1 lg:grid-cols-[1fr_440px]">
+        <section className="hidden border-r border-border bg-surface px-10 py-10 lg:flex lg:flex-col lg:justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <Users className="size-5" />
+            <div className="flex size-9 items-center justify-center rounded-[8px] bg-primary text-primary-foreground">
+              <span className="material-symbols-rounded text-[18px]">diversity_3</span>
             </div>
             <span className="text-lg font-bold">Koinonia</span>
           </div>
 
           <div className="max-w-md">
             <div className="mb-9 h-0.5 w-10 bg-warm-gold" />
-            <h1 className="text-4xl font-light leading-tight text-foreground">
-              Gestão que libera para o essencial.
+            <h1 className="text-[40px] font-light leading-[1.15] text-foreground">
+              Gestão que libera <em className="font-normal italic">para o essencial.</em>
             </h1>
             <p className="mt-5 max-w-sm text-base leading-7 text-text-secondary">
               Organize inscrições, acomodações e finanças do seu retiro com uma interface clara,
@@ -63,22 +63,31 @@ export function LoginPage() {
             </p>
           </div>
 
-          <div className="grid gap-3 text-sm text-text-secondary">
-            {['Gestão completa de participantes', 'Mapa visual de acomodações', 'Controle financeiro do retiro'].map((item) => (
-              <div key={item} className="flex items-center gap-3">
-                <span className="size-2 rounded-full bg-warm-gold" />
-                <span>{item}</span>
+          <div className="grid gap-3">
+            {[
+              { icon: 'group', title: 'Participantes', text: 'Cadastros e fichas completas' },
+              { icon: 'bed', title: 'Acomodações', text: 'Mapa visual de quartos e camas' },
+              { icon: 'payments', title: 'Financeiro', text: 'Controle claro de valores' },
+            ].map((item) => (
+              <div key={item.title} className="flex items-center gap-3 text-sm">
+                <div className="flex size-9 items-center justify-center rounded-[8px] bg-warm-gold-light text-warm-gold">
+                  <span className="material-symbols-rounded text-[18px]">{item.icon}</span>
+                </div>
+                <div>
+                  <p className="font-medium text-foreground">{item.title}</p>
+                  <p className="text-xs text-text-secondary">{item.text}</p>
+                </div>
               </div>
             ))}
           </div>
         </section>
 
-        <main className="flex min-h-screen items-center justify-center px-5 py-8 sm:px-8">
+        <main className="flex min-h-screen items-center justify-center px-5 py-8 sm:px-10">
           <div className="w-full max-w-md">
             <div className="mb-8 flex items-center justify-between lg:hidden">
               <div className="flex items-center gap-3">
-                <div className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                  <Users className="size-5" />
+                <div className="flex size-9 items-center justify-center rounded-[8px] bg-primary text-primary-foreground">
+                  <span className="material-symbols-rounded text-[18px]">diversity_3</span>
                 </div>
                 <span className="text-lg font-bold">Koinonia</span>
               </div>
@@ -87,8 +96,8 @@ export function LoginPage() {
               </Link>
             </div>
 
-            <p className="text-xs font-semibold uppercase text-text-tertiary">Acesso ao painel</p>
-            <h1 className="mt-2 text-2xl font-semibold text-foreground">Bem-vindo de volta</h1>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-warm-gold">Acesso ao painel</p>
+            <h1 className="mt-2 text-[22px] font-semibold leading-tight text-foreground">Bem-vindo de volta</h1>
             <p className="mt-2 text-sm text-text-secondary">Entre para continuar a gestão do retiro.</p>
 
             <form onSubmit={handleSubmit(onSubmit)} className="mt-8 flex flex-col gap-5">
@@ -125,7 +134,7 @@ export function LoginPage() {
                     type="button"
                     aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-2 top-1/2 inline-flex size-9 -translate-y-1/2 items-center justify-center rounded-lg text-text-secondary hover:bg-accent hover:text-foreground"
+                    className="absolute right-2 top-1/2 inline-flex size-8 -translate-y-1/2 items-center justify-center rounded-[7px] text-text-secondary hover:bg-neutral-soft hover:text-foreground"
                   >
                     {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                   </button>

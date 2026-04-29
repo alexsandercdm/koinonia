@@ -158,7 +158,7 @@ export function EventosPage() {
               }
             />
           ) : (
-            <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+            <div className="mx-auto w-full max-w-4xl space-y-4">
               {filtered.map((evento) => (
                 <EventoCard
                   key={evento.id}

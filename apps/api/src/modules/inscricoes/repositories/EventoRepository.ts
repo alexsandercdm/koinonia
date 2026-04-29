@@ -53,6 +53,10 @@ export class EventoRepository {
   async listWithStats() {
     const eventRows = await this.db.query.eventos.findMany({
       orderBy: (eventos, { desc }) => [desc(eventos.created_at)],
+      with: {
+        local: true,
+        configuracoes: true,
+      },
     })
 
     return await Promise.all(
@@ -67,9 +71,26 @@ export class EventoRepository {
             ),
           )
 
+        const inscritosCount = Number(result?.value ?? 0)
+        const capacidadeMaxima = Number(evento.capacidade_maxima ?? 0)
+        const ocupacaoPercentual =
+          capacidadeMaxima <= 0
+            ? 0
+            : Math.min(100, Math.round((inscritosCount / capacidadeMaxima) * 100))
+
+        const configs = evento.configuracoes ?? []
+        const cfgEncontrista = configs.find((c) => c.papel === 'encontrista')
+        const cfgServo = configs.find((c) => c.papel === 'servo')
+
+        const { local: _local, configuracoes: _configs, ...eventoBase } = evento
+
         return {
-          ...evento,
-          inscritos_count: result?.value ?? 0,
+          ...eventoBase,
+          inscritos_count: inscritosCount,
+          ocupacao_percentual: ocupacaoPercentual,
+          local_nome: evento.local?.nome ?? null,
+          preco_encontrista: cfgEncontrista ? Number(cfgEncontrista.valor) : null,
+          preco_servo: cfgServo ? Number(cfgServo.valor) : null,
         }
       }),
     )

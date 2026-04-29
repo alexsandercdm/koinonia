@@ -101,6 +101,16 @@ export class AcomodacaoStructureController {
     }
   }
 
+  async deleteQuarto(request: FastifyRequest, reply: FastifyReply) {
+    try {
+      const { quartoId } = request.params as { quartoId: string }
+      await this.repository.deleteQuarto(quartoId)
+      return reply.status(204).send()
+    } catch (error) {
+      return this.handleError(error, reply)
+    }
+  }
+
   async updateQuarto(request: FastifyRequest, reply: FastifyReply) {
     try {
       const { quartoId } = request.params as { quartoId: string }

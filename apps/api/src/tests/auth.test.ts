@@ -95,6 +95,39 @@ describe('Authentication E2E', { timeout: 30000 }, () => {
     expect(sessions.length).toBeGreaterThan(0)
   })
 
+  it('should accept the configured web dev origin for cookie auth requests', async () => {
+    await fetch(`${baseUrl}/api/v1/auth/sign-up/email`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: 'origin@example.com',
+        password: 'Password123!',
+        name: 'Origin User'
+      })
+    })
+
+    const response = await fetch(`${baseUrl}/api/v1/auth/sign-in/email`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        origin: 'http://localhost:3000',
+        cookie: 'better-auth.csrf-token=test'
+      },
+      body: JSON.stringify({
+        email: 'origin@example.com',
+        password: 'Password123!'
+      })
+    })
+
+    const body = (await response.json()) as any
+    if (response.status !== 200) {
+      throw new Error(`Trusted origin signin fail: ${JSON.stringify(body)}`)
+    }
+
+    expect(response.status).toEqual(200)
+    expect(body.user.email).toBe('origin@example.com')
+  })
+
   it('should sign out successfully', async () => {
     // Cadastrar e logar
     await fetch(`${baseUrl}/api/v1/auth/sign-up/email`, {

@@ -3,6 +3,7 @@ import { CreateParticipanteUseCase } from '../usecases/CreateParticipanteUseCase
 import { ListParticipantesUseCase } from '../usecases/ListParticipantesUseCase'
 import { GetParticipanteByIdUseCase } from '../usecases/GetParticipanteByIdUseCase'
 import { GetParticipanteHistoricoUseCase } from '../usecases/GetParticipanteHistoricoUseCase'
+import { UpdateParticipanteUseCase } from '../usecases/UpdateParticipanteUseCase'
 import { UpdateParticipanteSaudeUseCase } from '../usecases/UpdateParticipanteSaudeUseCase'
 import { DeleteParticipanteUseCase } from '../usecases/DeleteParticipanteUseCase'
 import { AuditLogRepository } from '../repositories/AuditLogRepository'
@@ -13,6 +14,7 @@ export class ParticipanteController {
   private listUseCase: ListParticipantesUseCase
   private getByIdUseCase: GetParticipanteByIdUseCase
   private getHistoricoUseCase: GetParticipanteHistoricoUseCase
+  private updateUseCase: UpdateParticipanteUseCase
   private updateSaudeUseCase: UpdateParticipanteSaudeUseCase
   private deleteUseCase: DeleteParticipanteUseCase
 
@@ -23,6 +25,7 @@ export class ParticipanteController {
     this.getHistoricoUseCase = new GetParticipanteHistoricoUseCase(db)
     
     const auditLogRepo = new AuditLogRepository(db)
+    this.updateUseCase = new UpdateParticipanteUseCase(db, auditLogRepo)
     this.updateSaudeUseCase = new UpdateParticipanteSaudeUseCase(db, auditLogRepo)
     
     this.deleteUseCase = new DeleteParticipanteUseCase(db)
@@ -76,6 +79,29 @@ export class ParticipanteController {
       return reply.send(historico)
     } catch (error) {
       if (error instanceof Error) {
+        return reply.status(400).send({ error: error.message })
+      }
+      return reply.status(500).send({ error: 'Internal server error' })
+    }
+  }
+
+  async update(request: FastifyRequest, reply: FastifyReply) {
+    try {
+      const { id } = request.params as any
+      const updateData = request.body as any
+      const user_id = (request as any).user.id
+      const participante = await this.updateUseCase.execute(id, user_id, updateData)
+      return reply.send(participante)
+    } catch (error) {
+      if (error instanceof Error) {
+        if (error.message === 'Participante not found') {
+          return reply.status(404).send({ error: error.message })
+        }
+
+        if (error.message === 'Email already exists' || error.message === 'Phone already exists') {
+          return reply.status(400).send({ error: error.message })
+        }
+
         return reply.status(400).send({ error: error.message })
       }
       return reply.status(500).send({ error: 'Internal server error' })

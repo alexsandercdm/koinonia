@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Frontend Funcional & Primeiro Deploy
-status: ready_to_plan
-last_updated: "2026-04-26T14:55:00.000Z"
+status: human_verification_required
+last_updated: "2026-04-26T22:43:00.000-03:00"
 progress:
   total_phases: 7
   completed_phases: 2
-  total_plans: 7
-  completed_plans: 7
+  total_plans: 11
+  completed_plans: 11
 ---
 
 # STATE
@@ -16,9 +16,9 @@ progress:
 ## Current Position
 
 Phase: 7 — Participantes CRUD UI
-Plan: Ready for planning
-Status: Ready to plan
-Last activity: 2026-04-26 — Phase 6.5 completed; frontend redesign baseline verified
+Plan: 4/4 plans executed; Phase 7 gap closure pending human retest
+Status: Human verification required
+Last activity: 2026-04-26 — Phase 7 search gap closure applied; `Joao`/`João` participant search ready for UAT retest
 
 ## Project Reference
 
@@ -85,6 +85,34 @@ See: `.planning/PROJECT.md` (updated 2026-04-22)
   - Created `.planning/phases/07-participantes-crud-ui/07-CONTEXT.md`
   - Captured UI decisions for list/search, create-edit flow, history access, permissions, and cache behavior
   - Identified API contract mismatch on participants list and the likely need to verify full-edit backend support during planning
+
+- 2026-04-26: Phase 7 — Participantes CRUD UI planning completed
+  - Created `.planning/phases/07-participantes-crud-ui/07-RESEARCH.md`
+  - Created `.planning/phases/07-participantes-crud-ui/07-PATTERNS.md`
+  - Created 3 executable plans:
+    - `07-01-PLAN.md` — backend participant full-update contract
+    - `07-02-PLAN.md` — participant hooks and record sheet components
+    - `07-03-PLAN.md` — participants page CRUD integration and final verification
+  - Covered `UI-PES-01` through `UI-PES-04` and decisions `D-01` through `D-14`
+
+- 2026-04-26: Phase 7 — Participantes CRUD UI execution completed
+  - Added audited `PATCH /api/v1/participantes/:id` with Better Auth role enforcement, duplicate protection, soft-delete safety, and `UPDATE_PARTICIPANT` audit logs
+  - Added participant TanStack Query hooks, three-tab ficha form, sheet-based create/edit/history/desativar flow, and `/participantes` page integration
+  - Automated checks passed:
+    - `pnpm --filter @koinonia/api type-check`
+    - `pnpm --filter @koinonia/api test -- --run UpdateParticipanteUseCase`
+    - `pnpm --filter @koinonia/web type-check`
+    - `pnpm --filter @koinonia/web build`
+    - stale redesign token scan across participant UI files
+  - Human UAT remains pending in `.planning/phases/07-participantes-crud-ui/07-HUMAN-UAT.md`
+
+- 2026-04-26: Phase 7 — Gap closure 07-04 applied
+  - Fixed participant cached search to normalize accents with Unicode NFD and combining mark removal
+  - `Joao` and `João` now match names such as `João` without adding per-keystroke backend refetches
+  - Automated checks passed:
+    - `pnpm --filter @koinonia/web type-check`
+    - normalization smoke check for `Joao`/`João`
+  - UAT Test 1 is pending human retest; history and soft-delete UAT remain blocked by later event/inscription flows
 
 - 2026-04-12: Phase 5 context gathered
   - Resume file: `.planning/phases/05-fase-0-frontend-revis-o-do-projeto-e-mapeamento-de-tarefas-do-roadmap/05-CONTEXT.md`

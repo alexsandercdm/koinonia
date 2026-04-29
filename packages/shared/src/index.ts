@@ -76,6 +76,9 @@ export const EventoSchema = z.object({
 export const EventoListItemSchema = EventoSchema.extend({
   inscritos_count: z.number().int().nonnegative(),
   ocupacao_percentual: z.number().min(0).max(100),
+  local_nome: z.string().nullable().optional(),
+  preco_encontrista: z.number().nullable().optional(),
+  preco_servo: z.number().nullable().optional(),
 })
 
 export const InscricaoSchema = z.object({

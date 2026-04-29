@@ -49,6 +49,17 @@ export const inscricoesKeys = {
   inadimplentes: (eventoId: string) => [...inscricoesKeys.all, 'inadimplentes', eventoId] as const,
 }
 
+// --------------- Inscrições por Evento ---------------
+
+export function useInscricoes(eventoId: string) {
+  return useQuery({
+    queryKey: inscricoesKeys.byEvento(eventoId),
+    queryFn: () => apiFetch<InscricaoListItem[]>(`/api/v1/inscricoes?evento_id=${eventoId}`),
+    enabled: !!eventoId,
+    staleTime: 0,
+  })
+}
+
 // --------------- Inadimplentes por Evento ---------------
 
 export function useInadimplentes(eventoId: string) {
