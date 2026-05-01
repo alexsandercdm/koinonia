@@ -4,8 +4,7 @@ import type { CreateEvento, Evento, EventoListItem, UpdateEvento } from '@koinon
 
 export const eventosKeys = {
   all: ['eventos'] as const,
-  lists: () => [...eventosKeys.all, 'list'] as const,
-  list: () => eventosKeys.lists(),
+  list: () => [...eventosKeys.all, 'list'] as const,
   detail: (id: string) => [...eventosKeys.all, 'detail', id] as const,
 }
 
@@ -36,7 +35,7 @@ export function useCreateEvento() {
         body: JSON.stringify(payload),
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: eventosKeys.lists() })
+      queryClient.invalidateQueries({ queryKey: eventosKeys.list() })
     },
   })
 }
@@ -51,7 +50,7 @@ export function useUpdateEvento() {
         body: JSON.stringify(payload),
       }),
     onSuccess: (_data, { id }) => {
-      queryClient.invalidateQueries({ queryKey: eventosKeys.lists() })
+      queryClient.invalidateQueries({ queryKey: eventosKeys.list() })
       queryClient.invalidateQueries({ queryKey: eventosKeys.detail(id) })
     },
   })

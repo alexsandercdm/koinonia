@@ -42,9 +42,9 @@ export function EventoCard({ evento, canWrite, onEdit }: EventoCardProps) {
   const isAoVivo = evento.status === 'aberto'
   const borderColor = statusBorderColor[evento.status] ?? 'border-l-border'
 
-  const precoEncontrista = (evento as any).preco_encontrista as number | null | undefined
-  const precoServo = (evento as any).preco_servo as number | null | undefined
-  const localNome = (evento as any).local_nome as string | null | undefined
+  const precoEncontrista = evento.preco_encontrista
+  const precoServo = evento.preco_servo
+  const localNome = evento.local_nome
 
   return (
     <article

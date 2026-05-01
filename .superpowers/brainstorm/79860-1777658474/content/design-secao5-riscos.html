@@ -1,0 +1,98 @@
+<h2>Seção 5 — Riscos Técnicos e Decisões Críticas</h2>
+<p class="subtitle">O que pode dar errado e como mitigar antes de começar</p>
+
+<div style="display:flex; flex-direction:column; gap:12px">
+
+  <!-- RISCO 1 -->
+  <div style="background:#F7F4EF; border:1px solid #E0D9CF; border-radius:8px; padding:16px; border-left:4px solid #C0392B">
+    <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px">
+      <span style="background:#C0392B; color:#fff; font-size:10px; padding:2px 8px; border-radius:4px; font-weight:600">ALTO</span>
+      <strong style="font-size:13px">Vazamento cross-tenant por query sem guard</strong>
+    </div>
+    <p style="font-size:12px; color:#555; margin:0 0 8px 0">Um endpoint que esqueça o filtro <code>WHERE organization_id = ctx.orgId</code> expõe dados de outras igrejas. É o risco mais grave do row-level isolation.</p>
+    <div style="background:#fff; border-radius:6px; padding:10px; font-size:12px; color:#2D4A3E">
+      <strong>Mitigação:</strong> Criar uma classe base <code>BaseRepository</code> que injeta <code>organization_id</code> automaticamente em todo select/insert/update. Repositórios só herdam dela — nunca constroem queries cruas. Testes de integração verificam que nenhum endpoint retorna dados de outra org.
+    </div>
+  </div>
+
+  <!-- RISCO 2 -->
+  <div style="background:#F7F4EF; border:1px solid #E0D9CF; border-radius:8px; padding:16px; border-left:4px solid #E67E22">
+    <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px">
+      <span style="background:#E67E22; color:#fff; font-size:10px; padding:2px 8px; border-radius:4px; font-weight:600">MÉDIO</span>
+      <strong style="font-size:13px">Better Auth Organizations — compatibilidade com hierarquia customizada</strong>
+    </div>
+    <p style="font-size:12px; color:#555; margin:0 0 8px 0">O plugin suporta roles customizadas, mas a hierarquia de 6 níveis com visibilidade em cascata (Pastor de Rede vê só sua rede) vai além do que o plugin oferece nativamente.</p>
+    <div style="background:#fff; border-radius:6px; padding:10px; font-size:12px; color:#2D4A3E">
+      <strong>Mitigação:</strong> Better Auth armazena o papel (string). A lógica de hierarquia e visibilidade fica inteiramente no <code>PermissionResolver</code> da aplicação — o plugin só gerencia memberships e sessions. Fazer um spike técnico na Phase 8.5 para confirmar integração antes de commitar.
+    </div>
+  </div>
+
+  <!-- RISCO 3 -->
+  <div style="background:#F7F4EF; border:1px solid #E0D9CF; border-radius:8px; padding:16px; border-left:4px solid #E67E22">
+    <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px">
+      <span style="background:#E67E22; color:#fff; font-size:10px; padding:2px 8px; border-radius:4px; font-weight:600">MÉDIO</span>
+      <strong style="font-size:13px">Migração de dados existentes</strong>
+    </div>
+    <p style="font-size:12px; color:#555; margin:0 0 8px 0">O banco atual tem dados sem <code>organization_id</code>. Adicionar a coluna como NOT NULL quebra a migration. Se houver dados de teste reais, precisam de uma org "seed".</p>
+    <div style="background:#fff; border-radius:6px; padding:10px; font-size:12px; color:#2D4A3E">
+      <strong>Mitigação:</strong> Migration em duas etapas — (1) adicionar coluna como nullable + criar org seed + backfill, (2) tornar NOT NULL. Script de backfill deve ser idempotente e testado em ambiente de staging antes da produção.
+    </div>
+  </div>
+
+  <!-- RISCO 4 -->
+  <div style="background:#F7F4EF; border:1px solid #E0D9CF; border-radius:8px; padding:16px; border-left:4px solid #E67E22">
+    <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px">
+      <span style="background:#E67E22; color:#fff; font-size:10px; padding:2px 8px; border-radius:4px; font-weight:600">MÉDIO</span>
+      <strong style="font-size:13px">Cache cross-tenant no frontend</strong>
+    </div>
+    <p style="font-size:12px; color:#555; margin:0 0 8px 0">Se o usuário trocar de organização e o TanStack Query não invalidar o cache, ele vê dados da org anterior.</p>
+    <div style="background:#fff; border-radius:6px; padding:10px; font-size:12px; color:#2D4A3E">
+      <strong>Mitigação:</strong> Todas as query keys incluem <code>orgId</code> como prefixo — ex: <code>['org', orgId, 'eventos']</code>. Ao trocar de org, chamar <code>queryClient.clear()</code> para limpar todo o cache da sessão anterior.
+    </div>
+  </div>
+
+  <!-- RISCO 5 -->
+  <div style="background:#F7F4EF; border:1px solid #E0D9CF; border-radius:8px; padding:16px; border-left:4px solid #27AE60">
+    <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px">
+      <span style="background:#27AE60; color:#fff; font-size:10px; padding:2px 8px; border-radius:4px; font-weight:600">BAIXO</span>
+      <strong style="font-size:13px">Performance sem índices compostos</strong>
+    </div>
+    <p style="font-size:12px; color:#555; margin:0 0 8px 0">Queries com <code>WHERE organization_id = X</code> em tabelas grandes ficam lentas sem índice.</p>
+    <div style="background:#fff; border-radius:6px; padding:10px; font-size:12px; color:#2D4A3E">
+      <strong>Mitigação:</strong> Criar índice em <code>(organization_id, id)</code> e <code>(organization_id, created_at)</code> nas tabelas principais na própria migration da Phase 8.5. Baixo risco no estágio atual — volume é pequeno.
+    </div>
+  </div>
+
+</div>
+
+<!-- DECISÕES CRÍTICAS -->
+<div class="section" style="margin-top:24px">
+  <h3>Decisões que precisam ser tomadas antes de codar</h3>
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px">
+
+    <div style="background:#1A1612; color:#F7F4EF; border-radius:8px; padding:14px">
+      <p class="label" style="color:#C4923A; margin-bottom:6px">Como o Pastor de Rede enxerga "sua rede"?</p>
+      <p style="font-size:12px; color:#E0D9CF; margin:0">Ele vê todas as pessoas da org, ou só as que foram explicitamente linkadas a ele? Definir antes de modelar a visibilidade hierárquica.</p>
+    </div>
+
+    <div style="background:#1A1612; color:#F7F4EF; border-radius:8px; padding:14px">
+      <p class="label" style="color:#C4923A; margin-bottom:6px">Onboarding: org criada por quem?</p>
+      <p style="font-size:12px; color:#E0D9CF; margin:0">Qualquer usuário pode criar uma org e vira Presidente automaticamente? Ou há um step de verificação? Para v1.0: self-service livre — quem cria é owner.</p>
+    </div>
+
+    <div style="background:#1A1612; color:#F7F4EF; border-radius:8px; padding:14px">
+      <p class="label" style="color:#C4923A; margin-bottom:6px">Um usuário pode ser membro de múltiplas orgs?</p>
+      <p style="font-size:12px; color:#E0D9CF; margin:0">Better Auth suporta isso nativamente. É útil para pastores que atuam em mais de uma igreja. Recomendado: sim, com org "ativa" na sessão.</p>
+    </div>
+
+    <div style="background:#1A1612; color:#F7F4EF; border-radius:8px; padding:14px">
+      <p class="label" style="color:#C4923A; margin-bottom:6px">Pessoa (cadastro) = Usuário (login)?</p>
+      <p style="font-size:12px; color:#E0D9CF; margin:0">Atualmente, <code>pessoas</code> e <code>users</code> (Better Auth) são entidades separadas. Definir se/como elas se relacionam — um membro precisa ter login?</p>
+    </div>
+
+  </div>
+</div>
+
+<div style="margin-top:20px; padding:16px; background:#e8f4ee; border-radius:8px; border:1px solid #2D4A3E; font-size:13px">
+  <strong>Os riscos e decisões estão claros?</strong> Confirme e vou escrever o documento de design completo.
+</div>

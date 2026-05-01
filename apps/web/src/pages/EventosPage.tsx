@@ -48,7 +48,7 @@ export function EventosPage() {
       const matchSearch = !searchTerm || [
         evento.nome,
         evento.descricao,
-        evento.local_id,
+        evento.local_nome,
       ].some((value) => normalizeSearchText(value).includes(searchTerm))
       const matchFilter = activeFilter === 'todos' || evento.status === activeFilter
 
