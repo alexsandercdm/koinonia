@@ -1,24 +1,22 @@
 import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import {
-  Users,
-  ClipboardList,
   Bed,
-  Wallet,
+  Calendar,
+  ChevronRight,
+  ClipboardList,
   Plus,
-  ArrowRight,
-  TrendingUp,
-  TrendingDown,
-  FileText,
-  FileSpreadsheet,
-  Image,
-  CheckCircle,
-  Circle,
-  MapPin,
+  Users,
+  Wallet,
 } from 'lucide-react'
 import { AppLayout } from '../components/layout/AppLayout'
+import { Badge } from '../components/ui/badge'
+import { Button } from '../components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
+import { EmptyState } from '../components/ui/empty-state'
 import { apiFetch } from '../lib/api'
 import type { InscricaoListItem, EventoListItem } from '../hooks/use-inscricoes'
+import type { MapaAcomodacao } from '@koinonia/shared'
 
 interface MetricasFinanceiro {
   totalArrecadado: number
@@ -45,51 +43,31 @@ function getInitials(nome: string): string {
     .toUpperCase()
 }
 
-function timeAgo(dateStr?: string): string {
-  if (!dateStr) return ''
-  const diff = Date.now() - new Date(dateStr).getTime()
-  const mins = Math.floor(diff / 60000)
-  if (mins < 1) return 'agora'
-  if (mins < 60) return `há ${mins} min`
-  const hrs = Math.floor(mins / 60)
-  if (hrs < 24) return `há ${hrs}h`
-  return `há ${Math.floor(hrs / 24)}d`
+function formatEventDate(value?: string): string {
+  if (!value) return ''
+  return new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })
+    .format(new Date(`${value}T00:00:00`))
 }
 
-const STATUS_CONFIG: Record<string, { label: string; classes: string }> = {
-  PAGO_TOTAL: {
-    label: 'Pago',
-    classes: 'bg-emerald-400/10 text-emerald-400 border border-emerald-400/20',
-  },
-  PAGO_PARCIAL: {
-    label: 'Parcial',
-    classes: 'bg-blue-400/10 text-blue-400 border border-blue-400/20',
-  },
-  PENDENTE: {
-    label: 'Pendente',
-    classes: 'bg-yellow-400/10 text-yellow-400 border border-yellow-400/20',
-  },
-  LISTA_ESPERA: {
-    label: 'Espera',
-    classes: 'bg-slate-400/10 text-slate-400 border border-slate-400/20',
-  },
-  CANCELADA: {
-    label: 'Cancelada',
-    classes: 'bg-red-400/10 text-red-400 border border-red-400/20',
-  },
+const STATUS_CONFIG: Record<string, { label: string; variant: React.ComponentProps<typeof Badge>['variant'] }> = {
+  PAGO_TOTAL: { label: 'Pago', variant: 'success' },
+  PAGO_PARCIAL: { label: 'Parcial', variant: 'info' },
+  PENDENTE: { label: 'Pendente', variant: 'warning' },
+  LISTA_ESPERA: { label: 'Espera', variant: 'neutral' },
+  CANCELADA: { label: 'Cancelada', variant: 'danger' },
 }
 
-const quickReports = [
-  { icon: FileText, label: 'Lista de Presença', meta: 'PDF', color: 'text-violet-400' },
-  { icon: FileSpreadsheet, label: 'Resumo Financeiro', meta: 'XLS', color: 'text-emerald-400' },
-  { icon: FileText, label: 'Restrições Alimentares', meta: 'PDF', color: 'text-amber-400' },
-  { icon: Image, label: 'Mapa de Quartos', meta: 'IMG', color: 'text-sky-400' },
-]
+const PAPEL_LABEL: Record<string, string> = {
+  encontrista: 'Encontrista',
+  servo: 'Servo',
+}
 
-const proximasTarefas = [
-  { label: 'Confirmar Buffet', due: 'Vence hoje, 17:00', done: false },
-  { label: 'Enviar E-mail de Boas Vindas', due: 'Vence amanhã', done: false },
-  { label: 'Reunião com Equipe de Som', due: '22 de Maio', done: false },
+const quickLinks = [
+  { icon: Users, label: 'Participantes', path: '/participantes' },
+  { icon: Calendar, label: 'Eventos', path: '/eventos' },
+  { icon: ClipboardList, label: 'Inscrições', path: '/inscricoes' },
+  { icon: Bed, label: 'Acomodações', path: '/acomodacoes' },
+  { icon: Wallet, label: 'Financeiro', path: '/financeiro' },
 ]
 
 export function DashboardPage() {
@@ -115,10 +93,18 @@ export function DashboardPage() {
 
   const primeiroEvento = eventos?.[0]
 
-  const { data: inscricoesRecentes } = useQuery({
-    queryKey: ['inscricoes-recentes', primeiroEvento?.id],
+  const { data: inscricoes } = useQuery({
+    queryKey: ['inscricoes-dashboard', primeiroEvento?.id],
     queryFn: () =>
-      apiFetch<InscricaoListItem[]>(`/api/v1/inscricoes?evento_id=${primeiroEvento!.id}&limit=5`),
+      apiFetch<InscricaoListItem[]>(`/api/v1/inscricoes?evento_id=${primeiroEvento!.id}`),
+    enabled: !!primeiroEvento?.id,
+    retry: 1,
+  })
+
+  const { data: mapa } = useQuery({
+    queryKey: ['mapa-acomodacao-dashboard', primeiroEvento?.id],
+    queryFn: () =>
+      apiFetch<MapaAcomodacao>(`/api/v1/eventos/${primeiroEvento!.id}/mapa-acomodacao`),
     enabled: !!primeiroEvento?.id,
     retry: 1,
   })
@@ -127,313 +113,216 @@ export function DashboardPage() {
     ? participantesData.length
     : (participantesData as ParticipantesListResponse)?.total ?? 0
 
-  const pagamentosConfirmados = metricas?.porStatus?.['PAGO_TOTAL'] ?? metricas?.porStatus?.['Pago'] ?? 0
-  const ocupacaoLeitos = metricas ? Math.round(metricas.breakEvenPct) : 0
+  const inscricoesCount = inscricoes?.length ?? 0
+  const inadimplentesCount = inscricoes?.filter(
+    (i) => i.valor_total > 0 && i.valor_pago < i.valor_total
+  ).length ?? 0
+
+  const todasCamas = mapa?.quartos.flatMap((q) => q.camas) ?? []
+  const totalCamas = todasCamas.length
+  const ocupadas = todasCamas.filter((c) => c.ocupante !== null).length
+  const vagasLivres = totalCamas - ocupadas
 
   const metricCards = [
     {
       icon: Users,
-      label: 'Total de Inscritos',
+      label: 'Participantes',
       value: participantesCount || '—',
-      trend: { value: 12, up: true },
-      color: 'text-violet-400',
-      bg: 'bg-violet-500/10',
+      subtitle: participantesCount ? `${participantesCount} cadastrados` : 'Nenhum ainda',
+      iconClass: 'bg-status-info-bg text-status-info',
       path: '/participantes',
     },
     {
-      icon: Wallet,
-      label: 'Pagamentos Confirmados',
-      value: pagamentosConfirmados || '—',
-      trend: { value: 5, up: true },
-      color: 'text-emerald-400',
-      bg: 'bg-emerald-500/10',
-      path: '/financeiro',
+      icon: ClipboardList,
+      label: 'Inscrições',
+      value: inscricoesCount || '—',
+      subtitle: inadimplentesCount > 0 ? `${inadimplentesCount} inadimplentes` : 'Nenhum inadimplente',
+      iconClass: 'bg-warm-gold-light text-warm-gold',
+      path: '/inscricoes',
     },
     {
       icon: Bed,
-      label: 'Ocupação de Leitos',
-      value: ocupacaoLeitos ? `${ocupacaoLeitos}%` : '—',
-      trend: { value: 2, up: false },
-      color: 'text-sky-400',
-      bg: 'bg-sky-500/10',
+      label: 'Acomodações',
+      value: totalCamas ? `${ocupadas} / ${totalCamas}` : '—',
+      subtitle: totalCamas ? `${vagasLivres} vagas livres` : 'Sem mapa carregado',
+      iconClass: 'bg-status-success-bg text-status-success',
       path: '/acomodacoes',
     },
     {
-      icon: ClipboardList,
+      icon: Wallet,
       label: 'Arrecadado',
       value: metricas ? formatCurrency(metricas.totalArrecadado) : '—',
-      trend: null,
-      color: 'text-amber-400',
-      bg: 'bg-amber-500/10',
+      subtitle: metricas ? `${metricas.breakEvenPct.toFixed(0)}% da meta` : 'Sem dados',
+      iconClass: 'bg-status-warning-bg text-status-warning',
       path: '/financeiro',
     },
   ]
 
+  const localInfo = [mapa?.local.nome, mapa?.local.endereco].filter(Boolean).join(' · ')
+  const dateRange = primeiroEvento
+    ? `${formatEventDate(primeiroEvento.data_inicio)} – ${formatEventDate(primeiroEvento.data_fim)}`
+    : null
+  const eventSubtitle = [localInfo, dateRange].filter(Boolean).join(' · ')
+
   return (
     <AppLayout
+      title="Dashboard"
       actions={
-        <button
-          onClick={() => navigate('/inscricoes')}
-          className="flex items-center gap-2 bg-[#4d0085] hover:bg-[#4d0085]/90 text-white px-4 py-2 rounded-xl font-medium transition-colors text-sm"
-        >
+        <Button onClick={() => navigate('/eventos')} size="sm">
           <Plus size={16} />
-          Novo Evento
-        </button>
+          Novo evento
+        </Button>
       }
     >
-      <div className="p-8 space-y-8 max-w-[1400px] mx-auto w-full">
-        {/* Hero Card */}
-        <section className="relative h-[280px] rounded-2xl overflow-hidden group">
-          <div
-            className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
-            style={{
-              backgroundImage:
-                'url(https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?w=1600&q=80)',
-            }}
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#0f0814] via-[#0f0814]/80 to-transparent z-10" />
-          <div className="relative z-20 h-full flex flex-col justify-end p-8">
-            <p className="text-xs font-semibold uppercase tracking-widest text-[#ffbf00] mb-2">
-              Destaque
-            </p>
-            <h2 className="text-3xl font-bold text-white mb-1 leading-tight">
-              {primeiroEvento?.nome ?? 'Retiro Koinonia 2025'}
-            </h2>
-            {primeiroEvento && (
-              <div className="flex items-center gap-4 text-slate-400 text-sm mb-6">
-                <span className="flex items-center gap-1.5">
-                  <span className="material-symbols-outlined text-[16px]">calendar_today</span>
-                  {new Date(primeiroEvento.data_inicio).toLocaleDateString('pt-BR')} –{' '}
-                  {new Date(primeiroEvento.data_fim).toLocaleDateString('pt-BR')}
-                </span>
-              </div>
-            )}
-            {!primeiroEvento && (
-              <div className="flex items-center gap-1.5 text-slate-400 text-sm mb-6">
-                <MapPin size={14} />
-                <span>O maior evento de imersão espiritual do ano</span>
-              </div>
-            )}
-            <button
-              onClick={() => navigate('/participantes')}
-              className="self-start flex items-center gap-2 bg-[#4d0085] hover:bg-[#4d0085]/90 text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-[#4d0085]/20 transition-all"
-            >
-              Gerenciar Evento
-              <ArrowRight size={16} />
-            </button>
+      <div className="mx-auto w-full max-w-[1100px] space-y-7 p-4 sm:p-6 lg:p-7">
+        {/* Event Banner */}
+        <section className="overflow-hidden rounded-panel border border-border bg-surface shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+          <div className="flex flex-col gap-5 border-l-[3px] border-warm-gold px-8 py-7 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-warm-gold">
+                Evento em andamento
+              </p>
+              <h2 className="text-[22px] font-semibold leading-tight tracking-[-0.02em] text-foreground">
+                {primeiroEvento?.nome ?? 'Nenhum evento ativo'}
+              </h2>
+              {eventSubtitle && (
+                <p className="mt-1 text-[13px] text-text-secondary">{eventSubtitle}</p>
+              )}
+            </div>
+            <div className="flex shrink-0 gap-2">
+              <Button variant="outline" size="sm" onClick={() => navigate('/acomodacoes')}>
+                <Bed size={15} />
+                Mapa
+              </Button>
+              <Button size="sm" onClick={() => navigate('/inscricoes')}>
+                <ClipboardList size={15} />
+                Inscrições
+              </Button>
+            </div>
+          </div>
+          <div className="relative h-1.5 bg-neutral-soft">
+            <div
+              className="absolute inset-y-0 left-0 rounded-r-full bg-warm-gold"
+              style={{ width: `${Math.min(metricas?.breakEvenPct ?? 0, 100)}%` }}
+            />
+          </div>
+          <div className="flex justify-end px-8 py-2">
+            <span className="text-[11px] text-text-tertiary">
+              {Math.min(metricas?.breakEvenPct ?? 0, 100).toFixed(0)}% da meta financeira atingida
+            </span>
           </div>
         </section>
 
-        {/* Metrics Grid */}
+        {/* Metric Cards */}
         <section>
-          <h3 className="text-xl font-bold text-white mb-6">Métricas Atuais</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {metricCards.map(({ icon: Icon, label, value, trend, color, bg, path }) => (
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {metricCards.map(({ icon: Icon, label, value, subtitle, iconClass, path }) => (
               <button
                 key={label}
                 onClick={() => navigate(path)}
-                className="bg-surface-dark border border-border-dark p-6 rounded-xl flex flex-col gap-4 hover:border-[#4d0085]/50 transition-all text-left group"
+                className="rounded-[10px] border border-border bg-surface p-5 text-left shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-colors hover:border-warm-border-strong hover:bg-surface-raised"
               >
-                <div className="flex items-center justify-between">
-                  <div className={`size-10 rounded-xl ${bg} flex items-center justify-center`}>
-                    <Icon size={20} className={color} />
-                  </div>
-                  {trend ? (
-                    <span
-                      className={`flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-full ${
-                        trend.up
-                          ? 'bg-emerald-500/10 text-emerald-400'
-                          : 'bg-red-500/10 text-red-400'
-                      }`}
-                    >
-                      {trend.up ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
-                      {trend.value}%
-                    </span>
-                  ) : (
-                    <ArrowRight
-                      size={16}
-                      className="text-slate-600 group-hover:text-slate-400 transition-colors"
-                    />
-                  )}
+                <div className={`mb-4 flex size-10 items-center justify-center rounded-[8px] ${iconClass}`}>
+                  <Icon size={18} />
                 </div>
-                <div>
-                  <p className="text-2xl font-bold text-white">{value}</p>
-                  <p className="text-sm text-slate-400 mt-1">{label}</p>
-                </div>
+                <p className="text-[28px] font-semibold leading-none tracking-tight text-foreground">
+                  {value}
+                </p>
+                <p className="mt-1.5 text-[13px] font-medium text-foreground">{label}</p>
+                <p className="mt-0.5 text-[12px] text-text-secondary">{subtitle}</p>
               </button>
             ))}
           </div>
         </section>
 
-        {/* Relatórios Rápidos */}
-        <section>
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-xl font-bold text-white">Relatórios Rápidos</h3>
-            <button className="text-xs font-bold text-[#ffbf00] hover:underline">
-              Ver todos os relatórios
-            </button>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {quickReports.map(({ icon: Icon, label, meta, color }) => (
-              <button
-                key={label}
-                className="bg-surface-dark border border-border-dark hover:border-[#4d0085]/50 p-5 rounded-xl flex items-center gap-4 transition-all hover:bg-surface-elevated group"
-              >
-                <div className="size-10 rounded-xl bg-white/5 flex items-center justify-center shrink-0 group-hover:bg-[#4d0085]/10 transition-colors">
-                  <Icon size={18} className={color} />
-                </div>
-                <div className="text-left min-w-0">
-                  <p className="text-sm font-medium text-white truncate">{label}</p>
-                  <p className="text-xs text-slate-500 mt-0.5">{meta}</p>
-                </div>
-              </button>
-            ))}
-          </div>
-        </section>
-
-        {/* Bottom 2-column: Inscrições Recentes + Próximas Tarefas */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Inscrições + Acesso Rápido */}
+        <section className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_280px]">
           {/* Inscrições Recentes */}
-          <section className="bg-surface-dark border border-border-dark rounded-xl overflow-hidden">
-            <div className="flex items-center justify-between p-5 border-b border-border-dark">
-              <h3 className="font-bold text-white">Inscrições Recentes</h3>
+          <Card>
+            <CardHeader className="flex-row items-center justify-between border-b border-border">
+              <CardTitle>Inscrições recentes</CardTitle>
               <button
                 onClick={() => navigate('/inscricoes')}
-                className="text-xs font-bold text-[#ffbf00] hover:underline"
+                className="text-sm font-semibold text-warm-gold"
               >
-                Ver Todas
+                Ver todas
               </button>
-            </div>
-            <div className="divide-y divide-border-dark">
-              {inscricoesRecentes && inscricoesRecentes.length > 0 ? (
-                inscricoesRecentes.slice(0, 5).map((inscricao) => {
-                  const statusCfg = STATUS_CONFIG[inscricao.status] ?? {
-                    label: inscricao.status,
-                    classes: 'bg-slate-400/10 text-slate-400 border border-slate-400/20',
-                  }
-                  const nome = inscricao.pessoa?.nome ?? 'Participante'
-                  return (
-                    <div key={inscricao.id} className="flex items-center gap-4 px-5 py-4">
-                      <div className="size-10 rounded-full bg-[#4d0085]/20 border border-[#4d0085]/30 flex items-center justify-center shrink-0">
-                        <span className="text-sm font-bold text-violet-300">
-                          {getInitials(nome)}
-                        </span>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-white truncate">{nome}</p>
-                        <p className="text-xs text-slate-500">{timeAgo(inscricao.created_at)}</p>
-                      </div>
-                      <span
-                        className={`px-2.5 py-1 rounded-full text-[11px] font-bold uppercase shrink-0 ${statusCfg.classes}`}
-                      >
-                        {statusCfg.label}
-                      </span>
-                    </div>
-                  )
-                })
-              ) : (
-                [
-                  { initials: 'JD', nome: 'João Delatorre', time: 'há 5 min', status: 'PAGO_TOTAL' },
-                  { initials: 'MS', nome: 'Maria Santos', time: 'há 15 min', status: 'PENDENTE' },
-                  { initials: 'RL', nome: 'Ricardo Lemos', time: 'há 1h', status: 'PAGO_TOTAL' },
-                ].map((item) => {
-                  const cfg = STATUS_CONFIG[item.status]
-                  return (
-                    <div key={item.nome} className="flex items-center gap-4 px-5 py-4">
-                      <div className="size-10 rounded-full bg-[#4d0085]/20 border border-[#4d0085]/30 flex items-center justify-center shrink-0">
-                        <span className="text-sm font-bold text-violet-300">{item.initials}</span>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-white">{item.nome}</p>
-                        <p className="text-xs text-slate-500">Inscrito {item.time}</p>
-                      </div>
-                      <span
-                        className={`px-2.5 py-1 rounded-full text-[11px] font-bold uppercase shrink-0 ${cfg.classes}`}
-                      >
-                        {cfg.label}
-                      </span>
-                    </div>
-                  )
-                })
-              )}
-            </div>
-          </section>
-
-          {/* Próximas Tarefas */}
-          <section className="bg-surface-dark border border-border-dark rounded-xl overflow-hidden">
-            <div className="flex items-center justify-between p-5 border-b border-border-dark">
-              <h3 className="font-bold text-white">Próximas Tarefas</h3>
-            </div>
-            <div className="divide-y divide-border-dark">
-              {proximasTarefas.map((tarefa) => (
-                <div key={tarefa.label} className="flex items-start gap-4 px-5 py-4">
-                  <button className="mt-0.5 shrink-0 text-slate-600 hover:text-[#4d0085] transition-colors">
-                    {tarefa.done ? (
-                      <CheckCircle size={20} className="text-emerald-400" />
-                    ) : (
-                      <Circle size={20} />
-                    )}
-                  </button>
-                  <div className="flex-1 min-w-0">
-                    <p
-                      className={`text-sm font-medium ${tarefa.done ? 'line-through text-slate-500' : 'text-white'}`}
-                    >
-                      {tarefa.label}
-                    </p>
-                    <p className="text-xs text-slate-500 mt-0.5">{tarefa.due}</p>
+            </CardHeader>
+            <CardContent className="p-0">
+              {inscricoes && inscricoes.length > 0 ? (
+                <>
+                  {/* Table header */}
+                  <div className="grid grid-cols-[1fr_auto_auto_auto] gap-4 px-5 py-2.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-text-tertiary">
+                    <span>Participante</span>
+                    <span className="w-24 text-center">Papel</span>
+                    <span className="w-20 text-center">Status</span>
+                    <span className="w-24 text-right">Valor</span>
                   </div>
+                  <div className="divide-y divide-border">
+                    {inscricoes.slice(0, 6).map((inscricao) => {
+                      const statusCfg = STATUS_CONFIG[inscricao.status] ?? {
+                        label: inscricao.status,
+                        variant: 'neutral' as const,
+                      }
+                      const nome = inscricao.pessoa?.nome ?? 'Participante'
+                      const valorDisplay =
+                        inscricao.valor_total > 0 ? formatCurrency(inscricao.valor_total) : '—'
+                      return (
+                        <div
+                          key={inscricao.id}
+                          className="grid grid-cols-[1fr_auto_auto_auto] items-center gap-4 px-5 py-3.5"
+                        >
+                          <div className="flex min-w-0 items-center gap-3">
+                            <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-[11px] font-bold text-foreground">
+                              {getInitials(nome)}
+                            </div>
+                            <p className="truncate text-sm font-medium text-foreground">{nome}</p>
+                          </div>
+                          <span className="w-24 text-center text-sm text-text-secondary">
+                            {PAPEL_LABEL[inscricao.papel] ?? inscricao.papel}
+                          </span>
+                          <div className="flex w-20 justify-center">
+                            <Badge variant={statusCfg.variant}>{statusCfg.label}</Badge>
+                          </div>
+                          <span className="w-24 text-right text-sm font-medium text-foreground">
+                            {valorDisplay}
+                          </span>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </>
+              ) : (
+                <div className="p-5">
+                  <EmptyState
+                    title="Nenhuma inscrição ainda"
+                    description="As inscrições aparecerão aqui assim que houver um evento ativo."
+                  />
                 </div>
-              ))}
-              <div className="px-5 py-4">
-                <button className="flex items-center gap-2 text-sm text-slate-500 hover:text-[#ffbf00] transition-colors font-medium">
-                  <Plus size={16} />
-                  Adicionar Tarefa
-                </button>
-              </div>
-            </div>
-          </section>
-        </div>
+              )}
+            </CardContent>
+          </Card>
 
-        {/* Financial Summary */}
-        {metricas && (
-          <section>
-            <div className="bg-surface-dark border border-border-dark rounded-xl p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-bold text-white">Resumo Financeiro</h3>
+          {/* Acesso Rápido */}
+          <Card>
+            <CardHeader className="border-b border-border">
+              <CardTitle>Acesso rápido</CardTitle>
+            </CardHeader>
+            <CardContent className="divide-y divide-border p-0">
+              {quickLinks.map(({ icon: Icon, label, path }) => (
                 <button
-                  onClick={() => navigate('/financeiro')}
-                  className="text-xs font-bold text-[#ffbf00] hover:underline"
+                  key={label}
+                  onClick={() => navigate(path)}
+                  className="flex w-full items-center gap-3 px-5 py-4 text-left transition-colors hover:bg-surface-raised"
                 >
-                  Ver detalhes
+                  <Icon size={16} className="shrink-0 text-text-secondary" />
+                  <span className="flex-1 text-sm font-medium text-foreground">{label}</span>
+                  <ChevronRight size={16} className="shrink-0 text-text-tertiary" />
                 </button>
-              </div>
-              <div className="flex justify-between items-end mb-3">
-                <div>
-                  <p className="text-sm text-slate-400">Total Arrecadado</p>
-                  <p className="text-2xl font-bold text-emerald-400">
-                    {formatCurrency(metricas.totalArrecadado)}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm text-slate-400">Total Previsto</p>
-                  <p className="text-xl font-bold text-slate-300">
-                    {formatCurrency(metricas.totalPrevisto)}
-                  </p>
-                </div>
-              </div>
-              <div className="relative h-3 w-full bg-[#0f0814] rounded-full overflow-hidden">
-                <div
-                  className="absolute h-full bg-emerald-500 rounded-full shadow-[0_0_10px_rgba(16,185,129,0.4)] transition-all duration-700"
-                  style={{ width: `${Math.min(metricas.breakEvenPct, 100)}%` }}
-                />
-              </div>
-              <p className="text-xs text-slate-500 mt-2">
-                {metricas.breakEvenPct.toFixed(0)}% do previsto arrecadado · Meta: ponto de
-                equilíbrio
-              </p>
-            </div>
-          </section>
-        )}
+              ))}
+            </CardContent>
+          </Card>
+        </section>
       </div>
     </AppLayout>
   )

@@ -17,6 +17,9 @@ export default {
       },
     },
     extend: {
+      fontFamily: {
+        sans: ["DM Sans", "sans-serif"],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -39,6 +42,9 @@ export default {
           DEFAULT: "hsl(var(--muted))",
           foreground: "hsl(var(--muted-foreground))",
         },
+        neutral: {
+          soft: "hsl(var(--neutral-soft))",
+        },
         accent: {
           DEFAULT: "hsl(var(--accent))",
           foreground: "hsl(var(--accent-foreground))",
@@ -51,17 +57,41 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        // Stitch design tokens
-        "surface-dark": "#1b0f23",
-        "surface-elevated": "#291736",
-        "border-dark": "#2d1b3d",
-        "background-dark": "#0f0814",
-        "amber-accent": "#ffbf00",
+        surface: {
+          DEFAULT: "hsl(var(--surface))",
+          raised: "hsl(var(--surface-raised))",
+        },
+        warm: {
+          border: "hsl(var(--border))",
+          "border-strong": "hsl(var(--border-strong))",
+          gold: "hsl(var(--gold))",
+          "gold-muted": "hsl(var(--gold-muted))",
+          "gold-soft": "hsl(var(--gold-soft))",
+          "gold-light": "hsl(var(--gold-light))",
+        },
+        status: {
+          success: "hsl(var(--success))",
+          "success-bg": "hsl(var(--success-bg))",
+          warning: "hsl(var(--warning))",
+          "warning-bg": "hsl(var(--warning-bg))",
+          danger: "hsl(var(--danger))",
+          "danger-bg": "hsl(var(--danger-bg))",
+          info: "hsl(var(--info))",
+          "info-bg": "hsl(var(--info-bg))",
+        },
+        text: {
+          secondary: "hsl(var(--text-secondary))",
+          tertiary: "hsl(var(--text-tertiary))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+        control: "7px",
+        tabs: "8px",
+        panel: "10px",
+        pill: "9999px",
         xl: "1rem",
         "2xl": "1.5rem",
       },

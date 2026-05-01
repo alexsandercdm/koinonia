@@ -1,0 +1,119 @@
+<h2>Seção 3 — Módulos do Sistema</h2>
+<p class="subtitle">Visão produto — o que existe hoje, o que muda e o que é novo</p>
+
+<!-- V1.0 -->
+<div class="section">
+  <h3>v1.0 — Core Multi-Tenant <span style="font-size:12px; background:#2D4A3E; color:#a0c4b0; padding:2px 8px; border-radius:4px; margin-left:8px">Foco atual</span></h3>
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px">
+
+    <div style="background:#F7F4EF; border:1px solid #E0D9CF; border-radius:8px; padding:14px">
+      <p class="label" style="color:#C4923A">Organizations (NOVO)</p>
+      <ul style="font-size:12px; color:#444; line-height:1.8; margin:8px 0 0 0; padding-left:16px">
+        <li>Criação de organização (self-service)</li>
+        <li>Convite de membros por e-mail</li>
+        <li>Gestão de papéis (RBAC)</li>
+        <li>Troca de organização ativa</li>
+        <li>Configurações da org (nome, slug)</li>
+      </ul>
+    </div>
+
+    <div style="background:#F7F4EF; border:1px solid #E0D9CF; border-radius:8px; padding:14px">
+      <p class="label" style="color:#C4923A">Auth + RBAC (EVOLUÇÃO)</p>
+      <ul style="font-size:12px; color:#444; line-height:1.8; margin:8px 0 0 0; padding-left:16px">
+        <li>Login/registro existente (mantido)</li>
+        <li>Hierarquia de 6 papéis por org</li>
+        <li>PermissionResolver centralizado</li>
+        <li>Tenant Middleware no Fastify</li>
+        <li>Proteção de rotas por papel no frontend</li>
+      </ul>
+    </div>
+
+    <div style="background:#F7F4EF; border:1px solid #E0D9CF; border-radius:8px; padding:14px">
+      <p class="label" style="color:#2D4A3E">Pessoas (AJUSTE)</p>
+      <ul style="font-size:12px; color:#444; line-height:1.8; margin:8px 0 0 0; padding-left:16px">
+        <li>+ <code>organization_id</code> na tabela</li>
+        <li>Visibilidade hierárquica (membro vê só si mesmo)</li>
+        <li>CRUD existente continua funcionando</li>
+      </ul>
+    </div>
+
+    <div style="background:#F7F4EF; border:1px solid #E0D9CF; border-radius:8px; padding:14px">
+      <p class="label" style="color:#2D4A3E">Eventos (AJUSTE)</p>
+      <ul style="font-size:12px; color:#444; line-height:1.8; margin:8px 0 0 0; padding-left:16px">
+        <li>+ <code>organization_id</code> na tabela</li>
+        <li>Ciclo de vida: planejamento → inscrições abertas → em andamento → finalizado</li>
+        <li>Transições de status com validação</li>
+        <li>CRUD existente continua funcionando</li>
+      </ul>
+    </div>
+
+    <div style="background:#F7F4EF; border:1px solid #E0D9CF; border-radius:8px; padding:14px">
+      <p class="label" style="color:#2D4A3E">Inscrições (AJUSTE)</p>
+      <ul style="font-size:12px; color:#444; line-height:1.8; margin:8px 0 0 0; padding-left:16px">
+        <li>+ <code>organization_id</code> na tabela</li>
+        <li>Inscrição interna (membros cadastrados)</li>
+        <li>Fluxo de pagamento existente mantido</li>
+      </ul>
+    </div>
+
+    <div style="background:#F7F4EF; border:1px solid #E0D9CF; border-radius:8px; padding:14px">
+      <p class="label" style="color:#2D4A3E">Acomodações (AJUSTE)</p>
+      <ul style="font-size:12px; color:#444; line-height:1.8; margin:8px 0 0 0; padding-left:16px">
+        <li>+ <code>organization_id</code> em locais</li>
+        <li>Módulo completo existente mantido</li>
+        <li>Isolamento garantido via local_id → org_id</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+<!-- V1.1 -->
+<div class="section">
+  <h3>v1.1 — Feature Expansion <span style="font-size:12px; background:#4B3B2A; color:#C4923A; padding:2px 8px; border-radius:4px; margin-left:8px">Próximo ciclo</span></h3>
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px">
+
+    <div style="background:#FBF9F5; border:1px dashed #C4923A; border-radius:8px; padding:14px; opacity:0.85">
+      <p class="label" style="color:#C4923A">Financeiro por Evento (NOVO)</p>
+      <ul style="font-size:12px; color:#444; line-height:1.8; margin:8px 0 0 0; padding-left:16px">
+        <li>Receitas (inscrições + ofertas)</li>
+        <li>Despesas por categoria</li>
+        <li>Indicadores: lucro/prejuízo, break-even</li>
+        <li>Dashboard financeiro por evento</li>
+      </ul>
+    </div>
+
+    <div style="background:#FBF9F5; border:1px dashed #C4923A; border-radius:8px; padding:14px; opacity:0.85">
+      <p class="label" style="color:#C4923A">Equipes por Evento (NOVO)</p>
+      <ul style="font-size:12px; color:#444; line-height:1.8; margin:8px 0 0 0; padding-left:16px">
+        <li>Equipes com nome e função</li>
+        <li>Atribuição de servos/líderes</li>
+        <li>Visibilidade por papel hierárquico</li>
+      </ul>
+    </div>
+
+    <div style="background:#FBF9F5; border:1px dashed #C4923A; border-radius:8px; padding:14px; opacity:0.85">
+      <p class="label" style="color:#C4923A">Formulário Público (NOVO)</p>
+      <ul style="font-size:12px; color:#444; line-height:1.8; margin:8px 0 0 0; padding-left:16px">
+        <li>Link público sem login por evento</li>
+        <li>Inscrição de membros e servos</li>
+        <li>Integração automática com sistema interno</li>
+        <li>Aprovação manual opcional</li>
+      </ul>
+    </div>
+
+    <div style="background:#FBF9F5; border:1px dashed #C4923A; border-radius:8px; padding:14px; opacity:0.85">
+      <p class="label" style="color:#C4923A">Indicadores Gerais (NOVO)</p>
+      <ul style="font-size:12px; color:#444; line-height:1.8; margin:8px 0 0 0; padding-left:16px">
+        <li>Taxa de presença por evento</li>
+        <li>Crescimento de membros</li>
+        <li>Histórico de eventos da org</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+<div style="margin-top:16px; padding:16px; background:#e8f4ee; border-radius:8px; border:1px solid #2D4A3E; font-size:13px">
+  <strong>Faz sentido esse corte v1.0 vs v1.1?</strong> Confirme aqui antes de vermos o roadmap de execução.
+</div>

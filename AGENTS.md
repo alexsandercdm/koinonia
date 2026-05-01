@@ -102,3 +102,24 @@ Koinonia is a monorepo for managing spiritual retreats. Every change must preser
 - Start from existing code patterns before proposing a new structure.
 - When documentation and code disagree, call out the discrepancy and follow the live implementation.
 - Use this file as the project rules baseline for Codex, GSD workflows, and Antigravity-compatible agent setups.
+
+<!-- HOLYHOUSE HARNESS:START -->
+# Codex HolyHouse Contract Loader
+
+<!-- HOLYHOUSE HARNESS:START -->
+This project uses HolyHouse Harness.
+
+Mandatory files to load before meaningful work:
+
+- `.holyhouse/AGENT_CONTRACT.md`
+- `.holyhouse/HARNESS.md`
+- `.holyhouse/GATES.md`
+- `.holyhouse/STATE.md`
+- `.holyhouse/MEMORY.md`
+- `.holyhouse/DECISIONS.md`
+- relevant role behavior from `.holyhouse/skills/`
+
+The HolyHouse agent contract is mandatory and cannot be ignored. Completion requires verification evidence. Gate failures, test failures, and corrections must be recorded through the memory-writer behavior.
+<!-- HOLYHOUSE HARNESS:END -->
+<!-- HOLYHOUSE HARNESS:END -->
+<!-- HOLYHOUSE HARNESS:END -->

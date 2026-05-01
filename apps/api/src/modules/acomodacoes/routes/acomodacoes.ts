@@ -60,6 +60,10 @@ export async function acomodacaoRoutes(fastify: FastifyInstance) {
     },
   }, structureController.createQuarto.bind(structureController))
 
+  fastify.delete('/acomodacoes/quartos/:quartoId', {
+    ...requireLider,
+  }, structureController.deleteQuarto.bind(structureController))
+
   fastify.patch('/acomodacoes/quartos/:quartoId', {
     ...requireLider,
     schema: {

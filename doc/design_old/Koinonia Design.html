@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Koinonia — Design System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body, #root { height: 100%; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: #F7F4EF;
+  color: #1A1612;
+  -webkit-font-smoothing: antialiased;
+}
+/* Tokens */
+:root {
+  --bg: #F7F4EF;
+  --surface: #FFFFFF;
+  --surface-raised: #FDFCFA;
+  --border: #E8E3D9;
+  --border-strong: #CFC8BB;
+  --text-primary: #1A1612;
+  --text-secondary: #7A7060;
+  --text-tertiary: #B0A898;
+  --gold: #C4923A;
+  --gold-light: #F5ECD9;
+  --gold-muted: #EDD8AD;
+  --success: #3D7A52;
+  --success-light: #E8F4ED;
+  --warning: #B07030;
+  --warning-light: #FBF0E2;
+  --danger: #9B3A2E;
+  --danger-light: #FBECEC;
+  --info: #2E628B;
+  --info-light: #E8F2FA;
+  --sidebar-w: 220px;
+  --sidebar-collapsed: 56px;
+  --header-h: 56px;
+  --radius: 8px;
+  --radius-lg: 12px;
+}
+button { cursor: pointer; font-family: inherit; border: none; background: none; }
+input, select, textarea { font-family: inherit; }
+.ms { font-family: 'Material Symbols Rounded'; font-weight: normal; font-style: normal; font-size: 20px; line-height: 1; letter-spacing: normal; text-transform: none; display: inline-block; white-space: nowrap; direction: ltr; -webkit-font-smoothing: antialiased; font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20; }
+.ms-fill { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 20; }
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 99px; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useRef, useCallback } = React;
+
+/* ─── TOKENS ─────────────────────────────────────────────────── */
+const C = {
+  bg: '#F7F4EF', surface: '#FFFFFF', surfaceRaised: '#FDFCFA',
+  border: '#E8E3D9', borderStrong: '#CFC8BB',
+  text: '#1A1612', textSec: '#7A7060', textTer: '#B0A898',
+  gold: '#C4923A', goldLight: '#F5ECD9', goldMuted: '#EDD8AD',
+  success: '#3D7A52', successLight: '#E8F4ED',
+  warning: '#B07030', warningLight: '#FBF0E2',
+  danger: '#9B3A2E', dangerLight: '#FBECEC',
+  info: '#2E628B', infoLight: '#E8F2FA',
+};
+
+/* ─── PRIMITIVES ──────────────────────────────────────────────── */
+function Icon({ name, size = 20, fill = false, style = {}, className = '' }) {
+  return (
+    <span
+      className={'ms' + (fill ? ' ms-fill' : '') + (className ? ' ' + className : '')}
+      style={{ fontSize: size, ...style }}
+    >{name}</span>
+  );
+}
+
+function Badge({ children, color = 'gold' }) {
+  const maps = {
+    gold:    { bg: C.goldLight,    text: C.gold },
+    success: { bg: C.successLight, text: C.success },
+    warning: { bg: C.warningLight, text: C.warning },
+    danger:  { bg: C.dangerLight,  text: C.danger },
+    info:    { bg: C.infoLight,    text: C.info },
+    neutral: { bg: '#F0EDE8',      text: C.textSec },
+  };
+  const s = maps[color] || maps.neutral;
+  return (
+    <span style={{
+      display: 'inline-flex', alignItems: 'center', padding: '2px 8px',
+      borderRadius: 99, fontSize: 11, fontWeight: 500, letterSpacing: '0.02em',
+      background: s.bg, color: s.text,
+    }}>{children}</span>
+  );
+}
+
+function Divider({ vertical = false, style = {} }) {
+  return (
+    <div style={{
+      background: C.border,
+      width: vertical ? 1 : '100%',
+      height: vertical ? '100%' : 1,
+      flexShrink: 0,
+      ...style,
+    }} />
+  );
+}
+
+function Btn({ children, variant = 'primary', size = 'md', onClick, style = {}, disabled = false, icon }) {
+  const sizes = { sm: { padding: '6px 12px', fontSize: 13 }, md: { padding: '8px 16px', fontSize: 14 }, lg: { padding: '11px 22px', fontSize: 15 } };
+  const variants = {
+    primary: { bg: C.text, color: '#fff', border: 'none', hoverBg: '#2E2820' },
+    secondary: { bg: 'transparent', color: C.text, border: `1px solid ${C.border}`, hoverBg: C.surfaceRaised },
+    gold: { bg: C.gold, color: '#fff', border: 'none', hoverBg: '#A87B2F' },
+    ghost: { bg: 'transparent', color: C.textSec, border: 'none', hoverBg: '#F0EDE8' },
+    danger: { bg: C.dangerLight, color: C.danger, border: `1px solid #F0CACA`, hoverBg: '#F5DADA' },
+  };
+  const v = variants[variant];
+  const s = sizes[size];
+  const [hov, setHov] = useState(false);
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      onMouseEnter={() => setHov(true)}
+      onMouseLeave={() => setHov(false)}
+      style={{
+        display: 'inline-flex', alignItems: 'center', gap: 6,
+        borderRadius: 7, fontWeight: 500, lineHeight: 1,
+        background: disabled ? '#E8E3D9' : (hov ? v.hoverBg : v.bg),
+        color: disabled ? C.textTer : v.color,
+        border: v.border || 'none',
+        cursor: disabled ? 'not-allowed' : 'pointer',
+        transition: 'all 0.12s ease',
+        ...s, ...style,
+      }}
+    >
+      {icon && <Icon name={icon} size={15} />}
+      {children}
+    </button>
+  );
+}
+
+function Input({ value, onChange, placeholder, type = 'text', icon, style = {} }) {
+  const [focus, setFocus] = useState(false);
+  return (
+    <div style={{ position: 'relative' }}>
+      {icon && (
+        <span style={{ position: 'absolute', left: 11, top: '50%', transform: 'translateY(-50%)', color: focus ? C.gold : C.textTer, transition: 'color 0.15s' }}>
+          <Icon name={icon} size={17} />
+        </span>
+      )}
+      <input
+        type={type}
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        onFocus={() => setFocus(true)}
+        onBlur={() => setFocus(false)}
+        style={{
+          width: '100%', height: 38, padding: icon ? '0 12px 0 36px' : '0 12px',
+          border: `1px solid ${focus ? C.goldMuted : C.border}`,
+          borderRadius: 7, fontSize: 14, background: C.surface,
+          color: C.text, outline: 'none', transition: 'border 0.15s',
+          boxShadow: focus ? `0 0 0 3px ${C.goldLight}` : 'none',
+          ...style,
+        }}
+      />
+    </div>
+  );
+}
+
+function Card({ children, style = {}, padding = 20, onClick }) {
+  const [hov, setHov] = useState(false);
+  return (
+    <div
+      onClick={onClick}
+      onMouseEnter={() => onClick && setHov(true)}
+      onMouseLeave={() => onClick && setHov(false)}
+      style={{
+        background: C.surface,
+        border: `1px solid ${hov ? C.borderStrong : C.border}`,
+        borderRadius: 10,
+        padding,
+        transition: 'border 0.15s, box-shadow 0.15s',
+        boxShadow: hov ? '0 2px 12px rgba(0,0,0,0.07)' : '0 1px 3px rgba(0,0,0,0.04)',
+        cursor: onClick ? 'pointer' : 'default',
+        ...style,
+      }}
+    >{children}</div>
+  );
+}
+
+function EmptyState({ icon, title, sub, action }) {
+  return (
+    <div style={{ textAlign: 'center', padding: '64px 24px' }}>
+      <div style={{ width: 48, height: 48, borderRadius: '50%', background: '#F0EDE8', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+        <Icon name={icon} size={22} style={{ color: C.textTer }} />
+      </div>
+      <p style={{ fontSize: 15, fontWeight: 500, color: C.text, marginBottom: 4 }}>{title}</p>
+      <p style={{ fontSize: 13, color: C.textSec, marginBottom: action ? 20 : 0 }}>{sub}</p>
+      {action}
+    </div>
+  );
+}
+
+/* ─── SIDEBAR ──────────────────────────────────────────────────── */
+const NAV = [
+  { icon: 'space_dashboard', label: 'Dashboard',     page: 'dashboard' },
+  { icon: 'group',           label: 'Participantes', page: 'participantes' },
+  { icon: 'assignment',      label: 'Inscrições',    page: 'inscricoes' },
+  { icon: 'bed',             label: 'Acomodações',   page: 'acomodacoes' },
+  { icon: 'account_balance_wallet', label: 'Financeiro', page: 'financeiro' },
+];
+
+function Sidebar({ page, setPage }) {
+  const [expanded, setExpanded] = useState(false);
+  const w = expanded ? 220 : 56;
+
+  return (
+    <aside style={{
+      width: w, flexShrink: 0,
+      background: C.surface,
+      borderRight: `1px solid ${C.border}`,
+      display: 'flex', flexDirection: 'column',
+      transition: 'width 0.22s cubic-bezier(0.4,0,0.2,1)',
+      overflow: 'hidden', position: 'relative', zIndex: 10,
+    }}>
+      {/* Logo */}
+      <div style={{ height: 56, display: 'flex', alignItems: 'center', padding: '0 14px', gap: 12, flexShrink: 0, borderBottom: `1px solid ${C.border}` }}>
+        <div style={{
+          width: 28, height: 28, borderRadius: 7, background: C.text,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+        }}>
+          <Icon name="diversity_3" size={16} style={{ color: '#fff' }} />
+        </div>
+        {expanded && (
+          <div style={{ overflow: 'hidden', whiteSpace: 'nowrap' }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: C.text, lineHeight: 1.2 }}>Koinonia</div>
+            <div style={{ fontSize: 10, color: C.textTer, letterSpacing: '0.08em', textTransform: 'uppercase', marginTop: 1 }}>Gestão de Retiros</div>
+          </div>
+        )}
+      </div>
+
+      {/* Nav */}
+      <nav style={{ flex: 1, padding: '8px 6px', display: 'flex', flexDirection: 'column', gap: 2 }}>
+        {NAV.map(item => {
+          const active = page === item.page;
+          return (
+            <button
+              key={item.page}
+              onClick={() => setPage(item.page)}
+              title={!expanded ? item.label : undefined}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 10,
+                padding: '8px 10px', borderRadius: 7,
+                background: active ? C.goldLight : 'transparent',
+                color: active ? C.gold : C.textSec,
+                fontWeight: active ? 600 : 400,
+                fontSize: 13.5,
+                transition: 'all 0.12s',
+                whiteSpace: 'nowrap',
+                border: 'none', cursor: 'pointer',
+                borderLeft: active ? `2px solid ${C.gold}` : '2px solid transparent',
+              }}
+              onMouseEnter={e => { if (!active) { e.currentTarget.style.background = '#F7F4EF'; e.currentTarget.style.color = C.text; } }}
+              onMouseLeave={e => { if (!active) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = C.textSec; } }}
+            >
+              <Icon name={item.icon} size={19} fill={active} style={{ flexShrink: 0 }} />
+              {expanded && item.label}
+            </button>
+          );
+        })}
+      </nav>
+
+      {/* User + toggle */}
+      <div style={{ padding: '8px 6px', borderTop: `1px solid ${C.border}`, display: 'flex', flexDirection: 'column', gap: 4 }}>
+        <button
+          onClick={() => setExpanded(!expanded)}
+          title={expanded ? 'Colapsar menu' : 'Expandir menu'}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px',
+            borderRadius: 7, background: 'transparent', color: C.textTer,
+            fontSize: 13, border: 'none', cursor: 'pointer', whiteSpace: 'nowrap',
+            transition: 'all 0.12s',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.background = '#F7F4EF'; e.currentTarget.style.color = C.textSec; }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = C.textTer; }}
+        >
+          <Icon name={expanded ? 'chevron_left' : 'chevron_right'} size={19} style={{ flexShrink: 0 }} />
+          {expanded && 'Colapsar'}
+        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '6px 10px' }}>
+          <div style={{ width: 28, height: 28, borderRadius: '50%', background: C.goldLight, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <span style={{ fontSize: 12, fontWeight: 700, color: C.gold }}>A</span>
+          </div>
+          {expanded && (
+            <div style={{ overflow: 'hidden' }}>
+              <div style={{ fontSize: 13, fontWeight: 500, color: C.text, lineHeight: 1.3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Admin</div>
+              <div style={{ fontSize: 11, color: C.textTer, whiteSpace: 'nowrap' }}>admin@retiro.com</div>
+            </div>
+          )}
+        </div>
+      </div>
+    </aside>
+  );
+}
+
+/* ─── APP SHELL ─────────────────────────────────────────────────── */
+function AppShell({ page, setPage, title, actions, children }) {
+  return (
+    <div style={{ display: 'flex', height: '100vh', background: C.bg, overflow: 'hidden' }}>
+      <Sidebar page={page} setPage={setPage} />
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        {/* Header */}
+        <header style={{
+          height: 56, flexShrink: 0,
+          background: C.surface,
+          borderBottom: `1px solid ${C.border}`,
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          padding: '0 28px',
+        }}>
+          <h1 style={{ fontSize: 16, fontWeight: 600, color: C.text, letterSpacing: '-0.01em' }}>{title}</h1>
+          <div style={{ display: 'flex', gap: 8 }}>{actions}</div>
+        </header>
+        {/* Content */}
+        <main style={{ flex: 1, overflow: 'auto', padding: 28 }}>
+          {children}
+        </main>
+      </div>
+    </div>
+  );
+}
+
+/* ─── LOGIN PAGE ────────────────────────────────────────────────── */
+function LoginPage({ onLogin }) {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPass, setShowPass] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const submit = (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setTimeout(() => { setLoading(false); onLogin(); }, 900);
+  };
+
+  return (
+    <div style={{
+      minHeight: '100vh', background: C.bg,
+      display: 'flex', alignItems: 'stretch',
+    }}>
+      {/* Left panel */}
+      <div style={{
+        flex: 1, display: 'flex', flexDirection: 'column',
+        justifyContent: 'space-between', padding: '40px 48px',
+        background: C.surface, borderRight: `1px solid ${C.border}`,
+        minWidth: 0,
+      }}>
+        {/* Logo */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ width: 32, height: 32, borderRadius: 8, background: C.text, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Icon name="diversity_3" size={18} style={{ color: '#fff' }} />
+          </div>
+          <span style={{ fontSize: 17, fontWeight: 700, color: C.text }}>Koinonia</span>
+        </div>
+
+        {/* Center message */}
+        <div style={{ maxWidth: 380 }}>
+          <div style={{ width: 40, height: 2, background: C.gold, marginBottom: 32 }} />
+          <h2 style={{ fontSize: 36, fontWeight: 300, color: C.text, lineHeight: 1.2, marginBottom: 20, letterSpacing: '-0.02em' }}>
+            Gestão que libera<br />
+            <em style={{ fontStyle: 'italic', fontWeight: 400 }}>para o essencial.</em>
+          </h2>
+          <p style={{ fontSize: 15, color: C.textSec, lineHeight: 1.7, maxWidth: 320 }}>
+            Organize inscrições, acomodações e finanças do seu retiro — para que sua atenção fique onde importa.
+          </p>
+        </div>
+
+        {/* Bottom note */}
+        <p style={{ fontSize: 12, color: C.textTer }}>Sistema open-source para igrejas e ministérios</p>
+      </div>
+
+      {/* Right panel — form */}
+      <div style={{
+        width: 440, flexShrink: 0,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: '40px 48px',
+      }}>
+        <div style={{ width: '100%' }}>
+          <p style={{ fontSize: 12, color: C.textTer, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 12 }}>Acesso ao painel</p>
+          <h3 style={{ fontSize: 22, fontWeight: 600, color: C.text, marginBottom: 32, letterSpacing: '-0.02em' }}>Bem-vindo de volta</h3>
+
+          <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div>
+              <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: C.textSec, marginBottom: 6 }}>E-mail</label>
+              <Input value={email} onChange={e => setEmail(e.target.value)} placeholder="seu@email.com" icon="mail" type="email" />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: C.textSec, marginBottom: 6 }}>Senha</label>
+              <div style={{ position: 'relative' }}>
+                <Input value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" icon="lock" type={showPass ? 'text' : 'password'} />
+                <button type="button" onClick={() => setShowPass(!showPass)} style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: C.textTer, display: 'flex' }}>
+                  <Icon name={showPass ? 'visibility_off' : 'visibility'} size={17} />
+                </button>
+              </div>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <button type="button" style={{ fontSize: 13, color: C.gold, background: 'none', border: 'none', cursor: 'pointer' }}>Esqueceu a senha?</button>
+            </div>
+            <button
+              type="submit"
+              disabled={loading}
+              style={{
+                height: 42, borderRadius: 7, background: C.text,
+                color: '#fff', fontWeight: 600, fontSize: 14,
+                border: 'none', cursor: loading ? 'not-allowed' : 'pointer',
+                opacity: loading ? 0.7 : 1, transition: 'opacity 0.15s',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                marginTop: 8,
+              }}
+            >
+              {loading ? <><Icon name="progress_activity" size={16} style={{ animation: 'spin 0.8s linear infinite' }} />Entrando...</> : 'Entrar no painel'}
+            </button>
+          </form>
+
+          <div style={{ marginTop: 28, paddingTop: 24, borderTop: `1px solid ${C.border}`, textAlign: 'center' }}>
+            <span style={{ fontSize: 13, color: C.textSec }}>Ainda não tem acesso? </span>
+            <button style={{ fontSize: 13, color: C.gold, fontWeight: 500, background: 'none', border: 'none', cursor: 'pointer' }}>Solicitar conta</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─── DASHBOARD ─────────────────────────────────────────────────── */
+function fmt(n) { return n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
+
+const METRICS = [
+  { label: 'Participantes', value: '84', sub: '+6 esta semana', icon: 'group', color: C.info, colorLight: C.infoLight },
+  { label: 'Inscrições', value: '78', sub: '6 inadimplentes', icon: 'assignment', color: C.gold, colorLight: C.goldLight },
+  { label: 'Acomodações', value: '62 / 90', sub: '28 vagas livres', icon: 'bed', color: C.success, colorLight: C.successLight },
+  { label: 'Arrecadado', value: 'R$ 23.400', sub: '68% da meta', icon: 'account_balance_wallet', color: C.warning, colorLight: C.warningLight },
+];
+
+const RECENT = [
+  { nome: 'Ana Carolina Ferreira', papel: 'Encontrista', status: 'PAGO_TOTAL', valor: 380 },
+  { nome: 'Bruno Henrique Santos', papel: 'Servo', status: 'PAGO_PARCIAL', valor: 200 },
+  { nome: 'Camila Dias Oliveira', papel: 'Encontrista', status: 'PENDENTE', valor: 0 },
+  { nome: 'Daniel Rocha Lima', papel: 'Servo', status: 'PAGO_TOTAL', valor: 280 },
+  { nome: 'Fernanda Mota Costa', papel: 'Encontrista', status: 'LISTA_ESPERA', valor: 0 },
+];
+
+const STATUS_MAP = {
+  PAGO_TOTAL:   { label: 'Pago', color: 'success' },
+  PAGO_PARCIAL: { label: 'Parcial', color: 'warning' },
+  PENDENTE:     { label: 'Pendente', color: 'danger' },
+  LISTA_ESPERA: { label: 'Espera', color: 'neutral' },
+  CANCELADA:    { label: 'Cancelada', color: 'danger' },
+};
+
+function DashboardPage({ setPage }) {
+  return (
+    <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+      {/* Event banner */}
+      <Card style={{ marginBottom: 24, padding: 0, overflow: 'hidden' }}>
+        <div style={{
+          padding: '28px 32px',
+          borderLeft: `3px solid ${C.gold}`,
+          display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 24,
+        }}>
+          <div>
+            <p style={{ fontSize: 11, fontWeight: 600, color: C.gold, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 6 }}>Evento em andamento</p>
+            <h2 style={{ fontSize: 22, fontWeight: 600, color: C.text, letterSpacing: '-0.02em', marginBottom: 4 }}>Retiro Koinonia 2025</h2>
+            <p style={{ fontSize: 13, color: C.textSec }}>Chácara Paz e Amor · Juiz de Fora, MG · 18–20 jan 2025</p>
+          </div>
+          <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+            <Btn variant="secondary" size="sm" onClick={() => setPage('acomodacoes')} icon="bed">Mapa</Btn>
+            <Btn variant="primary" size="sm" onClick={() => setPage('inscricoes')} icon="assignment">Inscrições</Btn>
+          </div>
+        </div>
+        {/* Progress bar */}
+        <div style={{ height: 3, background: '#F0EDE8', position: 'relative' }}>
+          <div style={{ position: 'absolute', left: 0, top: 0, height: '100%', width: '68%', background: C.gold, borderRadius: '0 99px 99px 0' }} />
+        </div>
+        <div style={{ padding: '8px 32px', display: 'flex', justifyContent: 'flex-end' }}>
+          <span style={{ fontSize: 11, color: C.textTer }}>68% da meta financeira atingida</span>
+        </div>
+      </Card>
+
+      {/* Metrics */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14, marginBottom: 24 }}>
+        {METRICS.map(m => (
+          <Card key={m.label} style={{ padding: 20 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+              <div style={{ width: 36, height: 36, borderRadius: 8, background: m.colorLight, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Icon name={m.icon} size={18} style={{ color: m.color }} />
+              </div>
+            </div>
+            <div style={{ fontSize: 24, fontWeight: 600, color: C.text, letterSpacing: '-0.02em', lineHeight: 1, marginBottom: 4 }}>{m.value}</div>
+            <div style={{ fontSize: 12, color: C.textSec, marginBottom: 2 }}>{m.label}</div>
+            <div style={{ fontSize: 11, color: C.textTer }}>{m.sub}</div>
+          </Card>
+        ))}
+      </div>
+
+      {/* Bottom row */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: 14 }}>
+        {/* Recent activity */}
+        <Card>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
+            <h3 style={{ fontSize: 14, fontWeight: 600, color: C.text }}>Inscrições recentes</h3>
+            <button onClick={() => setPage('inscricoes')} style={{ fontSize: 12, color: C.gold, background: 'none', border: 'none', cursor: 'pointer', fontWeight: 500 }}>Ver todas</button>
+          </div>
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr>
+                {['Participante', 'Papel', 'Status', 'Valor'].map(h => (
+                  <th key={h} style={{ fontSize: 11, fontWeight: 500, color: C.textTer, textAlign: 'left', paddingBottom: 10, letterSpacing: '0.04em', textTransform: 'uppercase', borderBottom: `1px solid ${C.border}` }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {RECENT.map((r, i) => {
+                const st = STATUS_MAP[r.status];
+                return (
+                  <tr key={i}>
+                    <td style={{ padding: '11px 0', borderBottom: i < RECENT.length-1 ? `1px solid ${C.border}` : 'none' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+                        <div style={{ width: 28, height: 28, borderRadius: '50%', background: C.goldLight, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                          <span style={{ fontSize: 11, fontWeight: 700, color: C.gold }}>{r.nome[0]}</span>
+                        </div>
+                        <span style={{ fontSize: 13, color: C.text, fontWeight: 500 }}>{r.nome}</span>
+                      </div>
+                    </td>
+                    <td style={{ padding: '11px 8px', borderBottom: i < RECENT.length-1 ? `1px solid ${C.border}` : 'none', fontSize: 12, color: C.textSec }}>{r.papel}</td>
+                    <td style={{ padding: '11px 8px', borderBottom: i < RECENT.length-1 ? `1px solid ${C.border}` : 'none' }}>
+                      <Badge color={st.color}>{st.label}</Badge>
+                    </td>
+                    <td style={{ padding: '11px 0', borderBottom: i < RECENT.length-1 ? `1px solid ${C.border}` : 'none', fontSize: 13, color: r.valor ? C.text : C.textTer, textAlign: 'right' }}>{r.valor ? fmt(r.valor) : '—'}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </Card>
+
+        {/* Quick access */}
+        <Card>
+          <h3 style={{ fontSize: 14, fontWeight: 600, color: C.text, marginBottom: 14 }}>Acesso rápido</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            {NAV.slice(1).map(item => (
+              <button
+                key={item.page}
+                onClick={() => setPage(item.page)}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 10,
+                  padding: '10px 12px', borderRadius: 7,
+                  background: 'transparent', border: `1px solid ${C.border}`,
+                  color: C.text, fontSize: 13, fontWeight: 500,
+                  cursor: 'pointer', transition: 'all 0.12s', textAlign: 'left',
+                }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = C.goldMuted; e.currentTarget.style.background = C.goldLight; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.background = 'transparent'; }}
+              >
+                <Icon name={item.icon} size={16} style={{ color: C.textSec }} />
+                {item.label}
+                <Icon name="chevron_right" size={15} style={{ color: C.textTer, marginLeft: 'auto' }} />
+              </button>
+            ))}
+          </div>
+        </Card>
+      </div>
+    </div>
+  );
+}
+
+/* ─── PARTICIPANTES ─────────────────────────────────────────────── */
+const PARTICIPANTES = [
+  { id: 1, nome: 'Ana Carolina Ferreira', genero: 'F', papel: 'encontrista', email: 'ana@email.com', telefone: '(32) 99876-5432', alergias: null, condicoes_medicas: 'Hipertensão' },
+  { id: 2, nome: 'Bruno Henrique Santos', genero: 'M', papel: 'servo', email: 'bruno@email.com', telefone: '(32) 99123-4567', alergias: 'Frutos do mar', condicoes_medicas: null },
+  { id: 3, nome: 'Camila Dias Oliveira', genero: 'F', papel: 'encontrista', email: 'camila@email.com', telefone: '(32) 98765-4321', alergias: null, condicoes_medicas: null },
+  { id: 4, nome: 'Daniel Rocha Lima', genero: 'M', papel: 'servo', email: 'daniel@email.com', telefone: '(32) 97654-3210', alergias: null, condicoes_medicas: null },
+  { id: 5, nome: 'Fernanda Mota Costa', genero: 'F', papel: 'encontrista', email: 'fernanda@email.com', telefone: null, alergias: 'Glúten', condicoes_medicas: null },
+  { id: 6, nome: 'Gabriel Silva Nunes', genero: 'M', papel: 'encontrista', email: 'gabriel@email.com', telefone: '(32) 96543-2109', alergias: null, condicoes_medicas: null },
+  { id: 7, nome: 'Helena Costa Barbosa', genero: 'F', papel: 'servo', email: 'helena@email.com', telefone: '(32) 95432-1098', alergias: null, condicoes_medicas: null },
+  { id: 8, nome: 'Igor Mendes Pereira', genero: 'M', papel: 'encontrista', email: 'igor@email.com', telefone: '(21) 94321-0987', alergias: null, condicoes_medicas: 'Diabetes tipo 2' },
+];
+
+function ParticipantesPage() {
+  const [search, setSearch] = useState('');
+  const [filter, setFilter] = useState('todos');
+
+  const FILTERS = [
+    { key: 'todos', label: 'Todos' },
+    { key: 'encontrista', label: 'Encontristas' },
+    { key: 'servo', label: 'Servos' },
+    { key: 'M', label: 'Masculino' },
+    { key: 'F', label: 'Feminino' },
+  ];
+
+  const filtered = PARTICIPANTES.filter(p => {
+    if (search && !p.nome.toLowerCase().includes(search.toLowerCase())) return false;
+    if (filter === 'encontrista' && p.papel !== 'encontrista') return false;
+    if (filter === 'servo' && p.papel !== 'servo') return false;
+    if (filter === 'M' && p.genero !== 'M') return false;
+    if (filter === 'F' && p.genero !== 'F') return false;
+    return true;
+  });
+
+  const hasRestriction = p => !!(p.alergias || p.condicoes_medicas);
+
+  return (
+    <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+      {/* Toolbar */}
+      <div style={{ display: 'flex', gap: 12, marginBottom: 20, alignItems: 'center' }}>
+        <div style={{ flex: 1, maxWidth: 340 }}>
+          <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar por nome…" icon="search" />
+        </div>
+        <div style={{ display: 'flex', gap: 4, padding: '3px', background: C.surface, border: `1px solid ${C.border}`, borderRadius: 8 }}>
+          {FILTERS.map(f => (
+            <button
+              key={f.key}
+              onClick={() => setFilter(f.key)}
+              style={{
+                padding: '5px 12px', borderRadius: 6, fontSize: 12.5, fontWeight: filter === f.key ? 600 : 400,
+                background: filter === f.key ? C.text : 'transparent',
+                color: filter === f.key ? '#fff' : C.textSec,
+                border: 'none', cursor: 'pointer', transition: 'all 0.12s',
+              }}
+            >{f.label}</button>
+          ))}
+        </div>
+        <div style={{ marginLeft: 'auto' }}>
+          <Btn variant="primary" icon="person_add">Novo participante</Btn>
+        </div>
+      </div>
+
+      {/* Count */}
+      <p style={{ fontSize: 12, color: C.textTer, marginBottom: 14 }}>{filtered.length} participante{filtered.length !== 1 ? 's' : ''}</p>
+
+      {/* Table */}
+      <Card style={{ padding: 0, overflow: 'hidden' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <thead>
+            <tr style={{ background: C.surfaceRaised }}>
+              {['Participante', 'Gênero', 'Papel', 'Contato', 'Restrições', ''].map(h => (
+                <th key={h} style={{ padding: '10px 16px', fontSize: 11, fontWeight: 500, color: C.textTer, textAlign: 'left', borderBottom: `1px solid ${C.border}`, letterSpacing: '0.05em', textTransform: 'uppercase' }}>{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.map((p, i) => (
+              <tr
+                key={p.id}
+                style={{ borderBottom: i < filtered.length - 1 ? `1px solid ${C.border}` : 'none', transition: 'background 0.1s' }}
+                onMouseEnter={e => e.currentTarget.style.background = C.surfaceRaised}
+                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+              >
+                <td style={{ padding: '13px 16px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <div style={{ width: 32, height: 32, borderRadius: '50%', background: p.genero === 'F' ? '#F5ECD9' : C.infoLight, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <span style={{ fontSize: 13, fontWeight: 700, color: p.genero === 'F' ? C.gold : C.info }}>{p.nome[0]}</span>
+                    </div>
+                    <span style={{ fontSize: 14, fontWeight: 500, color: C.text }}>{p.nome}</span>
+                  </div>
+                </td>
+                <td style={{ padding: '13px 16px', fontSize: 13, color: C.textSec }}>{p.genero === 'M' ? 'Masculino' : 'Feminino'}</td>
+                <td style={{ padding: '13px 16px' }}>
+                  <Badge color={p.papel === 'encontrista' ? 'gold' : 'neutral'}>
+                    {p.papel === 'encontrista' ? 'Encontrista' : 'Servo'}
+                  </Badge>
+                </td>
+                <td style={{ padding: '13px 16px', fontSize: 12, color: C.textSec }}>{p.telefone || <span style={{ color: C.textTer }}>—</span>}</td>
+                <td style={{ padding: '13px 16px' }}>
+                  {hasRestriction(p) ? (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 5, color: C.warning }}>
+                      <Icon name="warning" size={14} />
+                      <span style={{ fontSize: 12 }}>{p.alergias || p.condicoes_medicas}</span>
+                    </div>
+                  ) : <span style={{ fontSize: 12, color: C.textTer }}>—</span>}
+                </td>
+                <td style={{ padding: '13px 16px', textAlign: 'right' }}>
+                  <button style={{ fontSize: 12, color: C.gold, background: 'none', border: 'none', cursor: 'pointer', fontWeight: 500 }}>Ver ficha</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </Card>
+    </div>
+  );
+}
+
+/* ─── INSCRIÇÕES ───────────────────────────────────────────────── */
+const INSCRICOES = [
+  { id: 1, nome: 'Ana Carolina Ferreira', papel: 'encontrista', status: 'PAGO_TOTAL', valor_total: 380, valor_pago: 380, genero: 'F' },
+  { id: 2, nome: 'Bruno Henrique Santos', papel: 'servo', status: 'PAGO_PARCIAL', valor_total: 280, valor_pago: 140, genero: 'M' },
+  { id: 3, nome: 'Camila Dias Oliveira', papel: 'encontrista', status: 'PENDENTE', valor_total: 380, valor_pago: 0, genero: 'F' },
+  { id: 4, nome: 'Daniel Rocha Lima', papel: 'servo', status: 'PAGO_TOTAL', valor_total: 280, valor_pago: 280, genero: 'M' },
+  { id: 5, nome: 'Fernanda Mota Costa', papel: 'encontrista', status: 'LISTA_ESPERA', valor_total: 380, valor_pago: 0, genero: 'F' },
+  { id: 6, nome: 'Gabriel Silva Nunes', papel: 'encontrista', status: 'PAGO_TOTAL', valor_total: 380, valor_pago: 380, genero: 'M' },
+  { id: 7, nome: 'Helena Costa Barbosa', papel: 'servo', status: 'PAGO_TOTAL', valor_total: 280, valor_pago: 280, genero: 'F' },
+  { id: 8, nome: 'Igor Mendes Pereira', papel: 'encontrista', status: 'PAGO_PARCIAL', valor_total: 380, valor_pago: 200, genero: 'M' },
+];
+
+function InscricoesPage() {
+  const [statusF, setStatusF] = useState('todos');
+  const [papelF, setPapelF] = useState('todos');
+  const [search, setSearch] = useState('');
+
+  const total = INSCRICOES.length;
+  const inadimplentes = INSCRICOES.filter(i => i.status === 'PENDENTE' || i.status === 'PAGO_PARCIAL').length;
+  const pagos = INSCRICOES.filter(i => i.status === 'PAGO_TOTAL').length;
+  const arrecadado = INSCRICOES.reduce((s, i) => s + i.valor_pago, 0);
+
+  const filtered = INSCRICOES.filter(i => {
+    if (search && !i.nome.toLowerCase().includes(search.toLowerCase())) return false;
+    if (statusF === 'inadimplentes' && i.status !== 'PENDENTE' && i.status !== 'PAGO_PARCIAL') return false;
+    if (papelF !== 'todos' && i.papel !== papelF) return false;
+    return true;
+  });
+
+  const SMETRICS = [
+    { label: 'Total inscritos', value: total, icon: 'group', color: C.info, colorLight: C.infoLight },
+    { label: 'Inadimplentes', value: inadimplentes, icon: 'warning', color: C.danger, colorLight: C.dangerLight },
+    { label: 'Pagamento total', value: pagos, icon: 'check_circle', color: C.success, colorLight: C.successLight },
+    { label: 'Arrecadado', value: fmt(arrecadado), icon: 'payments', color: C.gold, colorLight: C.goldLight },
+  ];
+
+  const SFILTERS = [
+    { key: 'todos', label: 'Todos os status' },
+    { key: 'inadimplentes', label: 'Inadimplentes' },
+  ];
+  const PFILTERS = [
+    { key: 'todos', label: 'Todos' },
+    { key: 'encontrista', label: 'Encontristas' },
+    { key: 'servo', label: 'Servos' },
+  ];
+
+  return (
+    <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+      {/* Metrics row */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14, marginBottom: 24 }}>
+        {SMETRICS.map(m => (
+          <Card key={m.label} style={{ padding: '16px 20px', display: 'flex', alignItems: 'center', gap: 14 }}>
+            <div style={{ width: 38, height: 38, borderRadius: 9, background: m.colorLight, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <Icon name={m.icon} size={18} style={{ color: m.color }} />
+            </div>
+            <div>
+              <div style={{ fontSize: 20, fontWeight: 600, color: C.text, lineHeight: 1, letterSpacing: '-0.02em' }}>{m.value}</div>
+              <div style={{ fontSize: 11, color: C.textSec, marginTop: 2 }}>{m.label}</div>
+            </div>
+          </Card>
+        ))}
+      </div>
+
+      {/* Filters + search */}
+      <div style={{ display: 'flex', gap: 10, marginBottom: 16, alignItems: 'center', flexWrap: 'wrap' }}>
+        <div style={{ flex: 1, minWidth: 200, maxWidth: 300 }}>
+          <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar por nome…" icon="search" />
+        </div>
+        <div style={{ display: 'flex', gap: 4, padding: '3px', background: C.surface, border: `1px solid ${C.border}`, borderRadius: 8 }}>
+          {SFILTERS.map(f => (
+            <button key={f.key} onClick={() => setStatusF(f.key)} style={{ padding: '5px 12px', borderRadius: 6, fontSize: 12.5, fontWeight: statusF === f.key ? 600 : 400, background: statusF === f.key ? C.text : 'transparent', color: statusF === f.key ? '#fff' : C.textSec, border: 'none', cursor: 'pointer', transition: 'all 0.12s' }}>{f.label}</button>
+          ))}
+        </div>
+        <div style={{ display: 'flex', gap: 4, padding: '3px', background: C.surface, border: `1px solid ${C.border}`, borderRadius: 8 }}>
+          {PFILTERS.map(f => (
+            <button key={f.key} onClick={() => setPapelF(f.key)} style={{ padding: '5px 12px', borderRadius: 6, fontSize: 12.5, fontWeight: papelF === f.key ? 600 : 400, background: papelF === f.key ? C.text : 'transparent', color: papelF === f.key ? '#fff' : C.textSec, border: 'none', cursor: 'pointer', transition: 'all 0.12s' }}>{f.label}</button>
+          ))}
+        </div>
+        <div style={{ marginLeft: 'auto' }}>
+          <Btn variant="primary" icon="person_add">Nova inscrição</Btn>
+        </div>
+      </div>
+
+      {/* Table */}
+      <Card style={{ padding: 0, overflow: 'hidden' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <thead>
+            <tr style={{ background: C.surfaceRaised }}>
+              {['Participante', 'Papel', 'Status', 'Valor total', 'Pago', 'Débito', ''].map(h => (
+                <th key={h} style={{ padding: '10px 16px', fontSize: 11, fontWeight: 500, color: C.textTer, textAlign: h === 'Valor total' || h === 'Pago' || h === 'Débito' ? 'right' : 'left', borderBottom: `1px solid ${C.border}`, letterSpacing: '0.05em', textTransform: 'uppercase' }}>{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.map((i, idx) => {
+              const st = STATUS_MAP[i.status];
+              const debito = i.valor_total - i.valor_pago;
+              return (
+                <tr key={i.id} style={{ borderBottom: idx < filtered.length - 1 ? `1px solid ${C.border}` : 'none', transition: 'background 0.1s' }}
+                  onMouseEnter={e => e.currentTarget.style.background = C.surfaceRaised}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                  <td style={{ padding: '12px 16px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+                      <div style={{ width: 30, height: 30, borderRadius: '50%', background: i.genero === 'F' ? C.goldLight : C.infoLight, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <span style={{ fontSize: 12, fontWeight: 700, color: i.genero === 'F' ? C.gold : C.info }}>{i.nome[0]}</span>
+                      </div>
+                      <span style={{ fontSize: 14, fontWeight: 500, color: C.text }}>{i.nome}</span>
+                    </div>
+                  </td>
+                  <td style={{ padding: '12px 16px', fontSize: 12, color: C.textSec }}>{i.papel === 'encontrista' ? 'Encontrista' : 'Servo'}</td>
+                  <td style={{ padding: '12px 16px' }}><Badge color={st.color}>{st.label}</Badge></td>
+                  <td style={{ padding: '12px 16px', fontSize: 13, color: C.text, textAlign: 'right' }}>{fmt(i.valor_total)}</td>
+                  <td style={{ padding: '12px 16px', fontSize: 13, color: i.valor_pago > 0 ? C.success : C.textTer, textAlign: 'right' }}>{i.valor_pago > 0 ? fmt(i.valor_pago) : '—'}</td>
+                  <td style={{ padding: '12px 16px', fontSize: 13, fontWeight: debito > 0 ? 500 : 400, color: debito > 0 ? C.danger : C.textTer, textAlign: 'right' }}>{debito > 0 ? fmt(debito) : '—'}</td>
+                  <td style={{ padding: '12px 16px', textAlign: 'right' }}>
+                    <button style={{ fontSize: 12, color: C.gold, background: 'none', border: 'none', cursor: 'pointer', fontWeight: 500 }}>Detalhar</button>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </Card>
+    </div>
+  );
+}
+
+/* ─── ACOMODAÇÕES ───────────────────────────────────────────────── */
+const QUARTOS = [
+  { id: 1, nome: 'Quarto 01', genero: 'F', camas: [
+    { id: 1, num: 1, ocupante: 'Ana Carolina F.' },
+    { id: 2, num: 2, ocupante: 'Camila Dias O.' },
+    { id: 3, num: 3, ocupante: null },
+    { id: 4, num: 4, ocupante: null },
+  ]},
+  { id: 2, nome: 'Quarto 02', genero: 'F', camas: [
+    { id: 5, num: 1, ocupante: 'Fernanda Mota C.' },
+    { id: 6, num: 2, ocupante: 'Helena Costa B.' },
+    { id: 7, num: 3, ocupante: null },
+    { id: 8, num: 4, ocupante: null },
+  ]},
+  { id: 3, nome: 'Quarto 03', genero: 'M', camas: [
+    { id: 9, num: 1, ocupante: 'Bruno H. Santos' },
+    { id: 10, num: 2, ocupante: 'Daniel Rocha L.' },
+    { id: 11, num: 3, ocupante: 'Gabriel Silva N.' },
+    { id: 12, num: 4, ocupante: null },
+  ]},
+  { id: 4, nome: 'Quarto 04', genero: 'M', camas: [
+    { id: 13, num: 1, ocupante: 'Igor Mendes P.' },
+    { id: 14, num: 2, ocupante: null },
+    { id: 15, num: 3, ocupante: null },
+    { id: 16, num: 4, ocupante: null },
+  ]},
+  { id: 5, nome: 'Quarto 05', genero: 'M', camas: [
+    { id: 17, num: 1, ocupante: null },
+    { id: 18, num: 2, ocupante: null },
+    { id: 19, num: 3, ocupante: null },
+    { id: 20, num: 4, ocupante: null },
+  ]},
+];
+
+function AcomodacoesPage() {
+  const [generoF, setGeneroF] = useState('todos');
+  const [tab, setTab] = useState('mapa');
+
+  const quartosFiltrados = QUARTOS.filter(q => generoF === 'todos' || q.genero === generoF);
+  const totalCamas = QUARTOS.flatMap(q => q.camas).length;
+  const ocupadas = QUARTOS.flatMap(q => q.camas).filter(c => c.ocupante).length;
+
+  return (
+    <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+      {/* Summary bar */}
+      <div style={{ display: 'flex', gap: 14, marginBottom: 24 }}>
+        <Card style={{ flex: 1, padding: '16px 20px', display: 'flex', alignItems: 'center', gap: 14 }}>
+          <div style={{ flex: 1 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+              <span style={{ fontSize: 13, fontWeight: 500, color: C.text }}>Ocupação geral</span>
+              <span style={{ fontSize: 13, fontWeight: 600, color: C.text }}>{ocupadas} / {totalCamas}</span>
+            </div>
+            <div style={{ height: 6, borderRadius: 99, background: '#F0EDE8', overflow: 'hidden' }}>
+              <div style={{ height: '100%', width: `${(ocupadas/totalCamas)*100}%`, background: C.gold, borderRadius: 99, transition: 'width 0.5s ease' }} />
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6 }}>
+              <span style={{ fontSize: 11, color: C.textTer }}>{totalCamas - ocupadas} vagas disponíveis</span>
+              <span style={{ fontSize: 11, color: C.gold }}>{Math.round((ocupadas/totalCamas)*100)}%</span>
+            </div>
+          </div>
+        </Card>
+        {[{label:'Quartos femininos', count: QUARTOS.filter(q=>q.genero==='F').length, icon:'female', color: C.gold, colorLight: C.goldLight},
+          {label:'Quartos masculinos', count: QUARTOS.filter(q=>q.genero==='M').length, icon:'male', color: C.info, colorLight: C.infoLight}].map(m=>(
+          <Card key={m.label} style={{ padding: '16px 20px', display: 'flex', alignItems: 'center', gap: 12, minWidth: 180 }}>
+            <div style={{ width: 36, height: 36, borderRadius: 8, background: m.colorLight, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Icon name={m.icon} size={18} style={{ color: m.color }} />
+            </div>
+            <div>
+              <div style={{ fontSize: 20, fontWeight: 600, color: C.text, lineHeight: 1 }}>{m.count}</div>
+              <div style={{ fontSize: 11, color: C.textSec, marginTop: 2 }}>{m.label}</div>
+            </div>
+          </Card>
+        ))}
+      </div>
+
+      {/* Tab + filters */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+        <div style={{ display: 'flex', gap: 0, borderBottom: `1px solid ${C.border}` }}>
+          {[{key:'mapa',label:'Mapa visual'},{key:'estrutura',label:'Estrutura'}].map(t => (
+            <button key={t.key} onClick={() => setTab(t.key)} style={{
+              padding: '8px 18px', fontSize: 13.5, fontWeight: tab===t.key ? 600 : 400,
+              color: tab===t.key ? C.text : C.textSec,
+              border: 'none', background: 'transparent', cursor: 'pointer',
+              borderBottom: tab===t.key ? `2px solid ${C.gold}` : '2px solid transparent',
+              marginBottom: -1, transition: 'all 0.12s',
+            }}>{t.label}</button>
+          ))}
+        </div>
+        {tab === 'mapa' && (
+          <div style={{ display: 'flex', gap: 4, padding: '3px', background: C.surface, border: `1px solid ${C.border}`, borderRadius: 8 }}>
+            {[{k:'todos',l:'Todos'},{k:'F',l:'Feminino'},{k:'M',l:'Masculino'}].map(f=>(
+              <button key={f.k} onClick={() => setGeneroF(f.k)} style={{ padding: '5px 12px', borderRadius: 6, fontSize: 12.5, fontWeight: generoF===f.k?600:400, background: generoF===f.k?C.text:'transparent', color: generoF===f.k?'#fff':C.textSec, border: 'none', cursor: 'pointer', transition: 'all 0.12s' }}>{f.l}</button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Grid */}
+      {tab === 'mapa' && (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 14 }}>
+          {quartosFiltrados.map(q => {
+            const ocupadasQ = q.camas.filter(c => c.ocupante).length;
+            const isF = q.genero === 'F';
+            return (
+              <Card key={q.id} style={{ padding: 16 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+                  <div>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: C.text }}>{q.nome}</div>
+                    <div style={{ fontSize: 11, color: isF ? C.gold : C.info, marginTop: 2, display: 'flex', alignItems: 'center', gap: 3 }}>
+                      <Icon name={isF ? 'female' : 'male'} size={13} />
+                      {isF ? 'Feminino' : 'Masculino'}
+                    </div>
+                  </div>
+                  <span style={{ fontSize: 11, color: C.textTer }}>{ocupadasQ}/{q.camas.length}</span>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  {q.camas.map(c => (
+                    <div key={c.id} style={{
+                      display: 'flex', alignItems: 'center', gap: 8,
+                      padding: '7px 10px', borderRadius: 6,
+                      background: c.ocupante ? (isF ? C.goldLight : C.infoLight) : '#F7F4EF',
+                      border: `1px solid ${c.ocupante ? (isF ? C.goldMuted : '#B8D4E8') : C.border}`,
+                    }}>
+                      <Icon name="bed" size={14} style={{ color: c.ocupante ? (isF ? C.gold : C.info) : C.textTer }} />
+                      <span style={{ fontSize: 12, color: c.ocupante ? C.text : C.textTer, flex: 1 }}>
+                        {c.ocupante || <em style={{ fontStyle: 'normal' }}>Livre</em>}
+                      </span>
+                      {!c.ocupante && <Icon name="add" size={14} style={{ color: C.textTer, cursor: 'pointer' }} />}
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            );
+          })}
+        </div>
+      )}
+
+      {tab === 'estrutura' && (
+        <EmptyState icon="apartment" title="Estrutura de acomodações" sub="Gerencie locais, quartos e camas do retiro nesta aba." />
+      )}
+    </div>
+  );
+}
+
+/* ─── FINANCEIRO ────────────────────────────────────────────────── */
+function FinanceiroPage() {
+  const totalPrevisto = 34200;
+  const totalArrecadado = 23400;
+  const totalDespesas = 8200;
+  const saldo = totalArrecadado - totalDespesas;
+  const pct = Math.round((totalArrecadado / totalPrevisto) * 100);
+
+  const DESPESAS = [
+    { cat: 'Alimentação', valor: 4800, pct: 58 },
+    { cat: 'Hospedagem', valor: 1800, pct: 22 },
+    { cat: 'Material', valor: 900, pct: 11 },
+    { cat: 'Transporte', valor: 400, pct: 5 },
+    { cat: 'Outros', valor: 300, pct: 4 },
+  ];
+
+  const PAGAMENTOS = [
+    { nome: 'Ana Carolina F.', data: '15/01', valor: 380, metodo: 'PIX' },
+    { nome: 'Daniel Rocha L.', data: '14/01', valor: 280, metodo: 'PIX' },
+    { nome: 'Gabriel Silva N.', data: '14/01', valor: 380, metodo: 'Transferência' },
+    { nome: 'Helena Costa B.', data: '13/01', valor: 280, metodo: 'PIX' },
+    { nome: 'Bruno H. Santos', data: '12/01', valor: 140, metodo: 'Dinheiro' },
+  ];
+
+  return (
+    <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+      {/* Top KPIs */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14, marginBottom: 24 }}>
+        {[
+          { label: 'Receita prevista', value: fmt(totalPrevisto), icon: 'trending_up', color: C.textSec, colorLight: '#F0EDE8' },
+          { label: 'Arrecadado', value: fmt(totalArrecadado), icon: 'payments', color: C.success, colorLight: C.successLight },
+          { label: 'Despesas', value: fmt(totalDespesas), icon: 'receipt_long', color: C.danger, colorLight: C.dangerLight },
+          { label: 'Saldo líquido', value: fmt(saldo), icon: 'account_balance', color: C.gold, colorLight: C.goldLight },
+        ].map(m => (
+          <Card key={m.label} style={{ padding: 20 }}>
+            <div style={{ width: 36, height: 36, borderRadius: 8, background: m.colorLight, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 14 }}>
+              <Icon name={m.icon} size={18} style={{ color: m.color }} />
+            </div>
+            <div style={{ fontSize: 20, fontWeight: 600, color: C.text, lineHeight: 1, letterSpacing: '-0.02em', marginBottom: 4 }}>{m.value}</div>
+            <div style={{ fontSize: 12, color: C.textSec }}>{m.label}</div>
+          </Card>
+        ))}
+      </div>
+
+      {/* Break-even */}
+      <Card style={{ marginBottom: 24, padding: '20px 24px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 14 }}>
+          <div>
+            <p style={{ fontSize: 13, fontWeight: 500, color: C.text, marginBottom: 2 }}>Progresso da meta financeira</p>
+            <p style={{ fontSize: 12, color: C.textSec }}>Break-even atingido quando chegar a 100%</p>
+          </div>
+          <span style={{ fontSize: 28, fontWeight: 700, color: C.gold, letterSpacing: '-0.03em' }}>{pct}%</span>
+        </div>
+        <div style={{ height: 8, borderRadius: 99, background: '#F0EDE8', overflow: 'hidden', marginBottom: 8 }}>
+          <div style={{ height: '100%', width: `${pct}%`, background: `linear-gradient(90deg, ${C.gold} 0%, #E0A844 100%)`, borderRadius: 99 }} />
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+          <span style={{ fontSize: 11, color: C.textTer }}>Arrecadado: {fmt(totalArrecadado)}</span>
+          <span style={{ fontSize: 11, color: C.textTer }}>Meta: {fmt(totalPrevisto)}</span>
+        </div>
+      </Card>
+
+      {/* Bottom row */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+        {/* Despesas */}
+        <Card>
+          <h3 style={{ fontSize: 14, fontWeight: 600, color: C.text, marginBottom: 16 }}>Despesas por categoria</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {DESPESAS.map(d => (
+              <div key={d.cat}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
+                  <span style={{ fontSize: 13, color: C.text }}>{d.cat}</span>
+                  <span style={{ fontSize: 13, fontWeight: 500, color: C.text }}>{fmt(d.valor)}</span>
+                </div>
+                <div style={{ height: 4, borderRadius: 99, background: '#F0EDE8', overflow: 'hidden' }}>
+                  <div style={{ height: '100%', width: `${d.pct}%`, background: C.gold, borderRadius: 99 }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+
+        {/* Últimos pagamentos */}
+        <Card>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+            <h3 style={{ fontSize: 14, fontWeight: 600, color: C.text }}>Últimos pagamentos</h3>
+            <Btn variant="secondary" size="sm" icon="add">Registrar</Btn>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+            {PAGAMENTOS.map((p, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 0', borderBottom: i < PAGAMENTOS.length - 1 ? `1px solid ${C.border}` : 'none' }}>
+                <div style={{ width: 30, height: 30, borderRadius: '50%', background: C.goldLight, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: C.gold }}>{p.nome[0]}</span>
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 13, fontWeight: 500, color: C.text, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.nome}</div>
+                  <div style={{ fontSize: 11, color: C.textTer }}>{p.data} · {p.metodo}</div>
+                </div>
+                <span style={{ fontSize: 13, fontWeight: 600, color: C.success, flexShrink: 0 }}>+{fmt(p.valor)}</span>
+              </div>
+            ))}
+          </div>
+        </Card>
+      </div>
+    </div>
+  );
+}
+
+/* ─── ROOT ──────────────────────────────────────────────────────── */
+const PAGE_TITLES = {
+  dashboard: 'Dashboard',
+  participantes: 'Participantes',
+  inscricoes: 'Inscrições',
+  acomodacoes: 'Gestão de Acomodações',
+  financeiro: 'Financeiro',
+};
+
+const PAGE_ACTIONS = {
+  participantes: (setPage) => <Btn variant="primary" icon="person_add">Novo participante</Btn>,
+  inscricoes: () => <Btn variant="primary" icon="person_add">Nova inscrição</Btn>,
+  financeiro: () => <Btn variant="secondary" icon="download">Exportar relatório</Btn>,
+  acomodacoes: () => <Btn variant="secondary" icon="picture_as_pdf">Exportar mapa PDF</Btn>,
+  dashboard: (setPage) => <Btn variant="primary" icon="add" onClick={() => setPage('inscricoes')}>Novo evento</Btn>,
+};
+
+function App() {
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [page, setPage] = useState('dashboard');
+
+  if (!loggedIn) return <LoginPage onLogin={() => setLoggedIn(true)} />;
+
+  const renderPage = () => {
+    switch (page) {
+      case 'dashboard': return <DashboardPage setPage={setPage} />;
+      case 'participantes': return <ParticipantesPage />;
+      case 'inscricoes': return <InscricoesPage />;
+      case 'acomodacoes': return <AcomodacoesPage />;
+      case 'financeiro': return <FinanceiroPage />;
+      default: return <DashboardPage setPage={setPage} />;
+    }
+  };
+
+  const actions = PAGE_ACTIONS[page] ? PAGE_ACTIONS[page](setPage) : null;
+
+  return (
+    <AppShell page={page} setPage={setPage} title={PAGE_TITLES[page]} actions={actions}>
+      {renderPage()}
+    </AppShell>
+  );
+}
+
+/* spin animation */
+const style = document.createElement('style');
+style.textContent = `@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`;
+document.head.appendChild(style);
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);
+</script>
+</body>
+</html>

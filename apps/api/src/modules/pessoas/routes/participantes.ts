@@ -73,6 +73,36 @@ export async function participanteRoutes(fastify: FastifyInstance) {
     }
   }, controller.getHistorico.bind(controller))
 
+  fastify.patch('/participantes/:id', {
+    ...requireLider,
+    schema: {
+      params: {
+        type: 'object',
+        required: ['id'],
+        properties: {
+          id: { type: 'string', format: 'uuid' }
+        }
+      },
+      body: {
+        type: 'object',
+        properties: {
+          nome: { type: 'string', minLength: 1, maxLength: 200 },
+          genero: { type: 'string', enum: ['M', 'F'] },
+          data_nascimento: { type: 'string', format: 'date' },
+          telefone: { type: 'string', maxLength: 20 },
+          email: { type: 'string', format: 'email', maxLength: 200 },
+          padrinho_id: { type: 'string', format: 'uuid' },
+          alergias: { type: 'string' },
+          restricoes_alimentares: { type: 'array', items: { type: 'string' } },
+          medicamentos: { type: 'string' },
+          condicoes_medicas: { type: 'string' },
+          contato_emergencia_nome: { type: 'string', maxLength: 200 },
+          contato_emergencia_tel: { type: 'string', maxLength: 20 }
+        }
+      }
+    }
+  }, controller.update.bind(controller))
+
   fastify.patch('/participantes/:id/saude', {
     ...requireLider,
     schema: {

@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { apiFetch } from '../lib/api'
-import type { Evento } from '@koinonia/shared'
+export { useEvento, useEventos } from './use-eventos'
+export type { EventoListItem } from '@koinonia/shared'
 
 // --------------- Types ---------------
 
@@ -22,16 +23,6 @@ export interface InscricaoListItem {
     telefone?: string
     email?: string
   }
-}
-
-export interface EventoListItem {
-  id: string
-  nome: string
-  status: string
-  data_inicio: string
-  data_fim: string
-  capacidade_maxima: number
-  local_id: string | null
 }
 
 export interface InadimplenteItem {
@@ -56,26 +47,16 @@ export const inscricoesKeys = {
   all: ['inscricoes'] as const,
   byEvento: (eventoId: string) => [...inscricoesKeys.all, 'evento', eventoId] as const,
   inadimplentes: (eventoId: string) => [...inscricoesKeys.all, 'inadimplentes', eventoId] as const,
-  eventos: () => ['eventos'] as const,
-  evento: (id: string) => ['eventos', id] as const,
 }
 
-// --------------- Eventos ---------------
+// --------------- Inscrições por Evento ---------------
 
-export function useEventos() {
+export function useInscricoes(eventoId: string) {
   return useQuery({
-    queryKey: inscricoesKeys.eventos(),
-    queryFn: () => apiFetch<EventoListItem[]>('/api/v1/eventos'),
-    staleTime: 1000 * 60 * 5,
-  })
-}
-
-export function useEvento(id: string) {
-  return useQuery({
-    queryKey: inscricoesKeys.evento(id),
-    queryFn: () => apiFetch<Evento>(`/api/v1/eventos/${id}`),
-    enabled: !!id,
-    staleTime: 1000 * 60 * 5,
+    queryKey: inscricoesKeys.byEvento(eventoId),
+    queryFn: () => apiFetch<InscricaoListItem[]>(`/api/v1/inscricoes?evento_id=${eventoId}`),
+    enabled: !!eventoId,
+    staleTime: 0,
   })
 }
 

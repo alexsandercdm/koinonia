@@ -1,0 +1,191 @@
+{
+  "report_metadata": {
+    "timestamp": "2026-04-24T07:00:00-03:00",
+    "repository_name": "koinonia",
+    "branch": "main",
+    "total_files_scanned": 77,
+    "total_issues": 16,
+    "tools_used": ["static-grep-analysis", "manual-code-review", "pattern-matching"],
+    "tools_failed": ["ESLint (classifier unavailable)", "TypeScript tsc (classifier unavailable)", "npm audit (classifier unavailable)"],
+    "analysis_note": "Análise parcial: ferramentas de lint/tsc indisponíveis nesta execução. Issues identificados via análise estática de código."
+  },
+  "summary": {
+    "critical": 0,
+    "high": 5,
+    "medium": 7,
+    "low": 4
+  },
+  "issues": [
+    {
+      "id": "SEC-001",
+      "file": "apps/api/src/config/auth.ts",
+      "line": 32,
+      "severity": "high",
+      "type": "security",
+      "message": "debug: true habilitado em configuração de autenticação — expõe informações sensíveis em produção",
+      "code_snippet": "debug: true,",
+      "suggestion": "Definir como `debug: process.env.NODE_ENV !== 'production'` para desabilitar automaticamente em produção"
+    },
+    {
+      "id": "SEC-002",
+      "file": "apps/api/src/config/auth.ts",
+      "line": 10,
+      "severity": "high",
+      "type": "security",
+      "message": "trustedOrigins hardcoded com localhost — inadequado para ambientes de produção e staging",
+      "code_snippet": "trustedOrigins: [\"http://localhost:3000\"],",
+      "suggestion": "Usar variável de ambiente: `trustedOrigins: [process.env.CORS_ORIGIN || 'http://localhost:3000']`"
+    },
+    {
+      "id": "SEC-003",
+      "file": "apps/api/src/middleware/auth.ts",
+      "line": 29,
+      "severity": "high",
+      "type": "security",
+      "message": "Token parcial logado via console.error — mesmo truncado, logs de token são um risco de segurança",
+      "code_snippet": "console.error(`AuthMiddleware - No session found for token: ${token.substring(0, 5)}...`)",
+      "suggestion": "Remover log do token. Logar apenas 'No session found' sem qualquer trecho do token"
+    },
+    {
+      "id": "SEC-004",
+      "file": "apps/api/src/config/auth.ts",
+      "line": 34,
+      "severity": "medium",
+      "type": "security",
+      "message": "Verificação de e-mail desabilitada (requireEmailVerification: false) — permite cadastro com e-mails inválidos",
+      "code_snippet": "requireEmailVerification: false,",
+      "suggestion": "Habilitar verificação de e-mail em produção ou documentar a razão de estar desabilitado"
+    },
+    {
+      "id": "TYPE-001",
+      "file": "apps/web/src/lib/auth.ts",
+      "line": 5,
+      "severity": "medium",
+      "type": "type_safety",
+      "message": "authClient tipado como 'any' — anula completamente a segurança de tipos no frontend",
+      "code_snippet": "export const authClient: any = createAuthClient({",
+      "suggestion": "Remover ': any' e usar o tipo inferido de createAuthClient. Adicionar override de tipo específico se necessário"
+    },
+    {
+      "id": "TYPE-002",
+      "file": "apps/api/src/modules/acomodacoes/repositories/AcomodacaoRepository.ts",
+      "line": 193,
+      "severity": "medium",
+      "type": "type_safety",
+      "message": "Parâmetros de transação (tx) tipados como 'any' em 6+ métodos do repositório — perde benefícios de tipo do Drizzle ORM",
+      "code_snippet": "async lockCama(tx: any, camaId: string)",
+      "suggestion": "Usar o tipo correto: `tx: Parameters<Parameters<typeof db.transaction>[0]>[0]` ou criar um alias de tipo `DrizzleTransaction`"
+    },
+    {
+      "id": "TYPE-003",
+      "file": "apps/api/src/modules/inscricoes/controllers/InscricaoController.ts",
+      "line": 34,
+      "severity": "medium",
+      "type": "type_safety",
+      "message": "Múltiplos 'as any' em request.body e request.params — ignora validação de tipos da entrada HTTP",
+      "code_snippet": "const inscricao = await this.registerUseCase.execute(request.body as any)",
+      "suggestion": "Definir schemas Zod/TypeBox e usar FastifyRequest<{Body: TSchema}> para validação e tipagem correta"
+    },
+    {
+      "id": "TYPE-004",
+      "file": "apps/api/src/modules/inscricoes/controllers/EventoController.ts",
+      "line": 20,
+      "severity": "medium",
+      "type": "type_safety",
+      "message": "request.body e request.params castados como 'any' em múltiplas actions do controller de Evento",
+      "code_snippet": "const evento = await this.createUseCase.execute(request.body as any)",
+      "suggestion": "Definir interfaces tipadas para os bodies de requisição e usar generics do Fastify"
+    },
+    {
+      "id": "TYPE-005",
+      "file": "apps/api/src/middleware/auth.ts",
+      "line": 39,
+      "severity": "medium",
+      "type": "type_safety",
+      "message": "session.user castado como 'any' para acessar campo 'role' — indica que o tipo do better-auth não inclui campos customizados",
+      "code_snippet": "role: (session.user as any).role || 'servo',",
+      "suggestion": "Estender o tipo do better-auth com declaração de módulo para incluir o campo 'role' nos tipos de sessão"
+    },
+    {
+      "id": "DEBT-001",
+      "file": "apps/api/src/modules/admin",
+      "line": null,
+      "severity": "medium",
+      "type": "testing",
+      "message": "Módulo 'admin' sem cobertura de testes — AuditLogController, ListAuditLogsUseCase e rotas não testados",
+      "code_snippet": null,
+      "suggestion": "Criar testes e2e para as rotas de admin em apps/api/src/tests/admin-e2e.test.ts"
+    },
+    {
+      "id": "DEBT-002",
+      "file": "apps/api/src/modules/financeiro",
+      "line": null,
+      "severity": "medium",
+      "type": "testing",
+      "message": "Módulo 'financeiro' sem cobertura de testes — FinanceiroController, GetMetricasUseCase e CreateDespesaUseCase não testados",
+      "code_snippet": null,
+      "suggestion": "Criar testes para os use cases financeiros e testes e2e para as rotas /financeiro"
+    },
+    {
+      "id": "SEC-005",
+      "file": "apps/api/src/app.ts",
+      "line": 36,
+      "severity": "high",
+      "type": "security",
+      "message": "JWT secret com fallback hardcoded 'secret123' — se JWT_SECRET não estiver definido, o app usa um segredo público",
+      "code_snippet": "secret: env.JWT_SECRET || 'secret123',",
+      "suggestion": "Tornar JWT_SECRET obrigatório no schema Zod em config/env.ts (remover .optional()). A ausência deve causar falha de inicialização, nunca um segredo fraco conhecido."
+    },
+    {
+      "id": "PERF-001",
+      "file": "apps/api/src/modules/inscricoes/usecases/GetInadimplentesUseCase.ts",
+      "line": 29,
+      "severity": "high",
+      "type": "performance",
+      "message": "N+1 query: getSumByInscricaoId executado dentro de loop para cada inscrição — O(n) queries no banco",
+      "code_snippet": "for (const inscricao of inscricoes) {\n  const totalPago = await this.pagamentoRepository.getSumByInscricaoId(inscricao.id)\n}",
+      "suggestion": "Substituir por query agregada única: SELECT inscricao_id, SUM(valor) FROM pagamentos WHERE inscricao_id = ANY($ids) GROUP BY inscricao_id — retornar Map<id, soma> e usar no loop sem acessar o banco."
+    },
+    {
+      "id": "DEBT-003",
+      "file": "apps/api/src/app.ts",
+      "line": 24,
+      "severity": "low",
+      "type": "debt",
+      "message": "Código comentado (3 console.log) deixado no arquivo — dead code que polui o fonte",
+      "code_snippet": "// console.log('Ambiente:', env.NODE_ENV);",
+      "suggestion": "Remover linhas comentadas. Se necessário para debug, usar um logger condicional"
+    },
+    {
+      "id": "DEBT-004",
+      "file": "apps/api/src/server.ts",
+      "line": 14,
+      "severity": "low",
+      "type": "style",
+      "message": "console.log usado para logging de servidor em vez de logger estruturado",
+      "code_snippet": "console.log(`🚀 Server running on http://localhost:${env.PORT}`)",
+      "suggestion": "Usar o logger do Fastify (fastify.log.info) para logging estruturado e consistente"
+    },
+    {
+      "id": "DEBT-005",
+      "file": "apps/api/src/routes/auth.ts",
+      "line": 24,
+      "severity": "low",
+      "type": "type_safety",
+      "message": "headers castado como 'any' na rota de auth — perde tipagem de headers do Fastify",
+      "code_snippet": "headers: request.headers as any,",
+      "suggestion": "Usar IncomingHttpHeaders do módulo 'http' ou o tipo correto do better-auth para headers"
+    }
+  ],
+  "recommendations": [
+    "Prioridade IMEDIATA: Remover 'debug: true' da config de auth antes de qualquer deploy em produção",
+    "Prioridade IMEDIATA: Remover log de token parcial do authMiddleware — risco de exposição em logs",
+    "Migrar trustedOrigins para variável de ambiente (CORS_ORIGIN já existe no .env.example)",
+    "Criar alias de tipo 'DrizzleTransaction' para substituir todos os parâmetros 'tx: any' nos repositórios",
+    "Adicionar schemas de validação Zod/TypeBox nos controllers para eliminar os 'as any' em request.body",
+    "Estender tipos do better-auth com module augmentation para incluir o campo 'role'",
+    "Criar testes e2e para os módulos 'admin' e 'financeiro' (0% de cobertura atualmente)",
+    "Configurar ESLint com regras @typescript-eslint/no-explicit-any para prevenir novos 'any' types",
+    "Implementar um logger estruturado (pino já incluído no Fastify) em vez de console.log/console.error"
+  ]
+}

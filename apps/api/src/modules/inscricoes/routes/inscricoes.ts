@@ -21,8 +21,8 @@ export async function inscricaoRoutes(fastify: FastifyInstance) {
         properties: {
           nome: { type: 'string' },
           descricao: { type: 'string' },
-          data_inicio: { type: 'string', format: 'date-time' },
-          data_fim: { type: 'string', format: 'date-time' },
+          data_inicio: { type: 'string', format: 'date' },
+          data_fim: { type: 'string', format: 'date' },
           capacidade_maxima: { type: 'number' },
           local_id: { type: 'string', format: 'uuid' },
           configuracoes: {
@@ -49,8 +49,8 @@ export async function inscricaoRoutes(fastify: FastifyInstance) {
         properties: {
           nome: { type: 'string' },
           descricao: { type: ['string', 'null'] },
-          data_inicio: { type: 'string', format: 'date-time' },
-          data_fim: { type: 'string', format: 'date-time' },
+          data_inicio: { type: 'string', format: 'date' },
+          data_fim: { type: 'string', format: 'date' },
           capacidade_maxima: { type: 'number' },
           local_id: { type: ['string', 'null'], format: 'uuid' },
           status: { type: 'string', enum: ['rascunho', 'aberto', 'encerrado', 'realizado', 'cancelado'] },
@@ -105,7 +105,7 @@ export async function inscricaoRoutes(fastify: FastifyInstance) {
           valor: { type: 'number' },
           forma_pagamento: { type: 'string' },
           comprovante_url: { type: 'string' },
-          data_pagamento: { type: 'string', format: 'date-time' }
+          data_pagamento: { type: 'string', format: 'date' }
         }
       }
     }

@@ -1,22 +1,24 @@
-import { useState } from 'react'
-import { Search, Users, AlertTriangle, CheckCircle, DollarSign } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { AlertTriangle, CheckCircle, Plus, Search, Users, Wallet } from 'lucide-react'
 import { AppLayout } from '../components/layout/AppLayout'
-import { useEventos, useInadimplentes } from '../hooks/use-inscricoes'
-import type { InadimplenteItem } from '../hooks/use-inscricoes'
+import { Badge } from '../components/ui/badge'
+import { Button } from '../components/ui/button'
+import { EmptyState } from '../components/ui/empty-state'
+import { FilterTabs } from '../components/ui/filter-tabs'
+import { useInscricoes } from '../hooks/use-inscricoes'
+import type { InscricaoListItem } from '../hooks/use-inscricoes'
 
-// ─── Types ───────────────────────────────────────────────────────────────────
+const SELECTED_EVENT_KEY = 'koinonia:selectedEventoId'
 
 type StatusFilter = 'todos' | 'inadimplentes'
 type PapelFilter = 'todos' | 'encontrista' | 'servo'
 
-// ─── Constants ───────────────────────────────────────────────────────────────
-
-const STATUS_CONFIG: Record<string, { label: string; classes: string }> = {
-  PENDENTE:      { label: 'Pendente',       classes: 'bg-yellow-400/10 text-yellow-400 border border-yellow-400/20' },
-  PAGO_PARCIAL:  { label: 'Pago Parcial',   classes: 'bg-blue-400/10 text-blue-400 border border-blue-400/20' },
-  PAGO_TOTAL:    { label: 'Pago Total',     classes: 'bg-emerald-400/10 text-emerald-400 border border-emerald-400/20' },
-  LISTA_ESPERA:  { label: 'Lista de Espera',classes: 'bg-slate-400/10 text-slate-400 border border-slate-400/20' },
-  CANCELADA:     { label: 'Cancelada',      classes: 'bg-red-400/10 text-red-400 border border-red-400/20' },
+const STATUS_CONFIG: Record<string, { label: string; variant: React.ComponentProps<typeof Badge>['variant'] }> = {
+  PAGO_TOTAL: { label: 'Pago', variant: 'success' },
+  PAGO_PARCIAL: { label: 'Parcial', variant: 'info' },
+  PENDENTE: { label: 'Pendente', variant: 'warning' },
+  LISTA_ESPERA: { label: 'Espera', variant: 'neutral' },
+  CANCELADA: { label: 'Cancelada', variant: 'danger' },
 }
 
 const PAPEL_LABELS: Record<string, string> = {
@@ -24,265 +26,220 @@ const PAPEL_LABELS: Record<string, string> = {
   servo: 'Servo',
 }
 
-// ─── Sub-components ──────────────────────────────────────────────────────────
-
-interface FilterPillProps {
-  label: string
-  active: boolean
-  onClick: () => void
+function formatCurrency(value: number) {
+  return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 }
 
-function FilterPill({ label, active, onClick }: FilterPillProps) {
-  return (
-    <button
-      onClick={onClick}
-      className={[
-        'px-4 py-1.5 rounded-full text-sm font-medium transition-all',
-        active
-          ? 'bg-primary text-white'
-          : 'bg-white/5 border border-border-dark text-slate-300 hover:border-primary/50',
-      ].join(' ')}
-    >
-      {label}
-    </button>
-  )
+function getInitial(nome: string) {
+  return nome.trim()[0]?.toUpperCase() ?? '?'
 }
 
-function StatusBadge({ status }: { status: string }) {
-  const config = STATUS_CONFIG[status] ?? { label: status, classes: 'bg-slate-400/10 text-slate-400 border border-slate-400/20' }
-  return (
-    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${config.classes}`}>
-      {config.label}
-    </span>
-  )
-}
-
-interface MetricCardProps {
+function MetricCard({
+  icon,
+  label,
+  value,
+  iconClass,
+}: {
   icon: React.ReactNode
   label: string
   value: string | number
-  sub?: string
-  iconBg?: string
-}
-
-function MetricCard({ icon, label, value, sub, iconBg = 'bg-primary/20' }: MetricCardProps) {
+  iconClass: string
+}) {
   return (
-    <div className="bg-surface-dark border border-border-dark rounded-xl p-5 flex items-center gap-4">
-      <div className={`size-12 rounded-xl ${iconBg} flex items-center justify-center shrink-0`}>
+    <div className="rounded-[10px] border border-border bg-surface p-5 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+      <div className={`mb-3 flex size-10 items-center justify-center rounded-[8px] ${iconClass}`}>
         {icon}
       </div>
-      <div>
-        <div className="text-2xl font-bold text-white">{value}</div>
-        <div className="text-xs text-slate-400 mt-0.5">{label}</div>
-        {sub && <div className="text-xs text-red-400 mt-0.5">{sub}</div>}
-      </div>
+      <p className="text-[28px] font-semibold leading-none tracking-tight text-foreground">{value}</p>
+      <p className="mt-1.5 text-[13px] text-text-secondary">{label}</p>
     </div>
   )
 }
 
-function InscricaoRow({ item }: { item: InadimplenteItem }) {
-  const debitoAberto = item.valor_total - item.valor_pago
-  const initial = item.pessoa?.nome?.trim()[0]?.toUpperCase() ?? '?'
+function InscricaoRow({ item }: { item: InscricaoListItem }) {
+  const debito = item.valor_total - item.valor_pago
+  const statusCfg = STATUS_CONFIG[item.status] ?? { label: item.status, variant: 'neutral' as const }
+  const nome = item.pessoa?.nome ?? '—'
 
   return (
-    <tr className="border-b border-border-dark hover:bg-white/3 transition-colors group">
-      <td className="py-3 px-4">
+    <tr className="border-b border-border transition-colors last:border-0 hover:bg-surface-raised">
+      <td className="px-5 py-3.5">
         <div className="flex items-center gap-3">
-          <div className="size-8 rounded-full bg-primary/20 flex items-center justify-center text-sm font-bold text-primary/80 shrink-0">
-            {initial}
+          <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-warm-gold-light text-[11px] font-bold text-warm-gold">
+            {getInitial(nome)}
           </div>
-          <div>
-            <div className="font-medium text-white text-sm">{item.pessoa?.nome ?? '—'}</div>
-            {item.pessoa?.telefone && (
-              <div className="text-xs text-slate-500">{item.pessoa.telefone}</div>
-            )}
-          </div>
+          <span className="text-sm font-medium text-foreground">{nome}</span>
         </div>
       </td>
-      <td className="py-3 px-4 text-sm text-slate-400">
-        {PAPEL_LABELS[item.papel] ?? item.papel}
+      <td className="px-5 py-3.5 text-sm text-text-secondary">{PAPEL_LABELS[item.papel] ?? item.papel}</td>
+      <td className="px-5 py-3.5">
+        <Badge variant={statusCfg.variant}>{statusCfg.label}</Badge>
       </td>
-      <td className="py-3 px-4">
-        <StatusBadge status={item.status} />
-      </td>
-      <td className="py-3 px-4 text-sm text-right">
-        <div className="text-white">R$ {item.valor_total.toFixed(2)}</div>
-        {item.valor_pago > 0 && (
-          <div className="text-xs text-emerald-400">Pago: R$ {item.valor_pago.toFixed(2)}</div>
-        )}
-      </td>
-      <td className="py-3 px-4 text-sm text-right">
-        {debitoAberto > 0 ? (
-          <span className="text-red-400 font-medium">R$ {debitoAberto.toFixed(2)}</span>
+      <td className="px-5 py-3.5 text-right text-sm text-foreground">{formatCurrency(item.valor_total)}</td>
+      <td className="px-5 py-3.5 text-right text-sm font-medium">
+        {item.valor_pago > 0 ? (
+          <span className="text-status-success">{formatCurrency(item.valor_pago)}</span>
         ) : (
-          <span className="text-emerald-400">—</span>
+          <span className="text-text-tertiary">—</span>
         )}
+      </td>
+      <td className="px-5 py-3.5 text-right text-sm font-semibold">
+        {debito > 0 ? (
+          <span className="text-status-danger">{formatCurrency(debito)}</span>
+        ) : (
+          <span className="text-text-tertiary">—</span>
+        )}
+      </td>
+      <td className="px-5 py-3.5 text-right">
+        <button className="text-sm font-semibold text-warm-gold hover:underline">Detalhar</button>
       </td>
     </tr>
   )
 }
 
-// ─── Main Page ────────────────────────────────────────────────────────────────
-
 export function InscricoesPage() {
-  const [selectedEventoId, setSelectedEventoId] = useState<string>('')
+  const [selectedEventoId, setSelectedEventoId] = useState(() =>
+    typeof window !== 'undefined' ? (window.localStorage.getItem(SELECTED_EVENT_KEY) ?? '') : ''
+  )
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('todos')
   const [papelFilter, setPapelFilter] = useState<PapelFilter>('todos')
   const [search, setSearch] = useState('')
 
-  const { data: eventos, isLoading: eventosLoading } = useEventos()
-  const { data: inadimplentes, isLoading: listLoading, error: listError } = useInadimplentes(selectedEventoId)
+  useEffect(() => {
+    const handler = () => {
+      setSelectedEventoId(window.localStorage.getItem(SELECTED_EVENT_KEY) ?? '')
+    }
+    window.addEventListener('storage', handler)
+    return () => window.removeEventListener('storage', handler)
+  }, [])
 
-  const selectedEvento = eventos?.find((e) => e.id === selectedEventoId)
+  const { data: inscricoes, isLoading, error } = useInscricoes(selectedEventoId)
 
-  // Filter rows
-  const filteredItems = (inadimplentes ?? []).filter((item) => {
+  const filtered = (inscricoes ?? []).filter((item) => {
     if (statusFilter === 'inadimplentes') {
-      const isInadimplente = item.status === 'PENDENTE' || item.status === 'PAGO_PARCIAL'
-      if (!isInadimplente) return false
+      if (item.status !== 'PENDENTE' && item.status !== 'PAGO_PARCIAL') return false
     }
     if (papelFilter !== 'todos' && item.papel !== papelFilter) return false
     if (search && !item.pessoa?.nome?.toLowerCase().includes(search.toLowerCase())) return false
     return true
   })
 
-  // Summary stats
-  const totalInscritos = inadimplentes?.length ?? 0
-  const totalInadimplentes = inadimplentes?.filter(
-    (i) => i.status === 'PENDENTE' || i.status === 'PAGO_PARCIAL',
-  ).length ?? 0
-  const totalPagos = inadimplentes?.filter((i) => i.status === 'PAGO_TOTAL').length ?? 0
-  const totalArrecadado = inadimplentes?.reduce((sum, i) => sum + i.valor_pago, 0) ?? 0
-  const totalAPagar = inadimplentes?.reduce((sum, i) => sum + (i.valor_total - i.valor_pago), 0) ?? 0
+  const totalInscritos = inscricoes?.length ?? 0
+  const totalInadimplentes = inscricoes?.filter((i) => i.status === 'PENDENTE' || i.status === 'PAGO_PARCIAL').length ?? 0
+  const totalPagos = inscricoes?.filter((i) => i.status === 'PAGO_TOTAL').length ?? 0
+  const totalArrecadado = inscricoes?.reduce((sum, i) => sum + i.valor_pago, 0) ?? 0
 
   return (
-    <AppLayout title="Inscrições">
-      <div className="p-8 max-w-7xl w-full mx-auto space-y-6">
-
-        {/* Event selector */}
-        <div className="bg-surface-dark border border-border-dark rounded-xl p-5">
-          <label className="block text-sm font-medium text-slate-300 mb-2">Selecionar Evento</label>
-          {eventosLoading ? (
-            <div className="h-10 bg-white/5 rounded-lg animate-pulse" />
-          ) : (
-            <select
-              className="w-full bg-white/5 border border-border-dark rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary transition-all"
-              value={selectedEventoId}
-              onChange={(e) => setSelectedEventoId(e.target.value)}
-            >
-              <option value="" className="bg-surface-dark">-- Selecione um evento --</option>
-              {(eventos ?? []).map((evento) => (
-                <option key={evento.id} value={evento.id} className="bg-surface-dark">
-                  {evento.nome} ({evento.status})
-                </option>
-              ))}
-            </select>
-          )}
-        </div>
-
-        {/* Metric cards — only when event is selected and data loaded */}
-        {selectedEventoId && inadimplentes && (
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+    <AppLayout
+      title="Inscrições"
+      actions={
+        <Button size="sm">
+          <Plus size={16} />
+          Nova inscrição
+        </Button>
+      }
+    >
+      <div className="mx-auto w-full max-w-[1100px] space-y-6 p-4 sm:p-6 lg:p-7">
+        {selectedEventoId && (
+          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
             <MetricCard
-              icon={<Users className="size-5 text-purple-300" />}
-              label="Total Inscritos"
+              icon={<Users size={18} />}
+              label="Total inscritos"
               value={totalInscritos}
-              iconBg="bg-primary/20"
+              iconClass="bg-status-info-bg text-status-info"
             />
             <MetricCard
-              icon={<AlertTriangle className="size-5 text-red-400" />}
+              icon={<AlertTriangle size={18} />}
               label="Inadimplentes"
               value={totalInadimplentes}
-              iconBg="bg-red-400/10"
+              iconClass="bg-status-warning-bg text-status-warning"
             />
             <MetricCard
-              icon={<CheckCircle className="size-5 text-emerald-400" />}
-              label="Pagamento Total"
+              icon={<CheckCircle size={18} />}
+              label="Pagamento total"
               value={totalPagos}
-              iconBg="bg-emerald-400/10"
+              iconClass="bg-status-success-bg text-status-success"
             />
             <MetricCard
-              icon={<DollarSign className="size-5 text-amber-400" />}
+              icon={<Wallet size={18} />}
               label="Arrecadado"
-              value={`R$ ${totalArrecadado.toFixed(2)}`}
-              sub={totalAPagar > 0 ? `Pendente: R$ ${totalAPagar.toFixed(2)}` : undefined}
-              iconBg="bg-amber-400/10"
+              value={formatCurrency(totalArrecadado)}
+              iconClass="bg-warm-gold-light text-warm-gold"
             />
           </div>
         )}
 
-        {/* Filters + Table */}
-        {selectedEventoId && (
-          <div className="bg-surface-dark border border-border-dark rounded-xl overflow-hidden">
-            {/* Table header with search and filters */}
-            <div className="p-5 border-b border-border-dark space-y-4">
-              <div className="flex items-center justify-between gap-4">
-                <h3 className="text-base font-semibold text-white">
-                  {selectedEvento?.nome ?? 'Evento'}
-                  {filteredItems.length !== totalInscritos && (
-                    <span className="ml-2 text-sm font-normal text-slate-400">
-                      ({filteredItems.length} de {totalInscritos})
-                    </span>
-                  )}
-                </h3>
-              </div>
-
-              {/* Search bar */}
-              <div className="relative group">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-slate-400 group-focus-within:text-primary transition-colors" />
+        {selectedEventoId ? (
+          <div className="overflow-hidden rounded-[10px] border border-border bg-surface shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+            {/* Toolbar */}
+            <div className="flex flex-wrap items-center gap-3 border-b border-border px-5 py-4">
+              <div className="relative min-w-[180px] flex-1">
+                <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-text-tertiary" />
                 <input
-                  type="text"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Buscar por nome..."
-                  className="w-full bg-white/5 border border-border-dark rounded-xl py-2.5 pl-10 pr-4 text-white text-sm placeholder:text-slate-500 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
+                  className="h-9 w-full rounded-lg border border-border bg-background pl-9 pr-3 text-sm text-foreground outline-none placeholder:text-text-tertiary focus:ring-2 focus:ring-ring"
                 />
               </div>
-
-              {/* Filter chips */}
-              <div className="flex flex-wrap gap-2">
-                {/* Status filters */}
-                <FilterPill label="Todos" active={statusFilter === 'todos'} onClick={() => setStatusFilter('todos')} />
-                <FilterPill label="Inadimplentes" active={statusFilter === 'inadimplentes'} onClick={() => setStatusFilter('inadimplentes')} />
-                <div className="w-px h-6 bg-border-dark mx-1 self-center" />
-                {/* Papel filters */}
-                <FilterPill label="Todos os papéis" active={papelFilter === 'todos'} onClick={() => setPapelFilter('todos')} />
-                <FilterPill label="Encontristas" active={papelFilter === 'encontrista'} onClick={() => setPapelFilter('encontrista')} />
-                <FilterPill label="Servos" active={papelFilter === 'servo'} onClick={() => setPapelFilter('servo')} />
-              </div>
+              <FilterTabs
+                ariaLabel="Filtro de status"
+                value={statusFilter}
+                onValueChange={(v) => setStatusFilter(v as StatusFilter)}
+                options={[
+                  { value: 'todos', label: 'Todos' },
+                  { value: 'inadimplentes', label: 'Inadimplentes' },
+                ]}
+              />
+              <FilterTabs
+                ariaLabel="Filtro de papel"
+                value={papelFilter}
+                onValueChange={(v) => setPapelFilter(v as PapelFilter)}
+                options={[
+                  { value: 'todos', label: 'Todos' },
+                  { value: 'encontrista', label: 'Encontristas' },
+                  { value: 'servo', label: 'Servos' },
+                ]}
+              />
+              <Button size="sm">
+                <Plus size={16} />
+                Nova inscrição
+              </Button>
             </div>
 
-            {/* Table body */}
-            {listLoading ? (
+            {isLoading ? (
               <div className="flex items-center justify-center py-16">
-                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary" />
+                <div className="size-10 animate-spin rounded-full border-b-2 border-ring" />
               </div>
-            ) : listError ? (
-              <div className="m-6 rounded-xl border border-red-900/50 bg-red-900/20 p-8 text-center">
-                <p className="text-red-400 font-medium">Erro ao carregar inscrições</p>
-                <p className="text-sm text-red-500 mt-1">
-                  {(listError as Error).message || 'Tente novamente mais tarde.'}
-                </p>
+            ) : error ? (
+              <div className="p-8 text-center">
+                <p className="font-semibold text-status-danger">Erro ao carregar inscrições</p>
+                <p className="mt-1 text-sm text-text-secondary">{(error as Error).message ?? 'Tente novamente mais tarde.'}</p>
               </div>
-            ) : filteredItems.length === 0 ? (
-              <div className="text-center py-16 text-slate-500">
-                <p className="font-medium">Nenhuma inscrição encontrada</p>
-                <p className="text-sm mt-1">Altere os filtros ou selecione outro evento.</p>
+            ) : filtered.length === 0 ? (
+              <div className="p-8">
+                <EmptyState title="Nenhuma inscrição encontrada" description="Altere os filtros para ver mais resultados." />
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-border-dark bg-white/3">
-                      <th className="py-3 px-4 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Participante</th>
-                      <th className="py-3 px-4 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Papel</th>
-                      <th className="py-3 px-4 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Status</th>
-                      <th className="py-3 px-4 text-right text-xs font-medium text-slate-400 uppercase tracking-wider">Valor</th>
-                      <th className="py-3 px-4 text-right text-xs font-medium text-slate-400 uppercase tracking-wider">Débito</th>
+                    <tr className="border-b border-border bg-surface-raised">
+                      {['Participante', 'Papel', 'Status', 'Valor Total', 'Pago', 'Débito', ''].map((col, i) => (
+                        <th
+                          key={i}
+                          className={[
+                            'px-5 py-3 text-[10px] font-semibold uppercase tracking-[0.08em] text-text-tertiary',
+                            i >= 3 ? 'text-right' : 'text-left',
+                          ].join(' ')}
+                        >
+                          {col}
+                        </th>
+                      ))}
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredItems.map((item) => (
+                    {filtered.map((item) => (
                       <InscricaoRow key={item.id} item={item} />
                     ))}
                   </tbody>
@@ -290,19 +247,13 @@ export function InscricoesPage() {
               </div>
             )}
           </div>
+        ) : (
+          <EmptyState
+            icon={<Users className="size-8" />}
+            title="Nenhum evento selecionado"
+            description="Selecione um evento no seletor do topo para ver as inscrições."
+          />
         )}
-
-        {/* Empty state — no event selected */}
-        {!selectedEventoId && !eventosLoading && (
-          <div className="rounded-xl border-2 border-dashed border-border-dark p-16 text-center">
-            <div className="size-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-              <Users className="size-8 text-primary/50" />
-            </div>
-            <p className="text-slate-400 font-medium">Selecione um evento para ver as inscrições</p>
-            <p className="text-sm text-slate-500 mt-1">As inscrições são listadas por evento.</p>
-          </div>
-        )}
-
       </div>
     </AppLayout>
   )

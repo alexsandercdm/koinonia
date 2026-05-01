@@ -1,0 +1,89 @@
+CODE REVIEW REPORT - KOINONIA
+Data: 24 de abril de 2026 | Branch: main | Arquivos: ~77 TS
+
+RESUMO: 0 critical | 5 high | 7 medium | 4 low | TOTAL: 16
+
+=== HIGH (3) ===
+
+[SEC-001] apps/api/src/config/auth.ts:32 | SECURITY
+debug: true habilitado em configuracao de autenticacao
+FIX: debug: process.env.NODE_ENV !== 'production'
+
+[SEC-002] apps/api/src/config/auth.ts:10 | SECURITY
+trustedOrigins hardcoded com localhost - impede producao/staging
+FIX: trustedOrigins: [process.env.CORS_ORIGIN || 'http://localhost:3000']
+
+[SEC-003] apps/api/src/middleware/auth.ts:29 | SECURITY
+Token parcial logado via console.error - risco de exposicao em logs
+FIX: Remover token do log. Apenas: console.error('No session found')
+
+[SEC-005] apps/api/src/app.ts:36 | SECURITY
+env.JWT_SECRET || 'secret123' - fallback hardcoded permite forjar tokens JWT
+FIX: Tornar JWT_SECRET obrigatorio no schema Zod, remover fallback
+
+[PERF-001] apps/api/src/modules/inscricoes/usecases/GetInadimplentesUseCase.ts:29 | PERFORMANCE
+N+1 query: getSumByInscricaoId chamado em loop - O(n) queries por chamada
+FIX: Usar query agregada: SELECT inscricao_id, SUM(valor) GROUP BY inscricao_id
+
+=== MEDIUM (7) ===
+
+[SEC-004] apps/api/src/config/auth.ts:34 | SECURITY
+requireEmailVerification: false - permite emails invalidos/inexistentes
+FIX: Habilitar em producao ou documentar razao
+
+[TYPE-001] apps/web/src/lib/auth.ts:5 | TYPE_SAFETY
+authClient tipado como 'any' - anula tipagem do better-auth no frontend
+FIX: Remover ': any', usar tipo inferido de createAuthClient
+
+[TYPE-002] apps/api/src/modules/acomodacoes/repositories/AcomodacaoRepository.ts | TYPE_SAFETY
+Parametros de transacao (tx: any) em 6+ metodos do repositorio
+FIX: Criar alias DrizzleTransaction
+
+[TYPE-003] apps/api/src/modules/inscricoes/controllers/InscricaoController.ts | TYPE_SAFETY
+Multiplos 'as any' em request.body e request.params (12 ocorrencias)
+FIX: Schemas Zod/TypeBox + FastifyRequest<{Body: T, Params: P}>
+
+[TYPE-004] apps/api/src/modules/inscricoes/controllers/EventoController.ts | TYPE_SAFETY
+as any em body/params em 4 actions do controller
+FIX: Mesma abordagem do TYPE-003
+
+[DEBT-001] apps/api/src/modules/admin | TESTING
+Modulo admin sem nenhum teste (0% cobertura)
+FIX: Criar apps/api/src/tests/admin-e2e.test.ts
+
+[DEBT-002] apps/api/src/modules/financeiro | TESTING
+Modulo financeiro sem nenhum teste (0% cobertura)
+FIX: Criar testes unitarios e e2e para routes /financeiro
+
+=== LOW (4) ===
+
+[TYPE-005] apps/api/src/middleware/auth.ts:39 | TYPE_SAFETY
+session.user castado como any para acessar 'role'
+FIX: Module augmentation para estender User do better-auth
+
+[DEBT-003] apps/api/src/app.ts:24-26 | DEBT
+3 linhas de console.log comentadas (dead code)
+FIX: Remover
+
+[DEBT-004] apps/api/src/server.ts:14 | STYLE
+console.log em vez de logger estruturado
+FIX: fastify.log.info(...)
+
+[DEBT-005] apps/api/src/routes/auth.ts:24 | TYPE_SAFETY
+headers castado como any
+FIX: Usar IncomingHttpHeaders
+
+=== COBERTURA DE TESTES ===
+pessoas:     COBERTO (unit + e2e)
+inscricoes:  COBERTO (unit + e2e)
+acomodacoes: COBERTO (e2e)
+admin:       DESCOBERTO
+financeiro:  DESCOBERTO
+auth:        COBERTO (e2e)
+
+=== ACOES IMEDIATAS ===
+1. Remover debug: true do auth config (SEC-001)
+2. Remover log de token do authMiddleware (SEC-003)
+3. Migrar trustedOrigins para env var (SEC-002)
+
+Gerado em 24/04/2026 - Koinonia Code Review Agent

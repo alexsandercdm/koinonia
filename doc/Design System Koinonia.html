@@ -1,0 +1,1347 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Koinonia — Design System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: 'DM Sans', sans-serif; background: #F7F4EF; color: #1A1612; -webkit-font-smoothing: antialiased; }
+button { cursor: pointer; font-family: inherit; border: none; background: none; }
+input, select, textarea { font-family: inherit; }
+.ms { font-family: 'Material Symbols Rounded'; font-weight: normal; font-style: normal; font-size: 20px; line-height: 1; letter-spacing: normal; text-transform: none; display: inline-block; white-space: nowrap; direction: ltr; -webkit-font-smoothing: antialiased; font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20; }
+.ms-fill { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 20; }
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #CFC8BB; border-radius: 99px; }
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+
+/* ── TOKENS ─────────────────────────────────────────────────── */
+const C = {
+  bg:           '#F7F4EF',
+  surface:      '#FFFFFF',
+  surfaceRaised:'#FDFCFA',
+  border:       '#E8E3D9',
+  borderStrong: '#CFC8BB',
+  text:         '#1A1612',
+  textSec:      '#7A7060',
+  textTer:      '#B0A898',
+  gold:         '#C4923A',
+  goldLight:    '#F5ECD9',
+  goldMuted:    '#EDD8AD',
+  success:      '#3D7A52',
+  successLight: '#E8F4ED',
+  warning:      '#B07030',
+  warningLight: '#FBF0E2',
+  danger:       '#9B3A2E',
+  dangerLight:  '#FBECEC',
+  info:         '#2E628B',
+  infoLight:    '#E8F2FA',
+};
+
+/* ── PRIMITIVES ─────────────────────────────────────────────── */
+function Icon({ name, size = 20, fill = false, style = {} }) {
+  return <span className={'ms' + (fill ? ' ms-fill' : '')} style={{ fontSize: size, ...style }}>{name}</span>;
+}
+
+function Badge({ children, color = 'gold' }) {
+  const maps = {
+    gold:    { bg: C.goldLight,    text: C.gold    },
+    success: { bg: C.successLight, text: C.success },
+    warning: { bg: C.warningLight, text: C.warning },
+    danger:  { bg: C.dangerLight,  text: C.danger  },
+    info:    { bg: C.infoLight,    text: C.info    },
+    neutral: { bg: '#F0EDE8',      text: C.textSec },
+  };
+  const s = maps[color] || maps.neutral;
+  return (
+    <span style={{
+      display: 'inline-flex', alignItems: 'center', padding: '2px 8px',
+      borderRadius: 99, fontSize: 11, fontWeight: 500, letterSpacing: '0.02em',
+      background: s.bg, color: s.text,
+    }}>{children}</span>
+  );
+}
+
+function Btn({ children, variant = 'primary', size = 'md', onClick, style = {}, disabled = false, icon }) {
+  const sizes = { sm: { padding: '6px 12px', fontSize: 13 }, md: { padding: '8px 16px', fontSize: 14 }, lg: { padding: '11px 22px', fontSize: 15 } };
+  const variants = {
+    primary:   { bg: C.text,        color: '#fff',    border: 'none',                  hoverBg: '#2E2820' },
+    secondary: { bg: 'transparent', color: C.text,    border: `1px solid ${C.border}`, hoverBg: C.surfaceRaised },
+    gold:      { bg: C.gold,        color: '#fff',    border: 'none',                  hoverBg: '#A87B2F' },
+    ghost:     { bg: 'transparent', color: C.textSec, border: 'none',                  hoverBg: '#F0EDE8' },
+    danger:    { bg: C.dangerLight, color: C.danger,  border: `1px solid #F0CACA`,     hoverBg: '#F5DADA' },
+  };
+  const v = variants[variant]; const s = sizes[size];
+  const [hov, setHov] = React.useState(false);
+  return (
+    <button onClick={onClick} disabled={disabled}
+      onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
+      style={{
+        display: 'inline-flex', alignItems: 'center', gap: 6,
+        borderRadius: 7, fontWeight: 500, lineHeight: 1,
+        background: disabled ? '#E8E3D9' : (hov ? v.hoverBg : v.bg),
+        color: disabled ? C.textTer : v.color, border: v.border || 'none',
+        cursor: disabled ? 'not-allowed' : 'pointer', transition: 'all 0.12s ease',
+        ...s, ...style,
+      }}
+    >
+      {icon && <Icon name={icon} size={15} />}
+      {children}
+    </button>
+  );
+}
+
+function Input({ value, onChange, placeholder, type = 'text', icon, style = {} }) {
+  const [focus, setFocus] = React.useState(false);
+  return (
+    <div style={{ position: 'relative' }}>
+      {icon && <span style={{ position: 'absolute', left: 11, top: '50%', transform: 'translateY(-50%)', color: focus ? C.gold : C.textTer, transition: 'color 0.15s', pointerEvents: 'none' }}><Icon name={icon} size={17} /></span>}
+      <input type={type} value={value} onChange={onChange} placeholder={placeholder}
+        onFocus={() => setFocus(true)} onBlur={() => setFocus(false)}
+        style={{
+          width: '100%', height: 38, padding: icon ? '0 12px 0 36px' : '0 12px',
+          border: `1px solid ${focus ? C.goldMuted : C.border}`,
+          borderRadius: 7, fontSize: 14, background: C.surface, color: C.text,
+          outline: 'none', transition: 'border 0.15s, box-shadow 0.15s',
+          boxShadow: focus ? `0 0 0 3px ${C.goldLight}` : 'none', ...style,
+        }}
+      />
+    </div>
+  );
+}
+
+function Card({ children, style = {}, padding = 20, onClick }) {
+  const [hov, setHov] = React.useState(false);
+  return (
+    <div onClick={onClick}
+      onMouseEnter={() => onClick && setHov(true)}
+      onMouseLeave={() => onClick && setHov(false)}
+      style={{
+        background: C.surface, border: `1px solid ${hov ? C.borderStrong : C.border}`,
+        borderRadius: 10, padding,
+        transition: 'border 0.15s, box-shadow 0.15s',
+        boxShadow: hov ? '0 2px 12px rgba(0,0,0,0.07)' : '0 1px 3px rgba(0,0,0,0.04)',
+        cursor: onClick ? 'pointer' : 'default', ...style,
+      }}
+    >{children}</div>
+  );
+}
+
+function FilterTabs({ options, value, onChange }) {
+  return (
+    <div style={{ display: 'flex', gap: 4, padding: '3px', background: C.surface, border: `1px solid ${C.border}`, borderRadius: 8 }}>
+      {options.map(o => (
+        <button key={o.key} onClick={() => onChange(o.key)}
+          style={{
+            padding: '5px 12px', borderRadius: 6, fontSize: 12.5,
+            fontWeight: value === o.key ? 600 : 400,
+            background: value === o.key ? C.text : 'transparent',
+            color: value === o.key ? '#fff' : C.textSec,
+            border: 'none', cursor: 'pointer', transition: 'all 0.12s',
+          }}>{o.label}</button>
+      ))}
+    </div>
+  );
+}
+
+/* ── NAV ITEMS ──────────────────────────────────────────────── */
+const NAV_SECTIONS = [
+  { id: 'foundation',      label: 'Foundation' },
+  { id: 'typography',      label: 'Typography' },
+  { id: 'color',           label: 'Color' },
+  { id: 'spacing',         label: 'Spacing & Shape' },
+  { id: 'components',      label: 'Components' },
+  { id: 'layout',          label: 'Layout' },
+  { id: 'patterns',        label: 'Patterns' },
+  { id: 'implementation',  label: 'Implementation' },
+];
+
+/* ── SECTION HEADER ─────────────────────────────────────────── */
+function SectionH({ id, title, sub }) {
+  return (
+    <div id={id} style={{ paddingTop: 64, paddingBottom: 32, borderBottom: `1px solid ${C.border}`, marginBottom: 40 }}>
+      <p style={{ fontSize: 11, fontWeight: 600, color: C.gold, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 8 }}>
+        {title}
+      </p>
+      {sub && <p style={{ fontSize: 14, color: C.textSec, maxWidth: 560 }}>{sub}</p>}
+    </div>
+  );
+}
+
+function Label({ children }) {
+  return <p style={{ fontSize: 11, fontWeight: 600, color: C.textTer, letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 12 }}>{children}</p>;
+}
+
+function Spec({ label, value }) {
+  return (
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '7px 0', borderBottom: `1px solid ${C.border}` }}>
+      <span style={{ fontSize: 12, color: C.textSec }}>{label}</span>
+      <code style={{ fontSize: 12, background: '#F0EDE8', padding: '2px 7px', borderRadius: 4, color: C.text, fontFamily: 'monospace' }}>{value}</code>
+    </div>
+  );
+}
+
+/* ── SWATCH ─────────────────────────────────────────────────── */
+function Swatch({ hex, name, token, size = 'md' }) {
+  const [copied, setCopied] = React.useState(false);
+  const copy = () => { navigator.clipboard.writeText(hex); setCopied(true); setTimeout(() => setCopied(false), 1200); };
+  const h = size === 'lg' ? 72 : size === 'sm' ? 36 : 52;
+  const border = hex === '#FFFFFF' || hex === '#FDFCFA' ? `1px solid ${C.border}` : 'none';
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div onClick={copy} style={{
+        height: h, borderRadius: 8, background: hex, border, cursor: 'pointer',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        transition: 'transform 0.1s',
+      }}
+        onMouseEnter={e => e.currentTarget.style.transform = 'scale(0.97)'}
+        onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+      >
+        {copied && <span style={{ fontSize: 11, fontWeight: 600, color: hex === C.text ? '#fff' : C.text, background: 'rgba(255,255,255,0.7)', padding: '2px 8px', borderRadius: 99 }}>Copiado!</span>}
+      </div>
+      <div>
+        <div style={{ fontSize: 13, fontWeight: 500, color: C.text }}>{name}</div>
+        <div style={{ fontSize: 11, color: C.textTer, fontFamily: 'monospace' }}>{hex}</div>
+        {token && <div style={{ fontSize: 10, color: C.textTer, marginTop: 1 }}>C.{token}</div>}
+      </div>
+    </div>
+  );
+}
+
+/* ── ICON ROW ───────────────────────────────────────────────── */
+function IconRow({ icons }) {
+  return (
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+      {icons.map(name => (
+        <div key={name} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '12px 16px', background: C.surface, border: `1px solid ${C.border}`, borderRadius: 8, minWidth: 72 }}>
+          <Icon name={name} size={20} />
+          <span style={{ fontSize: 10, color: C.textTer, textAlign: 'center', fontFamily: 'monospace', maxWidth: 70, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{name}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════
+   SECTIONS
+══════════════════════════════════════════════════════════════ */
+
+/* ── FOUNDATION ─────────────────────────────────────────────── */
+function FoundationSection() {
+  return (
+    <section>
+      <SectionH id="foundation" title="Foundation"
+        sub="Koinonia é um sistema de gestão de retiros para igrejas e ministérios. O design é quente, sério e acolhedor — usando tons terrosos e dourados sobre superfícies creme." />
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 }}>
+        {[
+          { title: 'Propósito', icon: 'diversity_3', body: 'Gestão administrativa de retiros: inscrições, acomodações, participantes e financeiro.' },
+          { title: 'Tom', icon: 'auto_awesome', body: 'Sério, cálido, confiável. Sem excessos decorativos. A interface some — a missão fica.' },
+          { title: 'Princípio', icon: 'filter_center_focus', body: 'Clareza sobre riqueza visual. Cada elemento justifica sua presença.' },
+        ].map(f => (
+          <Card key={f.title}>
+            <div style={{ width: 36, height: 36, borderRadius: 8, background: C.goldLight, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 14 }}>
+              <Icon name={f.icon} size={18} style={{ color: C.gold }} />
+            </div>
+            <div style={{ fontSize: 14, fontWeight: 600, color: C.text, marginBottom: 6 }}>{f.title}</div>
+            <div style={{ fontSize: 13, color: C.textSec, lineHeight: 1.65 }}>{f.body}</div>
+          </Card>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/* ── TYPOGRAPHY ─────────────────────────────────────────────── */
+function TypographySection() {
+  const scale = [
+    { name: 'Display',     size: 40, weight: 300, lh: '1.15', ls: '-0.03em', use: 'Hero / Login headline' },
+    { name: 'Heading 1',   size: 22, weight: 600, lh: '1.3',  ls: '-0.02em', use: 'Event banner title' },
+    { name: 'Heading 2',   size: 16, weight: 600, lh: '1.4',  ls: '-0.01em', use: 'Drawer titles, section headers' },
+    { name: 'Heading 3',   size: 14, weight: 600, lh: '1.4',  ls: '0',       use: 'Card titles, table section headers' },
+    { name: 'Body',        size: 14, weight: 400, lh: '1.6',  ls: '0',       use: 'Parágrafo padrão' },
+    { name: 'Body Medium', size: 14, weight: 500, lh: '1.5',  ls: '0',       use: 'Nomes em tabelas, labels de input' },
+    { name: 'Small',       size: 13, weight: 400, lh: '1.6',  ls: '0',       use: 'Texto secundário, metadados' },
+    { name: 'Caption',     size: 12, weight: 400, lh: '1.5',  ls: '0',       use: 'Datas, roles, detalhes auxiliares' },
+    { name: 'Label',       size: 11, weight: 600, lh: '1.2',  ls: '0.08em',  use: 'Section titles, table headers (uppercase)' },
+  ];
+  return (
+    <section>
+      <SectionH id="typography" title="Typography"
+        sub="DM Sans em todo o sistema. Fonte humanista com boa legibilidade em tamanhos pequenos e alto impacto em display." />
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 32 }}>
+        <Card>
+          <Label>Fonte primária</Label>
+          <div style={{ fontSize: 48, fontWeight: 300, color: C.text, lineHeight: 1.1, marginBottom: 8 }}>DM Sans</div>
+          <div style={{ fontSize: 13, color: C.textSec, marginBottom: 16 }}>Light · Regular · Medium · Semibold · Bold</div>
+          <div style={{ fontSize: 20, fontWeight: 300, color: C.textTer }}>AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz</div>
+        </Card>
+        <Card>
+          <Label>Ícones</Label>
+          <div style={{ fontSize: 14, fontWeight: 500, color: C.text, marginBottom: 4 }}>Material Symbols Rounded</div>
+          <div style={{ fontSize: 13, color: C.textSec, marginBottom: 16 }}>opsz 20, wght 300, FILL 0/1, GRAD 0</div>
+          <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+            {['diversity_3','group','event','bed','payments','check_circle','warning','info'].map(n => (
+              <Icon key={n} name={n} size={22} style={{ color: C.textSec }} />
+            ))}
+          </div>
+          <div style={{ marginTop: 10, display: 'flex', gap: 10, alignItems: 'center' }}>
+            {['diversity_3','group','event','bed','payments','check_circle','warning','info'].map(n => (
+              <Icon key={n} name={n} size={22} fill style={{ color: C.gold }} />
+            ))}
+          </div>
+          <div style={{ marginTop: 8, fontSize: 11, color: C.textTer }}>Outline (wght 300) e Fill (FILL 1)</div>
+        </Card>
+      </div>
+
+      <Card style={{ padding: 0, overflow: 'hidden' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <thead>
+            <tr style={{ background: C.surfaceRaised }}>
+              {['Estilo','Tamanho','Peso','Line-height','Letter-spacing','Uso'].map(h => (
+                <th key={h} style={{ padding: '10px 16px', fontSize: 11, fontWeight: 500, color: C.textTer, textAlign: 'left', borderBottom: `1px solid ${C.border}`, letterSpacing: '0.05em', textTransform: 'uppercase' }}>{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {scale.map((s, i) => (
+              <tr key={s.name} style={{ borderBottom: i < scale.length - 1 ? `1px solid ${C.border}` : 'none' }}>
+                <td style={{ padding: '10px 16px' }}>
+                  <span style={{ fontSize: s.size > 22 ? 22 : s.size, fontWeight: s.weight, letterSpacing: s.ls, color: C.text }}>{s.name}</span>
+                </td>
+                <td style={{ padding: '10px 16px' }}><code style={{ fontSize: 12, background: '#F0EDE8', padding: '2px 6px', borderRadius: 4 }}>{s.size}px</code></td>
+                <td style={{ padding: '10px 16px' }}><code style={{ fontSize: 12, background: '#F0EDE8', padding: '2px 6px', borderRadius: 4 }}>{s.weight}</code></td>
+                <td style={{ padding: '10px 16px', fontSize: 12, color: C.textSec }}>{s.lh}</td>
+                <td style={{ padding: '10px 16px', fontSize: 12, color: C.textSec }}>{s.ls}</td>
+                <td style={{ padding: '10px 16px', fontSize: 12, color: C.textTer }}>{s.use}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </Card>
+
+      <div style={{ marginTop: 24, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+        <Card>
+          <Label>Exemplo — display light + itálico</Label>
+          <div style={{ fontSize: 36, fontWeight: 300, color: C.text, lineHeight: 1.15, letterSpacing: '-0.03em' }}>
+            Gestão que libera<br/>
+            <em style={{ fontStyle: 'italic', fontWeight: 400 }}>para o essencial.</em>
+          </div>
+        </Card>
+        <Card>
+          <Label>Hierarquia padrão em card</Label>
+          <p style={{ fontSize: 11, fontWeight: 600, color: C.gold, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 6 }}>Evento em andamento</p>
+          <h2 style={{ fontSize: 22, fontWeight: 600, color: C.text, letterSpacing: '-0.02em', marginBottom: 4 }}>Retiro Koinonia 2025</h2>
+          <p style={{ fontSize: 13, color: C.textSec }}>Chácara Paz e Amor · Juiz de Fora, MG</p>
+          <div style={{ marginTop: 12, fontSize: 14, color: C.text, lineHeight: 1.65 }}>
+            Organize inscrições, acomodações e finanças — sua atenção fica onde importa.
+          </div>
+        </Card>
+      </div>
+    </section>
+  );
+}
+
+/* ── COLOR ──────────────────────────────────────────────────── */
+function ColorSection() {
+  return (
+    <section>
+      <SectionH id="color" title="Color"
+        sub="Paleta quente baseada em tons terrosos e creme, com dourado como cor de destaque e semânticas de status claras." />
+
+      <Label>Superfícies & fundos</Label>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 14, marginBottom: 32 }}>
+        <Swatch hex="#F7F4EF" name="Background" token="bg" size="lg" />
+        <Swatch hex="#FFFFFF" name="Surface" token="surface" size="lg" />
+        <Swatch hex="#FDFCFA" name="Surface Raised" token="surfaceRaised" size="lg" />
+        <Swatch hex="#E8E3D9" name="Border" token="border" size="lg" />
+        <Swatch hex="#CFC8BB" name="Border Strong" token="borderStrong" size="lg" />
+      </div>
+
+      <Label>Texto</Label>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14, marginBottom: 32 }}>
+        <Swatch hex="#1A1612" name="Text Primary" token="text" size="lg" />
+        <Swatch hex="#7A7060" name="Text Secondary" token="textSec" size="lg" />
+        <Swatch hex="#B0A898" name="Text Tertiary" token="textTer" size="lg" />
+      </div>
+
+      <Label>Acento — Dourado</Label>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14, marginBottom: 32 }}>
+        <Swatch hex="#C4923A" name="Gold" token="gold" size="lg" />
+        <Swatch hex="#EDD8AD" name="Gold Muted" token="goldMuted" size="lg" />
+        <Swatch hex="#F5ECD9" name="Gold Light" token="goldLight" size="lg" />
+      </div>
+
+      <Label>Semânticas de status</Label>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14, marginBottom: 32 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <Swatch hex="#3D7A52" name="Success" token="success" />
+          <Swatch hex="#E8F4ED" name="Success Light" token="successLight" size="sm" />
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <Swatch hex="#B07030" name="Warning" token="warning" />
+          <Swatch hex="#FBF0E2" name="Warning Light" token="warningLight" size="sm" />
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <Swatch hex="#9B3A2E" name="Danger" token="danger" />
+          <Swatch hex="#FBECEC" name="Danger Light" token="dangerLight" size="sm" />
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <Swatch hex="#2E628B" name="Info" token="info" />
+          <Swatch hex="#E8F2FA" name="Info Light" token="infoLight" size="sm" />
+        </div>
+      </div>
+
+      <Card>
+        <Label>Uso de cor contextual — Gênero de participantes</Label>
+        <div style={{ display: 'flex', gap: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ width: 36, height: 36, borderRadius: '50%', background: C.goldLight, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ fontSize: 14, fontWeight: 700, color: C.gold }}>A</span>
+            </div>
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 500, color: C.text }}>Feminino</div>
+              <div style={{ fontSize: 11, color: C.textTer }}>goldLight + gold</div>
+            </div>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ width: 36, height: 36, borderRadius: '50%', background: C.infoLight, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ fontSize: 14, fontWeight: 700, color: C.info }}>B</span>
+            </div>
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 500, color: C.text }}>Masculino</div>
+              <div style={{ fontSize: 11, color: C.textTer }}>infoLight + info</div>
+            </div>
+          </div>
+        </div>
+      </Card>
+    </section>
+  );
+}
+
+/* ── SPACING & SHAPE ────────────────────────────────────────── */
+function SpacingSection() {
+  const radii = [
+    { label: 'Pill / Badge', value: '99px', use: 'Badge, FilterTabs ativo, chips de restrição' },
+    { label: 'Button / Input', value: '7px', use: 'Btn, Input, SelectInput, TextArea, Avatar logo' },
+    { label: 'Card', value: '10px', use: 'Card principal' },
+    { label: 'Dropdown / Drawer notif', value: '10px', use: 'Dropdowns, tooltips, drawers de info' },
+    { label: 'Icon container (sm)', value: '7–8px', use: 'Containers de ícone pequenos em cards' },
+    { label: 'FilterTabs container', value: '8px', use: 'Wrapper de tabs de filtro' },
+    { label: 'Logo mark', value: '7–8px', use: 'Mark quadrado no sidebar e login' },
+  ];
+  const spacing = [
+    { token: '4px',  use: 'Gap mínimo entre ícone e label' },
+    { token: '6px',  use: 'Gap ícone + texto em botões' },
+    { token: '8px',  use: 'Gap entre botões, padding interno small' },
+    { token: '10px', use: 'Padding nav items, gap em listas' },
+    { token: '12px', use: 'Grid gap pequeno, padding chip' },
+    { token: '14px', use: 'Grid gap principal de métricas' },
+    { token: '16px', use: 'Padding lateral de tabelas, form gap' },
+    { token: '20px', use: 'Padding padrão de Card' },
+    { token: '24px', use: 'Padding de Drawer, gap entre seções' },
+    { token: '28px', use: 'Padding de main content' },
+    { token: '32px', use: 'Padding do event banner' },
+    { token: '40px', use: 'Padding login panel lateral' },
+    { token: '56px', use: 'Altura de Header e Sidebar colapsada' },
+    { token: '64px', use: 'Padding-top de seções do design system' },
+  ];
+  const elevations = [
+    { name: 'Flat',    value: '0 1px 3px rgba(0,0,0,0.04)',     use: 'Card padrão' },
+    { name: 'Raised',  value: '0 2px 12px rgba(0,0,0,0.07)',    use: 'Card hover' },
+    { name: 'Overlay', value: '0 8px 32px rgba(0,0,0,0.10)',    use: 'Dropdown, EventPill aberto' },
+    { name: 'Drawer',  value: '-8px 0 40px rgba(0,0,0,0.10)',   use: 'Drawer lateral' },
+    { name: 'Ring',    value: `0 0 0 3px ${C.goldLight}`,       use: 'Focus de inputs e EventPill ativo' },
+  ];
+  const transitions = [
+    { token: '0.12s ease',                       use: 'Hover de botões, nav items, cor de borda' },
+    { token: '0.15s',                            use: 'Mudança de borda e shadow em inputs' },
+    { token: '0.20s',                            use: 'Overlay do Drawer (opacidade)' },
+    { token: '0.22s cubic-bezier(0.4,0,0.2,1)', use: 'Largura do Sidebar (colapso)' },
+    { token: '0.25s cubic-bezier(0.4,0,0.2,1)', use: 'Translatex do painel Drawer' },
+  ];
+
+  return (
+    <section>
+      <SectionH id="spacing" title="Spacing & Shape"
+        sub="Sistema de espaçamento baseado em múltiplos de 4px. Border-radius consistente por nível de hierarquia." />
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 32 }}>
+        <Card>
+          <Label>Border radius</Label>
+          {radii.map(r => (
+            <div key={r.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: `1px solid ${C.border}` }}>
+              <span style={{ fontSize: 12, color: C.textSec }}>{r.label}</span>
+              <div style={{ textAlign: 'right' }}>
+                <code style={{ fontSize: 12, background: '#F0EDE8', padding: '2px 7px', borderRadius: 4, display: 'block', marginBottom: 2 }}>{r.value}</code>
+                <span style={{ fontSize: 10, color: C.textTer }}>{r.use}</span>
+              </div>
+            </div>
+          ))}
+        </Card>
+        <Card>
+          <Label>Spacing scale</Label>
+          {spacing.map(s => (
+            <div key={s.token} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '5px 0', borderBottom: `1px solid ${C.border}` }}>
+              <div style={{ width: parseInt(s.token) > 40 ? 40 : parseInt(s.token), height: 8, background: C.gold, borderRadius: 2, flexShrink: 0 }} />
+              <code style={{ fontSize: 11, background: '#F0EDE8', padding: '1px 6px', borderRadius: 4, flexShrink: 0 }}>{s.token}</code>
+              <span style={{ fontSize: 11, color: C.textTer }}>{s.use}</span>
+            </div>
+          ))}
+        </Card>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+        <Card>
+          <Label>Elevações (box-shadow)</Label>
+          {elevations.map(e => (
+            <div key={e.name} style={{ marginBottom: 12 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                <span style={{ fontSize: 12, fontWeight: 500, color: C.text }}>{e.name}</span>
+                <span style={{ fontSize: 11, color: C.textTer }}>{e.use}</span>
+              </div>
+              <div style={{ height: 36, borderRadius: 8, background: C.surface, border: `1px solid ${C.border}`, boxShadow: e.value }} />
+            </div>
+          ))}
+        </Card>
+        <Card>
+          <Label>Transições</Label>
+          {transitions.map(t => (
+            <div key={t.token} style={{ padding: '8px 0', borderBottom: `1px solid ${C.border}` }}>
+              <code style={{ fontSize: 11, display: 'block', marginBottom: 2, color: C.text }}>{t.token}</code>
+              <span style={{ fontSize: 11, color: C.textTer }}>{t.use}</span>
+            </div>
+          ))}
+        </Card>
+      </div>
+    </section>
+  );
+}
+
+/* ── COMPONENTS ─────────────────────────────────────────────── */
+function ComponentsSection() {
+  const [tabFilter, setTabFilter] = React.useState('todos');
+  const [inputVal, setInputVal] = React.useState('');
+
+  return (
+    <section>
+      <SectionH id="components" title="Components"
+        sub="Componentes primitivos que compõem toda a UI do Koinonia. Todos implementados como funções React com estado local." />
+
+      {/* BUTTONS */}
+      <div style={{ marginBottom: 40 }}>
+        <Label>Botões</Label>
+        <Card style={{ marginBottom: 12 }}>
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center', marginBottom: 20 }}>
+            <Btn variant="primary">Primary</Btn>
+            <Btn variant="secondary">Secondary</Btn>
+            <Btn variant="gold">Gold</Btn>
+            <Btn variant="ghost">Ghost</Btn>
+            <Btn variant="danger">Danger</Btn>
+            <Btn variant="primary" disabled>Disabled</Btn>
+          </div>
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center', marginBottom: 20 }}>
+            <Btn variant="primary" icon="person_add" size="sm">Tamanho SM</Btn>
+            <Btn variant="primary" icon="person_add" size="md">Tamanho MD</Btn>
+            <Btn variant="primary" icon="person_add" size="lg">Tamanho LG</Btn>
+          </div>
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+            <Btn variant="primary" icon="add">Nova inscrição</Btn>
+            <Btn variant="secondary" icon="picture_as_pdf">Exportar PDF</Btn>
+            <Btn variant="secondary" icon="download">Relatório</Btn>
+            <Btn variant="ghost" icon="close">Cancelar</Btn>
+          </div>
+        </Card>
+        <Card style={{ padding: '14px 16px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 0 }}>
+            {[
+              ['primary', '#1A1612 (text)', '#fff', '#2E2820'],
+              ['secondary', 'transparent', 'text', 'surfaceRaised'],
+              ['gold', '#C4923A', '#fff', '#A87B2F'],
+              ['ghost', 'transparent', 'textSec', '#F0EDE8'],
+              ['danger', 'dangerLight', 'danger', '#F5DADA'],
+            ].map(([v, bg, c, hov]) => (
+              <div key={v} style={{ padding: '10px 12px', borderRight: `1px solid ${C.border}` }}>
+                <div style={{ fontSize: 12, fontWeight: 600, color: C.text, marginBottom: 4, textTransform: 'capitalize' }}>{v}</div>
+                <div style={{ fontSize: 11, color: C.textTer }}>bg: {bg}</div>
+                <div style={{ fontSize: 11, color: C.textTer }}>color: {c}</div>
+                <div style={{ fontSize: 11, color: C.textTer }}>hover: {hov}</div>
+              </div>
+            ))}
+          </div>
+        </Card>
+      </div>
+
+      {/* BADGES */}
+      <div style={{ marginBottom: 40 }}>
+        <Label>Badges</Label>
+        <Card>
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 16 }}>
+            <Badge color="gold">Ouro</Badge>
+            <Badge color="success">Pago total</Badge>
+            <Badge color="warning">Pago parcial</Badge>
+            <Badge color="danger">Cancelado</Badge>
+            <Badge color="info">Lista espera</Badge>
+            <Badge color="neutral">Neutro</Badge>
+          </div>
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+            <Badge color="gold">Encontrista</Badge>
+            <Badge color="neutral">Servo</Badge>
+            <Badge color="success">Confirmado</Badge>
+            <Badge color="warning">Pendente</Badge>
+            <Badge color="info">Em andamento</Badge>
+            <Badge color="danger">Inadimplente</Badge>
+          </div>
+          <div style={{ marginTop: 14, padding: '10px 12px', background: C.surfaceRaised, borderRadius: 8, border: `1px solid ${C.border}` }}>
+            <div style={{ fontSize: 12, fontWeight: 500, color: C.text, marginBottom: 4 }}>Especificação</div>
+            <div style={{ fontSize: 12, color: C.textSec }}>padding: 2px 8px · border-radius: 99px · font-size: 11px · font-weight: 500 · letter-spacing: 0.02em</div>
+          </div>
+        </Card>
+      </div>
+
+      {/* INPUTS */}
+      <div style={{ marginBottom: 40 }}>
+        <Label>Campos de formulário</Label>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+          <Card>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 500, color: C.textSec, marginBottom: 5 }}>Input padrão</div>
+                <Input value={inputVal} onChange={e => setInputVal(e.target.value)} placeholder="placeholder…" />
+              </div>
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 500, color: C.textSec, marginBottom: 5 }}>Input com ícone</div>
+                <Input value="" onChange={() => {}} placeholder="Buscar participante…" icon="search" />
+              </div>
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 500, color: C.textSec, marginBottom: 5 }}>Input email</div>
+                <Input value="" onChange={() => {}} placeholder="seu@email.com" icon="mail" type="email" />
+              </div>
+            </div>
+          </Card>
+          <Card>
+            <div style={{ marginBottom: 14 }}>
+              <div style={{ fontSize: 13, fontWeight: 500, color: C.textSec, marginBottom: 5 }}>FormField wrapper</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: C.textSec, marginBottom: 5 }}>Nome completo <span style={{ color: C.danger }}>*</span></label>
+                  <Input value="" onChange={() => {}} placeholder="Ex.: Ana Carolina Ferreira" />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: C.textSec, marginBottom: 5 }}>Observações</label>
+                  <textarea rows={3} placeholder="Texto livre…"
+                    style={{ width: '100%', padding: '8px 12px', border: `1px solid ${C.border}`, borderRadius: 7, fontSize: 14, background: C.surface, color: C.text, outline: 'none', resize: 'vertical', lineHeight: 1.6 }} />
+                  <p style={{ fontSize: 11, color: C.textTer, marginTop: 4 }}>Qualquer informação adicional relevante.</p>
+                </div>
+              </div>
+            </div>
+            <div style={{ padding: '10px 12px', background: C.surfaceRaised, borderRadius: 8, border: `1px solid ${C.border}` }}>
+              <div style={{ fontSize: 11, color: C.textSec }}>Focus: border <code style={{ fontSize: 11, background: '#F0EDE8', padding: '1px 5px', borderRadius: 3 }}>goldMuted</code> + ring <code style={{ fontSize: 11, background: '#F0EDE8', padding: '1px 5px', borderRadius: 3 }}>0 0 0 3px goldLight</code></div>
+            </div>
+          </Card>
+        </div>
+      </div>
+
+      {/* FILTER TABS */}
+      <div style={{ marginBottom: 40 }}>
+        <Label>FilterTabs</Label>
+        <Card>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <FilterTabs
+              options={[{ key: 'todos', label: 'Todos' }, { key: 'encontrista', label: 'Encontristas' }, { key: 'servo', label: 'Servos' }]}
+              value={tabFilter} onChange={setTabFilter}
+            />
+            <FilterTabs
+              options={[{ key: 'todos', label: 'Todos' }, { key: 'inad', label: 'Inadimplentes' }]}
+              value="todos" onChange={() => {}}
+            />
+          </div>
+          <div style={{ marginTop: 14, padding: '10px 12px', background: C.surfaceRaised, borderRadius: 8, border: `1px solid ${C.border}` }}>
+            <div style={{ fontSize: 12, color: C.textSec }}>Container: bg surface · border · radius 8px · padding 3px · gap 4px</div>
+            <div style={{ fontSize: 12, color: C.textSec }}>Item ativo: bg text · color #fff · fontWeight 600 · radius 6px</div>
+          </div>
+        </Card>
+      </div>
+
+      {/* CARDS */}
+      <div style={{ marginBottom: 40 }}>
+        <Label>Cards</Label>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
+          <Card>
+            <div style={{ fontSize: 13, fontWeight: 500, color: C.text, marginBottom: 4 }}>Card padrão</div>
+            <div style={{ fontSize: 12, color: C.textSec }}>background: surface · border: border · radius: 10px · padding: 20px · shadow flat</div>
+          </Card>
+          <Card onClick={() => {}}>
+            <div style={{ fontSize: 13, fontWeight: 500, color: C.text, marginBottom: 4 }}>Card clicável</div>
+            <div style={{ fontSize: 12, color: C.textSec }}>Hover: border-strong + shadow raised · cursor pointer</div>
+          </Card>
+          <Card>
+            <div style={{ width: 36, height: 36, borderRadius: 8, background: C.goldLight, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 14 }}>
+              <Icon name="payments" size={18} style={{ color: C.gold }} />
+            </div>
+            <div style={{ fontSize: 24, fontWeight: 600, color: C.text, letterSpacing: '-0.02em', lineHeight: 1, marginBottom: 4 }}>R$ 23.400</div>
+            <div style={{ fontSize: 12, color: C.textSec, marginBottom: 2 }}>Arrecadado</div>
+            <div style={{ fontSize: 11, color: C.textTer }}>68% da meta</div>
+          </Card>
+        </div>
+      </div>
+
+      {/* EMPTY STATE */}
+      <div style={{ marginBottom: 40 }}>
+        <Label>Estado vazio</Label>
+        <Card>
+          <div style={{ textAlign: 'center', padding: '40px 24px' }}>
+            <div style={{ width: 48, height: 48, borderRadius: '50%', background: '#F0EDE8', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+              <Icon name="group" size={22} style={{ color: C.textTer }} />
+            </div>
+            <p style={{ fontSize: 15, fontWeight: 500, color: C.text, marginBottom: 4 }}>Nenhum participante encontrado</p>
+            <p style={{ fontSize: 13, color: C.textSec, marginBottom: 20 }}>Adicione o primeiro participante para começar.</p>
+            <Btn variant="primary" icon="person_add">Novo participante</Btn>
+          </div>
+        </Card>
+      </div>
+
+      {/* INLINE INFO BOX */}
+      <div style={{ marginBottom: 40 }}>
+        <Label>Caixas de informação inline</Label>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {[
+            { bg: C.infoLight, color: C.info, icon: 'info', text: 'Esta informação é opcional mas fortemente recomendada para a segurança do participante.' },
+            { bg: C.goldLight, color: C.gold, icon: 'info', text: 'Após criar a chácara, você poderá adicionar quartos e camas individualmente.' },
+            { bg: C.warningLight, color: C.warning, icon: 'warning', text: 'Este participante possui alergia a amendoim registrada.' },
+            { bg: C.dangerLight, color: C.danger, icon: 'error', text: 'Inscrição com débito em aberto de R$ 140,00.' },
+          ].map((b, i) => (
+            <div key={i} style={{ padding: 14, background: b.bg, borderRadius: 8, display: 'flex', gap: 10 }}>
+              <Icon name={b.icon} size={16} style={{ color: b.color, flexShrink: 0, marginTop: 1 }} />
+              <p style={{ fontSize: 12, color: b.color, lineHeight: 1.6 }}>{b.text}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* AVATAR / INITIAL */}
+      <div style={{ marginBottom: 40 }}>
+        <Label>Avatares por inicial</Label>
+        <Card>
+          <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'center' }}>
+            {[
+              { initial: 'A', bg: C.goldLight, color: C.gold, size: 28, label: 'sm – Feminino' },
+              { initial: 'B', bg: C.infoLight,  color: C.info,  size: 28, label: 'sm – Masculino' },
+              { initial: 'C', bg: C.goldLight, color: C.gold, size: 32, label: 'md – Feminino' },
+              { initial: 'D', bg: C.infoLight,  color: C.info,  size: 32, label: 'md – Masculino' },
+              { initial: 'K', bg: C.text,       color: '#fff',  size: 28, label: 'Logo mark' },
+            ].map((a, i) => (
+              <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+                <div style={{ width: a.size, height: a.size, borderRadius: a.initial === 'K' ? 7 : '50%', background: a.bg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  {a.initial === 'K'
+                    ? <Icon name="diversity_3" size={a.size * 0.55} style={{ color: a.color }} />
+                    : <span style={{ fontSize: a.size * 0.42, fontWeight: 700, color: a.color }}>{a.initial}</span>
+                  }
+                </div>
+                <span style={{ fontSize: 10, color: C.textTer, textAlign: 'center' }}>{a.label}</span>
+              </div>
+            ))}
+          </div>
+        </Card>
+      </div>
+
+      {/* ICONS */}
+      <div style={{ marginBottom: 40 }}>
+        <Label>Ícones do sistema</Label>
+        <Card style={{ marginBottom: 10 }}>
+          <div style={{ fontSize: 12, fontWeight: 500, color: C.textSec, marginBottom: 10 }}>Navegação</div>
+          <IconRow icons={['space_dashboard','group','event','how_to_reg','bed','account_balance_wallet','chevron_left','chevron_right','expand_more','expand_less']} />
+        </Card>
+        <Card style={{ marginBottom: 10 }}>
+          <div style={{ fontSize: 12, fontWeight: 500, color: C.textSec, marginBottom: 10 }}>Ações</div>
+          <IconRow icons={['person_add','add','close','check','arrow_forward','download','picture_as_pdf','edit','delete','more_horiz']} />
+        </Card>
+        <Card style={{ marginBottom: 10 }}>
+          <div style={{ fontSize: 12, fontWeight: 500, color: C.textSec, marginBottom: 10 }}>Status & feedback</div>
+          <IconRow icons={['check_circle','warning','error','info','progress_activity','visibility','visibility_off','lock','mail','phone']} />
+        </Card>
+        <Card>
+          <div style={{ fontSize: 12, fontWeight: 500, color: C.textSec, marginBottom: 10 }}>Domínio</div>
+          <IconRow icons={['diversity_3','calendar_month','location_on','apartment','meeting_room','payments','receipt_long','trending_up','account_balance','assignment']} />
+        </Card>
+      </div>
+    </section>
+  );
+}
+
+/* ── LAYOUT ─────────────────────────────────────────────────── */
+function LayoutSection() {
+  return (
+    <section>
+      <SectionH id="layout" title="Layout"
+        sub="AppShell de duas colunas: Sidebar colapsável + área de conteúdo com Header fixo. Grid de 4 colunas para métricas." />
+
+      {/* AppShell diagram */}
+      <Card style={{ marginBottom: 24, padding: 0, overflow: 'hidden' }}>
+        <div style={{ padding: '16px 20px', borderBottom: `1px solid ${C.border}` }}>
+          <div style={{ fontSize: 13, fontWeight: 600, color: C.text }}>AppShell — estrutura geral</div>
+        </div>
+        <div style={{ display: 'flex', height: 320, background: C.bg }}>
+          {/* Sidebar mock */}
+          <div style={{ width: 56, background: C.surface, borderRight: `1px solid ${C.border}`, display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
+            <div style={{ height: 56, borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ width: 28, height: 28, borderRadius: 7, background: C.text, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Icon name="diversity_3" size={14} style={{ color: '#fff' }} />
+              </div>
+            </div>
+            <div style={{ flex: 1, padding: '8px 6px', display: 'flex', flexDirection: 'column', gap: 2 }}>
+              {['space_dashboard','group','event','how_to_reg','bed','account_balance_wallet'].map((icon, i) => (
+                <div key={icon} style={{ height: 36, borderRadius: 7, display: 'flex', alignItems: 'center', justifyContent: 'center', background: i === 0 ? C.goldLight : 'transparent', borderLeft: i === 0 ? `2px solid ${C.gold}` : '2px solid transparent' }}>
+                  <Icon name={icon} size={18} fill={i === 0} style={{ color: i === 0 ? C.gold : C.textSec }} />
+                </div>
+              ))}
+            </div>
+            <div style={{ height: 48, borderTop: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ width: 28, height: 28, borderRadius: '50%', background: C.goldLight, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ fontSize: 12, fontWeight: 700, color: C.gold }}>A</span>
+              </div>
+            </div>
+          </div>
+          {/* Content */}
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+            {/* Header */}
+            <div style={{ height: 56, background: C.surface, borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', padding: '0 24px', gap: 12 }}>
+              <span style={{ fontSize: 14, fontWeight: 600, color: C.text }}>Dashboard</span>
+              <div style={{ width: 1, height: 18, background: C.border }} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 8px', border: `1px solid ${C.border}`, borderRadius: 7, background: C.surfaceRaised }}>
+                <Icon name="calendar_month" size={13} style={{ color: C.gold }} />
+                <span style={{ fontSize: 12, fontWeight: 500, color: C.text }}>Retiro Koinonia 2025</span>
+                <Badge color="success">Ativo</Badge>
+                <Icon name="expand_more" size={14} style={{ color: C.textTer }} />
+              </div>
+              <div style={{ flex: 1 }} />
+              <Btn variant="primary" icon="add" size="sm">Novo evento</Btn>
+            </div>
+            {/* Main */}
+            <div style={{ flex: 1, padding: 20, overflow: 'hidden' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 10, marginBottom: 14 }}>
+                {[
+                  { label: 'Participantes', value: '84', icon: 'group', color: C.info, colorLight: C.infoLight },
+                  { label: 'Inscrições', value: '78', icon: 'assignment', color: C.gold, colorLight: C.goldLight },
+                  { label: 'Acomodações', value: '62/90', icon: 'bed', color: C.success, colorLight: C.successLight },
+                  { label: 'Arrecadado', value: 'R$ 23.4k', icon: 'account_balance_wallet', color: C.warning, colorLight: C.warningLight },
+                ].map(m => (
+                  <div key={m.label} style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 8, padding: '12px 14px' }}>
+                    <div style={{ width: 28, height: 28, borderRadius: 6, background: m.colorLight, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}>
+                      <Icon name={m.icon} size={14} style={{ color: m.color }} />
+                    </div>
+                    <div style={{ fontSize: 16, fontWeight: 600, color: C.text, lineHeight: 1 }}>{m.value}</div>
+                    <div style={{ fontSize: 10, color: C.textSec, marginTop: 2 }}>{m.label}</div>
+                  </div>
+                ))}
+              </div>
+              <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 8, padding: '14px', height: 80, display: 'flex', alignItems: 'center', justifyContent: 'center', color: C.textTer, fontSize: 12 }}>
+                Tabela de inscrições recentes…
+              </div>
+            </div>
+          </div>
+        </div>
+      </Card>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+        <Card>
+          <Label>Sidebar</Label>
+          {[
+            ['Largura colapsada', '56px'],
+            ['Largura expandida', '220px'],
+            ['Transição', '0.22s cubic-bezier(0.4,0,0.2,1)'],
+            ['Logo area height', '56px'],
+            ['Nav item padding', '8px 10px'],
+            ['Nav item radius', '7px'],
+            ['Active: bg', 'goldLight'],
+            ['Active: border-left', '2px solid gold'],
+            ['Active: color', 'gold, fontWeight 600'],
+            ['Hover: bg', '#F7F4EF (bg)'],
+          ].map(([k, v]) => <Spec key={k} label={k} value={v} />)}
+        </Card>
+        <Card>
+          <Label>Header</Label>
+          {[
+            ['Altura', '56px'],
+            ['Background', 'surface'],
+            ['Border-bottom', '1px solid border'],
+            ['Padding lateral', '0 24px'],
+            ['Gap interno', '16px'],
+            ['Título: fontSize', '15px, weight 600'],
+            ['Divisor event pill', '1px · height 18px'],
+            ['EventPill: border-radius', '8px'],
+            ['EventPill open: ring', '0 0 0 3px goldLight'],
+          ].map(([k, v]) => <Spec key={k} label={k} value={v} />)}
+
+          <div style={{ marginTop: 16 }}>
+            <Label>Main content</Label>
+            {[
+              ['Padding', '28px'],
+              ['Max-width padrão', '1100px, margin auto'],
+              ['Grid métricas', 'repeat(4, 1fr), gap 14px'],
+              ['Grid bottom row', '1fr 280px, gap 14px'],
+              ['Grid 2 colunas', '1fr 1fr, gap 14px/16px'],
+            ].map(([k, v]) => <Spec key={k} label={k} value={v} />)}
+          </div>
+        </Card>
+      </div>
+    </section>
+  );
+}
+
+/* ── PATTERNS ───────────────────────────────────────────────── */
+function PatternsSection() {
+  return (
+    <section>
+      <SectionH id="patterns" title="Patterns"
+        sub="Padrões recorrentes de composição: tabelas, drawers, progresso, steps e o sistema de status." />
+
+      {/* TABLE */}
+      <div style={{ marginBottom: 40 }}>
+        <Label>Tabela padrão</Label>
+        <Card style={{ padding: 0, overflow: 'hidden' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr style={{ background: C.surfaceRaised }}>
+                {['Participante','Papel','Status','Valor',''].map(h => (
+                  <th key={h} style={{ padding: '10px 16px', fontSize: 11, fontWeight: 500, color: C.textTer, textAlign: 'left', borderBottom: `1px solid ${C.border}`, letterSpacing: '0.05em', textTransform: 'uppercase' }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                { nome: 'Ana Carolina Ferreira', papel: 'Encontrista', status: 'success', label: 'Pago total',   valor: 'R$ 380,00', genero: 'F' },
+                { nome: 'Bruno Henrique Santos', papel: 'Servo',       status: 'warning', label: 'Pago parcial', valor: 'R$ 200,00', genero: 'M' },
+                { nome: 'Camila Dias Oliveira',  papel: 'Encontrista', status: 'danger',  label: 'Pendente',     valor: '—',          genero: 'F' },
+              ].map((r, i) => (
+                <tr key={i} style={{ borderBottom: i < 2 ? `1px solid ${C.border}` : 'none' }}>
+                  <td style={{ padding: '13px 16px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <div style={{ width: 32, height: 32, borderRadius: '50%', background: r.genero === 'F' ? C.goldLight : C.infoLight, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <span style={{ fontSize: 13, fontWeight: 700, color: r.genero === 'F' ? C.gold : C.info }}>{r.nome[0]}</span>
+                      </div>
+                      <span style={{ fontSize: 14, fontWeight: 500, color: C.text }}>{r.nome}</span>
+                    </div>
+                  </td>
+                  <td style={{ padding: '13px 16px', fontSize: 12, color: C.textSec }}>{r.papel}</td>
+                  <td style={{ padding: '13px 16px' }}><Badge color={r.status}>{r.label}</Badge></td>
+                  <td style={{ padding: '13px 16px', fontSize: 13, color: r.valor === '—' ? C.textTer : C.text }}>{r.valor}</td>
+                  <td style={{ padding: '13px 16px', textAlign: 'right' }}>
+                    <button style={{ fontSize: 12, color: C.gold, background: 'none', border: 'none', cursor: 'pointer', fontWeight: 500 }}>Detalhar</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <div style={{ padding: '10px 16px', background: C.surfaceRaised, borderTop: `1px solid ${C.border}`, fontSize: 11, color: C.textTer }}>
+            Header: surfaceRaised · cells: padding 13px 16px · row hover: surfaceRaised · action link: gold 12px 500
+          </div>
+        </Card>
+      </div>
+
+      {/* PROGRESS */}
+      <div style={{ marginBottom: 40 }}>
+        <Label>Barra de progresso</Label>
+        <Card>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+            {[
+              { label: 'Meta financeira', pct: 68, color: C.gold },
+              { label: 'Ocupação de acomodações', pct: 78, color: C.success },
+              { label: 'Inadimplência', pct: 14, color: C.danger },
+            ].map(p => (
+              <div key={p.label}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                  <span style={{ fontSize: 13, color: C.text }}>{p.label}</span>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: p.color }}>{p.pct}%</span>
+                </div>
+                <div style={{ height: 6, borderRadius: 99, background: '#F0EDE8', overflow: 'hidden' }}>
+                  <div style={{ height: '100%', width: `${p.pct}%`, background: p.color, borderRadius: 99 }} />
+                </div>
+              </div>
+            ))}
+          </div>
+          <div style={{ marginTop: 14, padding: '10px 12px', background: C.surfaceRaised, borderRadius: 8, border: `1px solid ${C.border}`, fontSize: 12, color: C.textSec }}>
+            Track: bg #F0EDE8 · height 4px (detalhes) / 6px (principal) / 8px (banner) · radius 99px · bar radius 99px
+          </div>
+        </Card>
+      </div>
+
+      {/* STEP INDICATOR */}
+      <div style={{ marginBottom: 40 }}>
+        <Label>Step indicator (Drawer multi-etapa)</Label>
+        <Card>
+          {(() => {
+            const steps = ['Dados pessoais', 'Contato de emergência', 'Saúde'];
+            const active = 1;
+            return (
+              <div style={{ display: 'flex', gap: 0, borderBottom: `1px solid ${C.border}` }}>
+                {steps.map((s, i) => (
+                  <button key={i}
+                    style={{
+                      flex: 1, padding: '8px 4px', fontSize: 12.5, fontWeight: active === i ? 600 : 400,
+                      color: active === i ? C.text : (i < active ? C.gold : C.textTer),
+                      border: 'none', background: 'transparent', cursor: 'pointer',
+                      borderBottom: active === i ? `2px solid ${C.gold}` : (i < active ? `2px solid ${C.goldMuted}` : '2px solid transparent'),
+                      marginBottom: -1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                    }}
+                  >
+                    <span style={{
+                      width: 18, height: 18, borderRadius: '50%', fontSize: 10, fontWeight: 700,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      background: i < active ? C.gold : (active === i ? C.text : '#F0EDE8'),
+                      color: i <= active ? '#fff' : C.textTer,
+                    }}>{i < active ? '✓' : i + 1}</span>
+                    {s}
+                  </button>
+                ))}
+              </div>
+            );
+          })()}
+          <div style={{ marginTop: 14, fontSize: 12, color: C.textSec }}>
+            Completo: bg gold · cor #fff · border-bottom goldMuted · label gold<br/>
+            Ativo: bg text · cor #fff · border-bottom gold · label text<br/>
+            Pendente: bg #F0EDE8 · cor textTer · border-bottom transparent · label textTer
+          </div>
+        </Card>
+      </div>
+
+      {/* STATUS MAP */}
+      <div style={{ marginBottom: 40 }}>
+        <Label>Sistema de status — inscrições</Label>
+        <Card>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 12 }}>
+            {[
+              { key: 'PAGO_TOTAL',   label: 'Pago total',    color: 'success' },
+              { key: 'PAGO_PARCIAL', label: 'Pago parcial',  color: 'warning' },
+              { key: 'PENDENTE',     label: 'Pendente',       color: 'danger'  },
+              { key: 'LISTA_ESPERA', label: 'Lista de espera',color: 'info'    },
+              { key: 'CANCELADO',    label: 'Cancelado',      color: 'neutral' },
+            ].map(s => (
+              <div key={s.key} style={{ textAlign: 'center', padding: '14px 10px', background: C.surfaceRaised, borderRadius: 8, border: `1px solid ${C.border}` }}>
+                <Badge color={s.color}>{s.label}</Badge>
+                <div style={{ fontSize: 10, color: C.textTer, marginTop: 6, fontFamily: 'monospace' }}>{s.key}</div>
+              </div>
+            ))}
+          </div>
+        </Card>
+      </div>
+
+      {/* EVENT BANNER */}
+      <div style={{ marginBottom: 40 }}>
+        <Label>Event banner (Dashboard)</Label>
+        <Card style={{ padding: 0, overflow: 'hidden' }}>
+          <div style={{ padding: '28px 32px', borderLeft: `3px solid ${C.gold}`, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 24 }}>
+            <div>
+              <p style={{ fontSize: 11, fontWeight: 600, color: C.gold, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 6 }}>Evento em andamento</p>
+              <h2 style={{ fontSize: 22, fontWeight: 600, color: C.text, letterSpacing: '-0.02em', marginBottom: 4 }}>Retiro Koinonia 2025</h2>
+              <p style={{ fontSize: 13, color: C.textSec }}>Chácara Paz e Amor · Juiz de Fora, MG · 18–20 jan 2025</p>
+            </div>
+            <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+              <Btn variant="secondary" size="sm" icon="bed">Mapa</Btn>
+              <Btn variant="primary" size="sm" icon="assignment">Inscrições</Btn>
+            </div>
+          </div>
+          <div style={{ height: 6, background: '#F0EDE8', position: 'relative' }}>
+            <div style={{ position: 'absolute', left: 0, top: 0, height: '100%', width: '68%', background: C.gold, borderRadius: '0 99px 99px 0' }} />
+          </div>
+          <div style={{ padding: '8px 32px', display: 'flex', justifyContent: 'flex-end' }}>
+            <span style={{ fontSize: 11, color: C.textTer }}>68% da meta financeira atingida</span>
+          </div>
+        </Card>
+      </div>
+
+      {/* DRAWER SPEC */}
+      <div style={{ marginBottom: 40 }}>
+        <Label>Drawer — especificação</Label>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+          <Card>
+            {[
+              ['Largura padrão', '500px'],
+              ['Largura form', '440–520px'],
+              ['Entrada', 'translateX(width) → 0'],
+              ['Transição', '0.25s cubic-bezier(0.4,0,0.2,1)'],
+              ['Overlay', 'rgba(26,22,18,0.28)'],
+              ['Header height', 'auto · padding 18px 24px'],
+              ['Header border', '1px solid border'],
+              ['Title', '16px · weight 600'],
+              ['Close button', '30×30 · radius 6 · bg #F0EDE8'],
+              ['Body padding', '24px'],
+              ['Footer padding', '16px 24px'],
+              ['Footer border', 'border-top 1px'],
+              ['Drawer shadow', '-8px 0 40px rgba(0,0,0,0.1)'],
+            ].map(([k, v]) => <Spec key={k} label={k} value={v} />)}
+          </Card>
+          <Card style={{ display: 'flex', alignItems: 'stretch', padding: 0, overflow: 'hidden', minHeight: 340 }}>
+            <div style={{ flex: 1, background: 'rgba(26,22,18,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ fontSize: 12, color: C.textSec }}>Overlay</span>
+            </div>
+            <div style={{ width: 220, background: C.surface, borderLeft: `1px solid ${C.border}`, boxShadow: '-8px 0 40px rgba(0,0,0,0.1)', display: 'flex', flexDirection: 'column' }}>
+              <div style={{ padding: '14px 18px', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span style={{ fontSize: 13, fontWeight: 600, color: C.text }}>Novo Participante</span>
+                <div style={{ width: 24, height: 24, borderRadius: 5, background: '#F0EDE8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Icon name="close" size={14} style={{ color: C.textSec }} />
+                </div>
+              </div>
+              <div style={{ flex: 1, padding: 18, fontSize: 12, color: C.textTer }}>conteúdo do drawer…</div>
+              <div style={{ padding: '12px 18px', borderTop: `1px solid ${C.border}`, display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                <Btn variant="secondary" size="sm">Cancelar</Btn>
+                <Btn variant="primary" size="sm" icon="check">Salvar</Btn>
+              </div>
+            </div>
+          </Card>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════
+   IMPLEMENTATION
+══════════════════════════════════════════════════════════════ */
+function ImplementationSection() {
+  const tokenMap = [
+    { design: 'C.bg',           hex: '#F7F4EF', css: '--background',      tailwind: 'bg-background / bg-[#F7F4EF]' },
+    { design: 'C.surface',      hex: '#FFFFFF', css: '--surface',          tailwind: 'bg-surface' },
+    { design: 'C.surfaceRaised',hex: '#FDFCFA', css: '--surface-raised',   tailwind: 'bg-surface-raised' },
+    { design: 'C.border',       hex: '#E8E3D9', css: '--border',           tailwind: 'border-border' },
+    { design: 'C.borderStrong', hex: '#CFC8BB', css: '--border-strong',    tailwind: 'border-border-strong' },
+    { design: 'C.text',         hex: '#1A1612', css: '--foreground',       tailwind: 'text-foreground' },
+    { design: 'C.textSec',      hex: '#6E6558', css: '--text-secondary',   tailwind: 'text-text-secondary' },
+    { design: 'C.textTer',      hex: '#A89E93', css: '--text-tertiary',    tailwind: 'text-text-tertiary' },
+    { design: 'C.gold',         hex: '#C4923A', css: '--gold',             tailwind: 'text-warm-gold / bg-warm-gold' },
+    { design: 'C.goldMuted',    hex: '#DCBA80', css: '--gold-muted',       tailwind: 'border-warm-gold-muted' },
+    { design: 'C.goldLight',    hex: '#F5EDD9', css: '--gold-light',       tailwind: 'bg-warm-gold-light' },
+    { design: 'C.success',      hex: '#336B46', css: '--success',          tailwind: 'text-status-success' },
+    { design: 'C.successLight', hex: '#E2F0E8', css: '--success-bg',       tailwind: 'bg-status-success-bg' },
+    { design: 'C.warning',      hex: '#B07030', css: '--warning',          tailwind: 'text-status-warning' },
+    { design: 'C.warningLight', hex: '#FBF0E2', css: '--warning-bg',       tailwind: 'bg-status-warning-bg' },
+    { design: 'C.danger',       hex: '#9B3A2E', css: '--danger',           tailwind: 'text-status-danger' },
+    { design: 'C.dangerLight',  hex: '#FBECEC', css: '--danger-bg',        tailwind: 'bg-status-danger-bg' },
+    { design: 'C.info',         hex: '#2E628B', css: '--info',             tailwind: 'text-status-info' },
+    { design: 'C.infoLight',    hex: '#E8F2FA', css: '--info-bg',          tailwind: 'bg-status-info-bg' },
+  ];
+
+  const componentMap = [
+    { name: 'Button',      variants: 'default · gold · outline · ghost · destructive',  sizes: 'sm · default · lg · icon', status: 'built' },
+    { name: 'Badge',       variants: 'gold · success · warning · danger · info · neutral', sizes: '—',                        status: 'built' },
+    { name: 'Input',       variants: 'default · with-icon',                              sizes: 'sm · default',              status: 'built' },
+    { name: 'Select',      variants: 'default',                                          sizes: 'default',                   status: 'built' },
+    { name: 'Textarea',    variants: 'default',                                          sizes: 'default',                   status: 'built' },
+    { name: 'Card',        variants: 'default',                                          sizes: '—',                         status: 'built' },
+    { name: 'FormField',   variants: 'default · with-hint · required',                  sizes: '—',                         status: 'built' },
+    { name: 'Label',       variants: 'default',                                          sizes: '—',                         status: 'built' },
+    { name: 'Alert',       variants: 'default · destructive',                            sizes: '—',                         status: 'built' },
+    { name: 'FilterTabs',  variants: 'default',                                          sizes: '—',                         status: 'built' },
+    { name: 'EmptyState',  variants: 'default',                                          sizes: '—',                         status: 'built' },
+    { name: 'Sheet',       variants: 'default (Drawer)',                                 sizes: 'sm · default · lg',         status: 'built' },
+    { name: 'AppLayout',   variants: 'sidebar + header + EventPill',                     sizes: '—',                         status: 'built' },
+  ];
+
+  const statusColor = { built: C.success, partial: C.warning, pending: C.textTer };
+  const statusLabel = { built: 'Implementado', partial: 'Parcial', pending: 'Pendente' };
+
+  return (
+    <section>
+      <SectionH id="implementation" title="Implementation"
+        sub="Mapeamento entre os tokens do design system e as classes Tailwind / variáveis CSS usadas na implementação (apps/web). Fonte da verdade: src/index.css + tailwind.config.js." />
+
+      {/* Token mapping table */}
+      <div style={{ marginBottom: 32 }}>
+        <Label>Tokens → Tailwind CSS</Label>
+        <Card style={{ padding: 0, overflow: 'hidden' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '130px 72px 1fr 1fr', borderBottom: `1px solid ${C.border}`, padding: '8px 16px', background: C.surfaceRaised }}>
+            {['Token (JS)', 'Hex', 'CSS Variable', 'Tailwind class'].map(h => (
+              <span key={h} style={{ fontSize: 11, fontWeight: 600, color: C.textTer, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{h}</span>
+            ))}
+          </div>
+          {tokenMap.map((t, i) => (
+            <div key={t.design} style={{
+              display: 'grid', gridTemplateColumns: '130px 72px 1fr 1fr',
+              padding: '7px 16px', alignItems: 'center',
+              background: i % 2 === 0 ? C.surface : C.surfaceRaised,
+              borderBottom: `1px solid ${C.border}`,
+            }}>
+              <code style={{ fontSize: 12, color: C.gold, fontFamily: 'monospace' }}>{t.design}</code>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <div style={{ width: 14, height: 14, borderRadius: 3, background: t.hex, border: `1px solid ${C.border}`, flexShrink: 0 }} />
+                <code style={{ fontSize: 11, color: C.textSec, fontFamily: 'monospace' }}>{t.hex}</code>
+              </div>
+              <code style={{ fontSize: 12, color: C.info, fontFamily: 'monospace' }}>{t.css}</code>
+              <code style={{ fontSize: 12, color: C.text, fontFamily: 'monospace' }}>{t.tailwind}</code>
+            </div>
+          ))}
+        </Card>
+      </div>
+
+      {/* Component status */}
+      <div style={{ marginBottom: 32 }}>
+        <Label>Componentes implementados</Label>
+        <Card style={{ padding: 0, overflow: 'hidden' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr 1fr 100px', borderBottom: `1px solid ${C.border}`, padding: '8px 16px', background: C.surfaceRaised }}>
+            {['Componente', 'Variantes', 'Tamanhos', 'Status'].map(h => (
+              <span key={h} style={{ fontSize: 11, fontWeight: 600, color: C.textTer, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{h}</span>
+            ))}
+          </div>
+          {componentMap.map((c, i) => (
+            <div key={c.name} style={{
+              display: 'grid', gridTemplateColumns: '140px 1fr 1fr 100px',
+              padding: '8px 16px', alignItems: 'center',
+              background: i % 2 === 0 ? C.surface : C.surfaceRaised,
+              borderBottom: `1px solid ${C.border}`,
+            }}>
+              <span style={{ fontSize: 13, fontWeight: 600, color: C.text }}>{c.name}</span>
+              <span style={{ fontSize: 12, color: C.textSec }}>{c.variants}</span>
+              <span style={{ fontSize: 12, color: C.textSec }}>{c.sizes}</span>
+              <span style={{ fontSize: 11, fontWeight: 600, color: statusColor[c.status] }}>● {statusLabel[c.status]}</span>
+            </div>
+          ))}
+        </Card>
+      </div>
+
+      {/* File references */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+        <Card>
+          <Label>Arquivos de referência</Label>
+          {[
+            { path: 'apps/web/src/index.css',            desc: 'CSS variables — fonte da verdade dos tokens' },
+            { path: 'apps/web/tailwind.config.js',       desc: 'Mapeamento das variáveis para classes Tailwind' },
+            { path: 'apps/web/src/components/ui/',       desc: 'Primitivos React: Button, Badge, Input, Card…' },
+            { path: 'apps/web/src/components/layout/',   desc: 'AppLayout, Sidebar, EventPill' },
+            { path: 'doc/Koinonia-redesign/',            desc: 'Protótipos JSX de referência visual' },
+            { path: 'doc/design_old/',                   desc: 'Designs anteriores (backup — não usar)' },
+          ].map(f => (
+            <div key={f.path} style={{ display: 'flex', flexDirection: 'column', padding: '7px 0', borderBottom: `1px solid ${C.border}` }}>
+              <code style={{ fontSize: 12, color: C.gold, fontFamily: 'monospace' }}>{f.path}</code>
+              <span style={{ fontSize: 11, color: C.textSec, marginTop: 2 }}>{f.desc}</span>
+            </div>
+          ))}
+        </Card>
+        <Card>
+          <Label>Convenções de uso</Label>
+          {[
+            { rule: 'Sempre use variáveis CSS / classes Tailwind', detail: 'Nunca hardcode hex no JSX/TSX do projeto' },
+            { rule: 'bg-surface / bg-background', detail: 'Não usar bg-white — use os tokens semânticos' },
+            { rule: 'text-warm-gold para dourado', detail: 'Nunca text-yellow-* ou text-amber-*' },
+            { rule: 'rounded-control para botões/inputs', detail: 'rounded-[7px] como fallback se necessário' },
+            { rule: 'Material Symbols Rounded', detail: 'Ícones via className="material-symbols-rounded"' },
+            { rule: 'DM Sans — fonte única', detail: 'Sem Inter, sem Geist, sem system-ui em produção' },
+          ].map(f => (
+            <div key={f.rule} style={{ display: 'flex', flexDirection: 'column', padding: '7px 0', borderBottom: `1px solid ${C.border}` }}>
+              <span style={{ fontSize: 12, fontWeight: 600, color: C.text }}>{f.rule}</span>
+              <span style={{ fontSize: 11, color: C.textSec, marginTop: 2 }}>{f.detail}</span>
+            </div>
+          ))}
+        </Card>
+      </div>
+    </section>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════
+   APP ROOT
+══════════════════════════════════════════════════════════════ */
+function App() {
+  const [activeSection, setActiveSection] = React.useState('foundation');
+
+  const scrollTo = (id) => {
+    setActiveSection(id);
+    const el = document.getElementById(id);
+    if (el) {
+      const y = el.getBoundingClientRect().top + window.scrollY - 24;
+      window.scrollTo({ top: y, behavior: 'smooth' });
+    }
+  };
+
+  // Update active section on scroll
+  React.useEffect(() => {
+    const handler = () => {
+      for (let i = NAV_SECTIONS.length - 1; i >= 0; i--) {
+        const el = document.getElementById(NAV_SECTIONS[i].id);
+        if (el && el.getBoundingClientRect().top <= 120) {
+          setActiveSection(NAV_SECTIONS[i].id);
+          break;
+        }
+      }
+    };
+    window.addEventListener('scroll', handler, { passive: true });
+    return () => window.removeEventListener('scroll', handler);
+  }, []);
+
+  return (
+    <div style={{ display: 'flex', minHeight: '100vh', background: C.bg }}>
+
+      {/* Fixed left nav */}
+      <nav style={{
+        width: 220, flexShrink: 0, position: 'sticky', top: 0, height: '100vh',
+        background: C.surface, borderRight: `1px solid ${C.border}`,
+        display: 'flex', flexDirection: 'column', overflow: 'hidden',
+      }}>
+        {/* Logo */}
+        <div style={{ padding: '20px 20px 16px', borderBottom: `1px solid ${C.border}` }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
+            <div style={{ width: 30, height: 30, borderRadius: 7, background: C.text, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <Icon name="diversity_3" size={16} style={{ color: '#fff' }} />
+            </div>
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: C.text, lineHeight: 1.2 }}>Koinonia</div>
+              <div style={{ fontSize: 10, color: C.textTer, letterSpacing: '0.06em', textTransform: 'uppercase' }}>Design System</div>
+            </div>
+          </div>
+          <div style={{ fontSize: 11, color: C.textTer }}>v2 · Abril 2026</div>
+        </div>
+        {/* Nav */}
+        <div style={{ flex: 1, padding: '12px 10px', overflow: 'auto' }}>
+          {NAV_SECTIONS.map(s => {
+            const active = activeSection === s.id;
+            return (
+              <button key={s.id} onClick={() => scrollTo(s.id)}
+                style={{
+                  width: '100%', textAlign: 'left', padding: '8px 10px', borderRadius: 7,
+                  fontSize: 13.5, fontWeight: active ? 600 : 400,
+                  background: active ? C.goldLight : 'transparent',
+                  color: active ? C.gold : C.textSec,
+                  border: 'none', cursor: 'pointer', transition: 'all 0.12s',
+                  borderLeft: active ? `2px solid ${C.gold}` : '2px solid transparent',
+                  marginBottom: 2,
+                }}
+                onMouseEnter={e => { if (!active) { e.currentTarget.style.background = '#F7F4EF'; e.currentTarget.style.color = C.text; } }}
+                onMouseLeave={e => { if (!active) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = C.textSec; } }}
+              >{s.label}</button>
+            );
+          })}
+        </div>
+      </nav>
+
+      {/* Main content */}
+      <main style={{ flex: 1, padding: '24px 48px 80px', maxWidth: 980, minWidth: 0 }}>
+        <FoundationSection />
+        <TypographySection />
+        <ColorSection />
+        <SpacingSection />
+        <ComponentsSection />
+        <LayoutSection />
+        <PatternsSection />
+        <ImplementationSection />
+      </main>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

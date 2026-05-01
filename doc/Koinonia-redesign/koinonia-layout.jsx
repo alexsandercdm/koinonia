@@ -1,3 +1,13 @@
+/* ─── NAV ────────────────────────────────────────────────────── */
+const NAV = [
+  { icon: 'space_dashboard', label: 'Dashboard',     page: 'dashboard'     },
+  { icon: 'group',           label: 'Participantes', page: 'participantes' },
+  { icon: 'event',           label: 'Eventos',       page: 'eventos'       },
+  { icon: 'how_to_reg',      label: 'Inscrições',    page: 'inscricoes'    },
+  { icon: 'bed',             label: 'Acomodações',   page: 'acomodacoes'   },
+  { icon: 'account_balance_wallet', label: 'Financeiro', page: 'financeiro' },
+];
+
 /* ─── EVENT CONTEXT PILL ─────────────────────────────────────── */
 function EventPill({ event, onSwitch }) {
   const [open, setOpen] = React.useState(false);
@@ -78,6 +88,97 @@ function EventPill({ event, onSwitch }) {
         </div>
       )}
     </div>
+  );
+}
+
+/* ─── SIDEBAR ────────────────────────────────────────────────── */
+function Sidebar({ page, setPage }) {
+  const [expanded, setExpanded] = React.useState(false);
+  const w = expanded ? 220 : 56;
+
+  return (
+    <aside style={{
+      width: w, flexShrink: 0,
+      background: C.surface,
+      borderRight: `1px solid ${C.border}`,
+      display: 'flex', flexDirection: 'column',
+      transition: 'width 0.22s cubic-bezier(0.4,0,0.2,1)',
+      overflow: 'hidden', position: 'relative', zIndex: 10,
+    }}>
+      {/* Logo */}
+      <div style={{ height: 56, display: 'flex', alignItems: 'center', padding: '0 14px', gap: 12, flexShrink: 0, borderBottom: `1px solid ${C.border}` }}>
+        <div style={{ width: 28, height: 28, borderRadius: 7, background: C.text, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <Icon name="diversity_3" size={16} style={{ color: '#fff' }} />
+        </div>
+        {expanded && (
+          <div style={{ overflow: 'hidden', whiteSpace: 'nowrap' }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: C.text, lineHeight: 1.2 }}>Koinonia</div>
+            <div style={{ fontSize: 10, color: C.textTer, letterSpacing: '0.08em', textTransform: 'uppercase', marginTop: 1 }}>Gestão de Retiros</div>
+          </div>
+        )}
+      </div>
+
+      {/* Nav */}
+      <nav style={{ flex: 1, padding: '8px 6px', display: 'flex', flexDirection: 'column', gap: 2 }}>
+        {NAV.map(item => {
+          const active = page === item.page;
+          return (
+            <button
+              key={item.page}
+              onClick={() => setPage(item.page)}
+              title={!expanded ? item.label : undefined}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 10,
+                padding: '8px 10px', borderRadius: 7,
+                background: active ? C.goldLight : 'transparent',
+                color: active ? C.gold : C.textSec,
+                fontWeight: active ? 600 : 400,
+                fontSize: 13.5,
+                transition: 'all 0.12s',
+                whiteSpace: 'nowrap',
+                border: 'none', cursor: 'pointer',
+                borderLeft: active ? `2px solid ${C.gold}` : '2px solid transparent',
+              }}
+              onMouseEnter={e => { if (!active) { e.currentTarget.style.background = '#F7F4EF'; e.currentTarget.style.color = C.text; } }}
+              onMouseLeave={e => { if (!active) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = C.textSec; } }}
+            >
+              <Icon name={item.icon} size={19} fill={active} style={{ flexShrink: 0 }} />
+              {expanded && item.label}
+            </button>
+          );
+        })}
+      </nav>
+
+      {/* User + toggle */}
+      <div style={{ padding: '8px 6px', borderTop: `1px solid ${C.border}`, display: 'flex', flexDirection: 'column', gap: 4 }}>
+        <button
+          onClick={() => setExpanded(!expanded)}
+          title={expanded ? 'Colapsar menu' : 'Expandir menu'}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px',
+            borderRadius: 7, background: 'transparent', color: C.textTer,
+            fontSize: 13, border: 'none', cursor: 'pointer', whiteSpace: 'nowrap',
+            transition: 'all 0.12s',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.background = '#F7F4EF'; e.currentTarget.style.color = C.textSec; }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = C.textTer; }}
+        >
+          <Icon name={expanded ? 'chevron_left' : 'chevron_right'} size={19} style={{ flexShrink: 0 }} />
+          {expanded && 'Colapsar'}
+        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '6px 10px' }}>
+          <div style={{ width: 28, height: 28, borderRadius: '50%', background: C.goldLight, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <span style={{ fontSize: 12, fontWeight: 700, color: C.gold }}>A</span>
+          </div>
+          {expanded && (
+            <div style={{ overflow: 'hidden' }}>
+              <div style={{ fontSize: 13, fontWeight: 500, color: C.text, lineHeight: 1.3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Admin</div>
+              <div style={{ fontSize: 11, color: C.textTer, whiteSpace: 'nowrap' }}>admin@retiro.com</div>
+            </div>
+          )}
+        </div>
+      </div>
+    </aside>
   );
 }
 

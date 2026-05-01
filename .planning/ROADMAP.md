@@ -29,10 +29,10 @@
 - Dashboards com métricas chave (TanStack Query/Recharts).
 
 ## Phase 5: Fase 0 Frontend — Redesign & Scaffold ✓
-**Goal:** Redesign visual completo do frontend seguindo protótipos Stitch e criação de páginas shell com navegação ativa.
+**Goal:** Redesign visual completo do frontend seguindo protótipos Stitch — baseline inicial substituído pelo redesign "Hallowed Weight" na Phase 6.5.
 **Requirements:** (UI scaffolding — pre-v1.1)
 - Todas as rotas principais navegáveis no dashboard.
-- Design system aplicado (dark mode, violet #4d0085, Inter, 48px touch targets).
+- ⚠️ Design system Stitch (dark mode, violet #4d0085, Inter) foi descartado e substituído na Phase 6.5 pelo design atual em `doc/Koinonia-redesign` (DM Sans, paleta creme/ouro).
 
 ---
 
@@ -55,39 +55,30 @@ Plans:
 - [ ] 06-02-PLAN.md — Backend route GET /eventos/:id/inscricoes + Zod schema drifts (INFRA-03, INFRA-04)
 - [ ] 06-03-PLAN.md — persistQueryClient with localStorage persister and session exclusion (INFRA-02)
 
-## Phase 6.5: Frontend Redesign (Hallowed Weight) (INSERTED)
-**Goal:** Substituir o design system Stitch (dark/purple/amber) pelo Hallowed Weight (cream/gold/black). Implementar 12 primitivas, AppShell com EventPill, Event Selector Screen, e migrar todas as páginas existentes para o novo sistema.
-**Requirements:** UX-01, UX-02, UX-03, UX-04, UX-05, UX-06, UX-07.
+### Phase 6.5: Frontend Redesign Migration (INSERTED)
+**Goal:** Migrar o frontend para o novo design em `doc/Koinonia-redesign`, substituindo o baseline Stitch/dark-violet por um shell, tokens, primitives e breakpoints novos antes das telas CRUD funcionais.
+**Requirements:** UI-RED-01, UI-RED-02, UI-RED-03, UI-RED-04, UI-RED-05.
 **Depends on:** Phase 6.
-**Reference:** `doc/Koinonia-redesign/HANDOFF.md`, `doc/Koinonia-redesign/UI-REVIEW.md`.
+**Plans:** 4 plans
 **Success criteria:**
-1. Paleta cream/gold/black aplicada via tokens semânticos no `apps/web/tailwind.config.js` + `apps/web/src/index.css` (substitui Stitch).
-2. Tipografia única: DM Sans + Material Symbols — `font-black` e `lucide-react` removidos do projeto.
-3. 12 primitivas exportadas e usadas (Btn, Input, Card, Badge, Drawer, FormField, FilterTabs, EmptyState, SectionTitle, SelectInput, TextArea, QRCodeSVG).
-4. AppShell com Sidebar 232px + Header 56px contendo EventPill (switcher contextual) renderiza em todas as rotas autenticadas.
-5. Event Selector Screen funcional como rota intermediária pós-login.
-6. Login two-column (editorial left + form right) implementado.
-7. Páginas migradas e visualmente conformes ao mockup: Dashboard, Participantes, Inscrições, Acomodações, Financeiro, Register.
-
-**Plans:** 10 plans
+1. Tokens globais do frontend refletem a direção "Hallowed Weight": fundo `#F7F4EF`, superfícies claras, texto `#1A1612`, bordas quentes e ouro restrito `#C4923A`.
+2. `AppLayout` e login usam o novo shell editorial claro, com navegação, header, ações e estado autenticado preservados.
+3. Páginas existentes (`dashboard`, `participantes`, `inscricoes`, `acomodacoes`, `financeiro`) continuam navegáveis e visualmente coerentes com o novo sistema.
+4. Novo comportamento responsivo cobre desktop e mobile operacional, sem depender do sidebar fixo em telas pequenas.
+5. Auth, TanStack Query, cache persistido e protected routes continuam funcionando após a migração visual.
 
 Plans:
-- [ ] 06.5-01-PLAN.md — Foundation: tailwind.config.js + index.css + index.html (UX-01, UX-02)
-- [ ] 06.5-02-PLAN.md — Form primitives: Btn, Input, SelectInput, TextArea, FormField (UX-03)
-- [ ] 06.5-03-PLAN.md — Display primitives: Card, Badge, EmptyState, SectionTitle (UX-03)
-- [ ] 06.5-04-PLAN.md — Utility primitives: Drawer, FilterTabs, Icon, QRCodeSVG (UX-03)
-- [ ] 06.5-05-PLAN.md — Barrel export index.ts (UX-03)
-- [ ] 06.5-06-PLAN.md — EventContext + ProtectedRoute redirect + App.tsx route (UX-05)
-- [ ] 06.5-07-PLAN.md — AppShell + Sidebar + EventPill (UX-04)
-- [ ] 06.5-08-PLAN.md — EventSelectorScreen (UX-05)
-- [ ] 06.5-09-PLAN.md — Login + Register two-column rewrite (UX-06, UX-07)
-- [ ] 06.5-10-PLAN.md — 5 page migrations + lucide-react removal (UX-07, UX-02)
+- [x] 06.5-01-PLAN.md — Design tokens and reusable primitives (UI-RED-01, UI-RED-03)
+- [x] 06.5-02-PLAN.md — Responsive AppLayout and Better Auth screens (UI-RED-02, UI-RED-05)
+- [x] 06.5-03-PLAN.md — Dashboard, participants, inscrições, and financeiro visual migration (UI-RED-04, UI-RED-05)
+- [x] 06.5-04-PLAN.md — Accommodation visual migration and final frontend non-regression (UI-RED-01, UI-RED-02, UI-RED-03, UI-RED-04, UI-RED-05)
 
 ## Phase 7: Participantes CRUD UI
 **Goal:** Conectar ParticipantsPage ao backend com CRUD completo — listar, buscar, criar, editar e inativar participantes.
 **Requirements:** UI-PES-01, UI-PES-02, UI-PES-03, UI-PES-04.
-**Depends on:** Phase 6.
-**Process:** Aplicar `/ui-ux-pro-max` para design das telas antes da codificação.
+**Depends on:** Phase 6.5.
+**Process:** Usar o design contract da Phase 6.5 como baseline visual antes da codificação funcional.
+**Plans:** 4 plans
 **Success criteria:**
 1. Usuário busca "João" e vê resultado filtrado instantâneo (dados do cache, sem nova requisição se offline).
 2. Usuário cria participante preenchendo 3 abas (Dados / Saúde / Emergência) — registro aparece na lista.
@@ -95,11 +86,17 @@ Plans:
 4. Usuário inativa participante — sumirá da lista ativa mas permanece em histórico de inscrições.
 5. Formulário exibe erro inline por campo sem necessidade de submit (validação on blur).
 
+Plans:
+- [x] 07-01-PLAN.md — Backend participant full-update contract (UI-PES-02, UI-PES-04)
+- [x] 07-02-PLAN.md — Participant hooks and record sheet components (UI-PES-01, UI-PES-02, UI-PES-03, UI-PES-04)
+- [x] 07-03-PLAN.md — Participants page CRUD integration and final verification (UI-PES-01, UI-PES-02, UI-PES-03, UI-PES-04)
+- [x] 07-04-PLAN.md — Accent-insensitive participant search gap closure (UI-PES-01)
+
 ## Phase 8: Eventos CRUD UI
 **Goal:** Criar EventosPage com listagem, criação e edição de eventos — rota `/eventos` acessível via navegação.
 **Requirements:** UI-EVT-01, UI-EVT-02.
-**Depends on:** Phase 6.
-**Process:** Aplicar `/ui-ux-pro-max` para design (Event list card e Event form sheet — sem protótipo Stitch).
+**Depends on:** Phase 6.5.
+**Process:** Usar o design contract da Phase 6.5 como baseline visual (Event list card e Event form drawer existem no redesign).
 **Success criteria:**
 1. Usuário acessa `/eventos` via sidebar — lista exibe nome, datas, local, capacidade e status colorido.
 2. Usuário cria evento com datas via date picker — evento aparece na lista com "Aberto" e "0/N vagas ocupadas".
@@ -122,7 +119,7 @@ Plans:
 ## Phase 10: Acomodações Polish + Offline Hardening
 **Goal:** Finalizar o módulo de acomodações com update otimista, export PDF e hardening para uso offline no local do retiro.
 **Requirements:** UI-ACO-01, UI-ACO-02, UI-ACO-03.
-**Depends on:** Phase 6.
+**Depends on:** Phase 6.5.
 **Success criteria:**
 1. Usuário atribui cama — cama muda de cor imediatamente (antes da resposta do servidor).
 2. Conflito 409 (cama já atribuída por outro usuário) → rollback visual instantâneo + toast "Cama já ocupada".
@@ -152,13 +149,11 @@ Plans:
 | INFRA-03 | Phase 6 | GET /eventos/:id/inscricoes backend route |
 | INFRA-04 | Phase 6 | Zod schema drift resolution |
 | INFRA-05 | Phase 6 | 11 packages installed |
-| UX-01 | Phase 6.5 | Paleta cream/gold/black via Tailwind tokens |
-| UX-02 | Phase 6.5 | Tipografia DM Sans + Material Symbols |
-| UX-03 | Phase 6.5 | 12 primitivas Hallowed Weight |
-| UX-04 | Phase 6.5 | AppShell com Sidebar + Header + EventPill |
-| UX-05 | Phase 6.5 | Event Selector Screen pós-login |
-| UX-06 | Phase 6.5 | Login two-column editorial |
-| UX-07 | Phase 6.5 | Migração de todas as páginas existentes |
+| UI-RED-01 | Phase 6.5 | New visual tokens and Tailwind theme |
+| UI-RED-02 | Phase 6.5 | New responsive application shell |
+| UI-RED-03 | Phase 6.5 | New shared UI primitives aligned with redesign |
+| UI-RED-04 | Phase 6.5 | Existing pages migrated without functional regressions |
+| UI-RED-05 | Phase 6.5 | Auth/session/protected navigation preserved |
 | UI-PES-01 | Phase 7 | Participant list + search |
 | UI-PES-02 | Phase 7 | Participant create/edit form |
 | UI-PES-03 | Phase 7 | Participant event history |
@@ -176,4 +171,4 @@ Plans:
 | DEPLOY-01 | Phase 11 | Production build + env config |
 | DEPLOY-02 | Phase 11 | Live deploy for user testing |
 
-**Total:** 28 requirements → 7 phases → 100% coverage ✓
+**Total:** 26 requirements → 7 phases → 100% coverage ✓

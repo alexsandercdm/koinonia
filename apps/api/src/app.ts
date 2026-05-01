@@ -27,7 +27,7 @@ export const buildApp = () => {
 
   // Register plugins
   app.register(cors, {
-    origin: typeof env.CORS_ORIGIN === 'string' ? env.CORS_ORIGIN.split(',') : true,
+    origin: typeof env.CORS_ORIGIN === 'string' ? env.CORS_ORIGIN.split(',').map((origin) => origin.trim()) : true,
     credentials: true,
   })
 

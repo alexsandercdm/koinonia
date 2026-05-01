@@ -1,39 +1,60 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root, .dark {
-    /* Midnight Koinonia Theme (The Digital Sanctuary) */
-    --background: 276 40% 10%; /* #1b0f23 */
-    --foreground: 270 20% 95%; /* #f1eef4 */
+    --background: 38 33% 95%;
+    --foreground: 30 18% 9%;
 
-    --card: 271 27% 12%; /* #24162e */
-    --card-foreground: 270 20% 95%; /* #f1eef4 */
+    --card: 0 0% 100%;
+    --card-foreground: 30 19% 9%;
 
-    --popover: 271 27% 12%; /* #24162e */
-    --popover-foreground: 270 20% 95%; /* #f1eef4 */
+    --popover: 36 43% 99%;
+    --popover-foreground: 30 19% 9%;
 
-    --primary: 275 100% 26%; /* #4d0085 */
-    --primary-foreground: 0 0% 100%; /* #ffffff */
+    --primary: 30 19% 9%;
+    --primary-foreground: 40 33% 95%;
 
-    --secondary: 45 100% 50%; /* #ffbf00 */
-    --secondary-foreground: 44 100% 8%; /* #281d00 */
+    --secondary: 38 53% 50%;
+    --secondary-foreground: 30 19% 9%;
 
-    --muted: 271 57% 17%; /* #2d1345 */
-    --muted-foreground: 283 15% 79%; /* #cec2d3 */
+    --muted: 36 21% 93%;
+    --muted-foreground: 35 10% 43%;
 
-    --accent: 271 57% 17%; /* #2d1345 */
-    --accent-foreground: 45 100% 50%; /* #ffbf00 */
+    --accent: 39 69% 91%;
+    --accent-foreground: 30 19% 9%;
 
-    --destructive: 6 100% 84%; /* #ffb4ab */
-    --destructive-foreground: 356 100% 21%; /* #690005 */
+    --destructive: 7 54% 39%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 277 9% 29%; /* #4c4451 */
-    --input: 277 9% 29%; /* #4c4451 */
-    --ring: 45 100% 50%; /* #ffbf00 */
+    --border: 40 25% 88%;
+    --input: 40 25% 88%;
+    --ring: 38 54% 50%;
 
     --radius: 0.5rem;
+
+    --surface: 0 0% 100%;
+    --surface-raised: 36 43% 99%;
+    --border-strong: 39 17% 77%;
+    --text-secondary: 37 12% 43%;
+    --text-tertiary: 40 13% 64%;
+    --gold: 38 54% 50%;
+    --gold-muted: 40 64% 80%;
+    --gold-soft: 41 58% 91%;
+    --gold-light: 41 58% 91%;
+    --neutral-soft: 38 21% 93%;
+    --success: 141 33% 36%;
+    --success-bg: 145 35% 93%;
+    --warning: 30 57% 44%;
+    --warning-bg: 34 76% 94%;
+    --danger: 7 54% 39%;
+    --danger-bg: 0 65% 95%;
+    --info: 206 50% 36%;
+    --info-bg: 207 64% 95%;
   }
 }
 
@@ -42,6 +63,22 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground antialiased;
+    @apply bg-background font-sans text-foreground antialiased;
+  }
+  .material-symbols-rounded,
+  .material-symbols-outlined {
+    font-family: 'Material Symbols Rounded';
+    font-size: 1.25em;
+    font-style: normal;
+    font-weight: normal;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+    -webkit-font-feature-settings: 'liga';
+    -webkit-font-smoothing: antialiased;
   }
 }

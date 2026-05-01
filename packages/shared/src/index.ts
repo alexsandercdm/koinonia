@@ -73,6 +73,14 @@ export const EventoSchema = z.object({
   updated_at: z.string().datetime().optional(),
 })
 
+export const EventoListItemSchema = EventoSchema.extend({
+  inscritos_count: z.number().int().nonnegative(),
+  ocupacao_percentual: z.number().min(0).max(100),
+  local_nome: z.string().nullable().optional(),
+  preco_encontrista: z.number().nullable().optional(),
+  preco_servo: z.number().nullable().optional(),
+})
+
 export const InscricaoSchema = z.object({
   id: z.string().uuid().optional(),
   evento_id: z.string().uuid(),
@@ -241,6 +249,7 @@ export type Evento = z.infer<typeof EventoSchema>
 export type Inscricao = z.infer<typeof InscricaoSchema>
 export type Pagamento = z.infer<typeof PagamentoSchema>
 export type Despesa = z.infer<typeof DespesaSchema>
+export type EventoListItem = z.infer<typeof EventoListItemSchema>
 
 export type CreatePessoa = z.infer<typeof CreatePessoaDTO>
 export type UpdatePessoa = z.infer<typeof UpdatePessoaDTO>

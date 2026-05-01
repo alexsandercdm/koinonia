@@ -34,6 +34,7 @@ Gestão de participantes e alocação de quartos com regras estritas de gênero 
 
 <!-- Current scope. Building toward these. -->
 - [ ] CRUD completo de Participantes (Busca, Histórico e Saúde).
+- [ ] Migração do frontend para o redesign `doc/Koinonia-redesign` antes dos CRUDs funcionais.
 - [ ] Módulo Inscrições e Eventos (Registro, Role, Valor e Pagamento).
 - [ ] Módulo Acomodação Cama-a-Cama (Locais, Quartos, Camas, Mapa Visual e Atribuição com lock otimista).
 - [ ] Módulo Financeiro (Break-Even, Fluxo de Caixa, Despesas).
@@ -55,8 +56,8 @@ A Stack está explicitada e definida no arquivo de documentação entregue.
 ## Constraints
 
 - **Tech Stack**: Fastify + React Vite + Drizzle + Better Auth — Manter consistência tecnológica.
-- **Acessibilidade & UI**: Mobile-first, alvos de toque >= 48px, texto >= 16px (Inter).
-- **Design System**: 14 telas geradas via Stitch AI (`.planning/stitch-assets/`). Ver `design/UI-SPEC.md`.
+- **Acessibilidade & UI**: Mobile-first, alvos de toque >= 44px, DM Sans como fonte única do sistema.
+- **Design System**: `doc/Koinonia-redesign` é o baseline visual atual (paleta "Hallowed Weight": fundo `#F7F4EF`, ouro `#C4923A`, texto `#1A1612`). Documentação em `doc/Design System Koinonia.html`. Designs antigos movidos para `doc/design_old/` como backup.
 - **Offline Grace**: O TanStack Query deve reter cache por tempo estendido (connecção instável na chácara).
 - **Fluxo de Trabalho**: Usar estritamente a skill `tlc-spec-driven` para Especificação, Design, Tarefas e Execução, como solitado.
 

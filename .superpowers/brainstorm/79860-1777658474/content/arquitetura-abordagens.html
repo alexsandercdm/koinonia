@@ -1,0 +1,90 @@
+<h2>3 Abordagens Arquiteturais para Multi-Tenant</h2>
+<p class="subtitle">Escolha a estratégia de isolamento + RBAC que mais faz sentido para o Koinonia</p>
+
+<div class="options">
+
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Row-Level Isolation + Better Auth Organizations</h3>
+      <p><strong>Recomendada</strong> — Adiciona <code>organization_id</code> em todas as tabelas de domínio. Usa o plugin nativo de Organizations do Better Auth para gerenciar membros, convites e papéis por org. Hierarquia de papéis mapeada como roles customizadas dentro do Better Auth.</p>
+      <div class="pros-cons" style="margin-top:12px">
+        <div class="pros">
+          <h4>Prós</h4>
+          <ul>
+            <li>Aproveita infra de auth já existente</li>
+            <li>Self-service onboarding nativo (convites, org creation)</li>
+            <li>Migrations simples — Drizzle continua funcionando normalmente</li>
+            <li>Padrão adotado por 90% dos SaaS em estágio inicial</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>Contras</h4>
+          <ul>
+            <li>Requer guard de <code>organization_id</code> em toda query</li>
+            <li>Risco de vazamento de dados se query guard falhar</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Row-Level Isolation + RBAC Customizado</h3>
+      <p>Mesmo isolamento row-level, mas RBAC construído do zero no domínio: tabelas <code>organizations</code>, <code>memberships</code>, <code>roles</code>, <code>permissions</code>. Better Auth fica apenas para autenticação (JWT/sessões). Controle total sobre a hierarquia.</p>
+      <div class="pros-cons" style="margin-top:12px">
+        <div class="pros">
+          <h4>Prós</h4>
+          <ul>
+            <li>Controle total sobre hierarquia e permissões</li>
+            <li>Sem acoplamento a biblioteca de auth</li>
+            <li>Modelo de domínio explícito e auditável</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>Contras</h4>
+          <ul>
+            <li>Muito código a escrever (convites, memberships, etc.)</li>
+            <li>Fronteira auth/domínio fica ambígua</li>
+            <li>Reinventa o que Better Auth já oferece</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Schema-per-Tenant + Better Auth Organizations</h3>
+      <p>Cada organização recebe um schema PostgreSQL dedicado (<code>org_uuid.eventos</code>, <code>org_uuid.pessoas</code>…). Better Auth gerencia membership no schema público. Isolamento máximo — sem risco de cross-tenant query.</p>
+      <div class="pros-cons" style="margin-top:12px">
+        <div class="pros">
+          <h4>Prós</h4>
+          <ul>
+            <li>Isolamento máximo — impossível vazar dados entre orgs</li>
+            <li>Backup por org nativo</li>
+            <li>Sem necessidade de guard de org em queries</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>Contras</h4>
+          <ul>
+            <li>Migrations complexas — Drizzle não suporta multi-schema bem</li>
+            <li>Overkill para estágio inicial</li>
+            <li>Operacionalmente caro (100 orgs = 100 schemas)</li>
+            <li>Refactor profundo no código existente</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="section" style="margin-top:24px; padding:16px; background:#f8f6f2; border-radius:8px; border-left:3px solid #C4923A">
+  <p class="label">Recomendação</p>
+  <p>Opção <strong>A</strong> — Better Auth já tem um plugin de Organizations maduro, com convites, roles e member management prontos. Isso economiza semanas de desenvolvimento e entrega self-service onboarding desde o dia 1. Row-level isolation com um guard centralizado no middleware do Fastify é o padrão da indústria nesse estágio.</p>
+</div>

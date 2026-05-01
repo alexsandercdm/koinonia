@@ -70,4 +70,47 @@ describe('UpdateEventoUseCase', () => {
       status: 'aberto',
     }))
   })
+
+  it('deve aceitar datas no formato YYYY-MM-DD', async () => {
+    const eventoRepository = {
+      findById: vi.fn()
+        .mockResolvedValueOnce({
+          id: 'evento-1',
+          nome: 'Retiro Antigo',
+          descricao: null,
+          data_inicio: '2026-04-10',
+          data_fim: '2026-04-12',
+          capacidade_maxima: 100,
+          local_id: null,
+          status: 'rascunho',
+          configuracoes: [],
+        })
+        .mockResolvedValueOnce({
+          id: 'evento-1',
+          nome: 'Retiro Antigo',
+          data_inicio: '2026-04-11',
+          data_fim: '2026-04-13',
+          capacidade_maxima: 100,
+          status: 'rascunho',
+          configuracoes: [],
+        }),
+      update: vi.fn().mockResolvedValue(undefined),
+      replaceConfigs: vi.fn().mockResolvedValue(undefined),
+    }
+
+    const useCase = new UpdateEventoUseCase(eventoRepository as any)
+    await useCase.execute({
+      id: 'evento-1',
+      data_inicio: '2026-04-11',
+      data_fim: '2026-04-13',
+    })
+
+    expect(eventoRepository.update).toHaveBeenCalledWith(
+      'evento-1',
+      expect.objectContaining({
+        data_inicio: '2026-04-11',
+        data_fim: '2026-04-13',
+      }),
+    )
+  })
 })

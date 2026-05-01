@@ -1,0 +1,120 @@
+<h2>Seção 4 — Roadmap de Execução</h2>
+<p class="subtitle">Como encaixar a evolução multi-tenant no desenvolvimento atual (Phase 8 em andamento)</p>
+
+<div style="margin-bottom:16px; padding:12px; background:#fff8ec; border-radius:8px; border-left:3px solid #C4923A; font-size:12px; color:#555">
+  <strong>Decisão de sequência:</strong> A foundation multi-tenant vai primeiro, antes de continuar as UIs de feature. Motivo: construir sobre base errada gera retrabalho em todas as telas subsequentes.
+</div>
+
+<!-- TIMELINE -->
+<div style="display:flex; flex-direction:column; gap:0">
+
+  <!-- PHASE 8.5 -->
+  <div style="display:flex; gap:16px">
+    <div style="display:flex; flex-direction:column; align-items:center">
+      <div style="width:36px; height:36px; background:#C4923A; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:700; font-size:13px; flex-shrink:0">8.5</div>
+      <div style="width:2px; flex:1; background:#E0D9CF; margin:4px 0"></div>
+    </div>
+    <div style="background:#FBF9F5; border:1px solid #C4923A; border-radius:8px; padding:16px; margin-bottom:12px; flex:1">
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px">
+        <p class="label" style="color:#C4923A; margin:0">PHASE 8.5 — Multi-Tenant Foundation</p>
+        <span style="background:#C4923A; color:#fff; font-size:10px; padding:2px 6px; border-radius:4px">INSERIR AGORA</span>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; font-size:12px">
+        <div>
+          <strong style="color:#1A1612">Backend</strong>
+          <ul style="margin:4px 0 0 0; padding-left:16px; line-height:1.8; color:#444">
+            <li>Better Auth Organizations plugin</li>
+            <li>DB migration: <code>organization_id</code> em pessoas, eventos, inscricoes, locais, despesas</li>
+            <li>Índices compostos <code>(organization_id, id)</code></li>
+            <li>TenantMiddleware no Fastify</li>
+            <li>PermissionResolver (hierarquia de papéis)</li>
+            <li>Guard obrigatório em todos os repositórios</li>
+          </ul>
+        </div>
+        <div>
+          <strong style="color:#1A1612">Frontend</strong>
+          <ul style="margin:4px 0 0 0; padding-left:16px; line-height:1.8; color:#444">
+            <li>Fluxo de criação de organização (onboarding)</li>
+            <li>Org switcher no header</li>
+            <li>Página de gestão de membros</li>
+            <li>Fluxo de convite por e-mail</li>
+            <li>OrgContext no React (orgId em todas as queries)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHASE 8 (resume) -->
+  <div style="display:flex; gap:16px">
+    <div style="display:flex; flex-direction:column; align-items:center">
+      <div style="width:36px; height:36px; background:#2D4A3E; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:700; font-size:13px; flex-shrink:0">8</div>
+      <div style="width:2px; flex:1; background:#E0D9CF; margin:4px 0"></div>
+    </div>
+    <div style="background:#F7F4EF; border:1px solid #E0D9CF; border-radius:8px; padding:16px; margin-bottom:12px; flex:1">
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px">
+        <p class="label" style="color:#2D4A3E; margin:0">PHASE 8 — Eventos CRUD UI (retomar)</p>
+        <span style="background:#2D4A3E; color:#fff; font-size:10px; padding:2px 6px; border-radius:4px">Em progresso</span>
+      </div>
+      <ul style="font-size:12px; color:#444; line-height:1.8; margin:0; padding-left:16px">
+        <li>Completar EventosPage com org context já injetado</li>
+        <li>Transições de ciclo de vida (planejamento → inscrições abertas → em andamento → finalizado)</li>
+        <li>Guards de papel: só Presidente/Pastor Principal cria eventos</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- PHASE 9 -->
+  <div style="display:flex; gap:16px">
+    <div style="display:flex; flex-direction:column; align-items:center">
+      <div style="width:36px; height:36px; background:#2D3A4A; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:700; font-size:13px; flex-shrink:0">9</div>
+      <div style="width:2px; flex:1; background:#E0D9CF; margin:4px 0"></div>
+    </div>
+    <div style="background:#F7F4EF; border:1px solid #E0D9CF; border-radius:8px; padding:16px; margin-bottom:12px; flex:1">
+      <p class="label" style="color:#2D3A4A; margin-bottom:8px">PHASE 9 — Inscrições CRUD + Pagamentos UI</p>
+      <ul style="font-size:12px; color:#444; line-height:1.8; margin:0; padding-left:16px">
+        <li>Fluxo completo de inscrição dentro do contexto da org</li>
+        <li>Registro e gestão de pagamentos</li>
+        <li>Filtro de inadimplentes</li>
+        <li>Cancelamento com nota</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- PHASE 10 -->
+  <div style="display:flex; gap:16px">
+    <div style="display:flex; flex-direction:column; align-items:center">
+      <div style="width:36px; height:36px; background:#3A2D4A; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:700; font-size:13px; flex-shrink:0">10</div>
+      <div style="width:2px; flex:1; background:#E0D9CF; margin:4px 0"></div>
+    </div>
+    <div style="background:#F7F4EF; border:1px solid #E0D9CF; border-radius:8px; padding:16px; margin-bottom:12px; flex:1">
+      <p class="label" style="color:#3A2D4A; margin-bottom:8px">PHASE 10 — Acomodações Polish + Offline Hardening</p>
+      <ul style="font-size:12px; color:#444; line-height:1.8; margin:0; padding-left:16px">
+        <li>Update otimista na atribuição de camas</li>
+        <li>Export PDF do mapa de quartos</li>
+        <li>Banner offline + sync ao reconectar</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- PHASE 11 -->
+  <div style="display:flex; gap:16px">
+    <div style="display:flex; flex-direction:column; align-items:center">
+      <div style="width:36px; height:36px; background:#1A1612; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#C4923A; font-weight:700; font-size:13px; flex-shrink:0">11</div>
+    </div>
+    <div style="background:#1A1612; border-radius:8px; padding:16px; flex:1">
+      <p class="label" style="color:#C4923A; margin-bottom:8px">PHASE 11 — Deploy v1.0 Multi-Tenant</p>
+      <ul style="font-size:12px; color:#E0D9CF; line-height:1.8; margin:0; padding-left:16px">
+        <li>Build de produção sem erros TypeScript</li>
+        <li>Variáveis de ambiente documentadas</li>
+        <li>API pública com endpoint <code>/health</code></li>
+        <li>Primeiro cliente cria sua organização, convida membros e gerencia um evento real</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+<div style="margin-top:20px; padding:16px; background:#e8f4ee; border-radius:8px; border:1px solid #2D4A3E; font-size:13px">
+  <strong>O roadmap faz sentido?</strong> Confirme antes de vermos os riscos técnicos.
+</div>

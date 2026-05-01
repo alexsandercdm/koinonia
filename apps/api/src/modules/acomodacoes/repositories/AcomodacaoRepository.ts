@@ -10,6 +10,11 @@ export class AcomodacaoRepository {
     return local
   }
 
+  async deleteQuarto(quartoId: string) {
+    await this.db.delete(camas).where(eq(camas.quarto_id, quartoId))
+    await this.db.delete(quartos).where(eq(quartos.id, quartoId))
+  }
+
   async updateLocal(localId: string, data: Partial<typeof locais.$inferInsert>) {
     const [local] = await this.db
       .update(locais)

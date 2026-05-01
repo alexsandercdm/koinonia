@@ -1,0 +1,177 @@
+<h2>Seção 2 — Modelagem de Domínio</h2>
+<p class="subtitle">Entidades principais e relacionamentos do Koinonia v1.0 multi-tenant</p>
+
+<!-- LEGENDA -->
+<div style="display:flex; gap:16px; margin-bottom:20px; flex-wrap:wrap">
+  <div style="display:flex; align-items:center; gap:6px; font-size:12px"><div style="width:14px;height:14px;background:#2D4A3E;border-radius:3px"></div> Existente (ajustado)</div>
+  <div style="display:flex; align-items:center; gap:6px; font-size:12px"><div style="width:14px;height:14px;background:#C4923A;border-radius:3px"></div> Novo</div>
+  <div style="display:flex; align-items:center; gap:6px; font-size:12px"><div style="width:14px;height:14px;background:#4B3B2A;border-radius:3px"></div> Gerenciado pelo Better Auth</div>
+</div>
+
+<!-- DIAGRAMA PRINCIPAL -->
+<div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; font-size:12px">
+
+  <!-- COLUNA 1: ORG + AUTH -->
+  <div style="display:flex; flex-direction:column; gap:12px">
+
+    <div style="background:#4B3B2A; color:#F7F4EF; border-radius:8px; padding:12px">
+      <p class="label" style="color:#C4923A; margin-bottom:6px">Better Auth — organizations</p>
+      <code style="font-size:11px; line-height:1.8; color:#E0D9CF; display:block">
+        id (uuid) PK<br>
+        name varchar<br>
+        slug varchar UNIQUE<br>
+        plan varchar<br>
+        created_at
+      </code>
+    </div>
+
+    <div style="background:#4B3B2A; color:#F7F4EF; border-radius:8px; padding:12px">
+      <p class="label" style="color:#C4923A; margin-bottom:6px">Better Auth — members</p>
+      <code style="font-size:11px; line-height:1.8; color:#E0D9CF; display:block">
+        id (uuid) PK<br>
+        user_id → users<br>
+        organization_id → orgs<br>
+        role varchar<br>
+        &nbsp;&nbsp;PRESIDENTE<br>
+        &nbsp;&nbsp;PASTOR_PRINCIPAL<br>
+        &nbsp;&nbsp;PASTOR_REDE<br>
+        &nbsp;&nbsp;DISCIPULADOR<br>
+        &nbsp;&nbsp;LIDER_CELULA<br>
+        &nbsp;&nbsp;MEMBRO<br>
+        created_at
+      </code>
+    </div>
+
+    <div style="background:#4B3B2A; color:#F7F4EF; border-radius:8px; padding:12px">
+      <p class="label" style="color:#C4923A; margin-bottom:6px">Better Auth — invitations</p>
+      <code style="font-size:11px; line-height:1.8; color:#E0D9CF; display:block">
+        id (uuid) PK<br>
+        email varchar<br>
+        organization_id → orgs<br>
+        role varchar<br>
+        invited_by → users<br>
+        status (pending/accepted)<br>
+        expires_at
+      </code>
+    </div>
+
+  </div>
+
+  <!-- COLUNA 2: PESSOAS + EVENTOS -->
+  <div style="display:flex; flex-direction:column; gap:12px">
+
+    <div style="background:#2D4A3E; color:#F7F4EF; border-radius:8px; padding:12px">
+      <p class="label" style="color:#C4923A; margin-bottom:6px">pessoas (ajustado)</p>
+      <code style="font-size:11px; line-height:1.8; color:#E0D9CF; display:block">
+        id (uuid) PK<br>
+        <strong style="color:#C4923A">organization_id → orgs</strong><br>
+        nome varchar<br>
+        genero varchar<br>
+        data_nascimento date<br>
+        telefone, email<br>
+        padrinho_id → pessoas<br>
+        alergias, restricoes<br>
+        medicamentos<br>
+        contato_emergencia_*<br>
+        created_at, updated_at<br>
+        deleted_at
+      </code>
+    </div>
+
+    <div style="background:#2D4A3E; color:#F7F4EF; border-radius:8px; padding:12px">
+      <p class="label" style="color:#C4923A; margin-bottom:6px">eventos (ajustado)</p>
+      <code style="font-size:11px; line-height:1.8; color:#E0D9CF; display:block">
+        id (uuid) PK<br>
+        <strong style="color:#C4923A">organization_id → orgs</strong><br>
+        nome varchar<br>
+        descricao text<br>
+        data_inicio, data_fim<br>
+        local_id → locais<br>
+        capacidade_maxima int<br>
+        status:<br>
+        &nbsp;&nbsp;planejamento<br>
+        &nbsp;&nbsp;inscricoes_abertas<br>
+        &nbsp;&nbsp;em_andamento<br>
+        &nbsp;&nbsp;finalizado<br>
+        &nbsp;&nbsp;cancelado<br>
+        created_at, updated_at
+      </code>
+    </div>
+
+    <div style="background:#2D4A3E; color:#F7F4EF; border-radius:8px; padding:12px">
+      <p class="label" style="color:#C4923A; margin-bottom:6px">inscricoes (ajustado)</p>
+      <code style="font-size:11px; line-height:1.8; color:#E0D9CF; display:block">
+        id (uuid) PK<br>
+        <strong style="color:#C4923A">organization_id → orgs</strong><br>
+        evento_id → eventos<br>
+        pessoa_id → pessoas<br>
+        papel (encontrista/servo)<br>
+        valor_total numeric<br>
+        status:<br>
+        &nbsp;&nbsp;PENDENTE<br>
+        &nbsp;&nbsp;PAGO_PARCIAL<br>
+        &nbsp;&nbsp;PAGO_TOTAL<br>
+        &nbsp;&nbsp;LISTA_ESPERA<br>
+        &nbsp;&nbsp;CANCELADA<br>
+        cama_id → camas<br>
+        observacoes text<br>
+        created_at, updated_at
+      </code>
+    </div>
+
+  </div>
+
+  <!-- COLUNA 3: LOCAIS + FINANCEIRO -->
+  <div style="display:flex; flex-direction:column; gap:12px">
+
+    <div style="background:#2D4A3E; color:#F7F4EF; border-radius:8px; padding:12px">
+      <p class="label" style="color:#C4923A; margin-bottom:6px">locais (ajustado)</p>
+      <code style="font-size:11px; line-height:1.8; color:#E0D9CF; display:block">
+        id (uuid) PK<br>
+        <strong style="color:#C4923A">organization_id → orgs</strong><br>
+        nome varchar<br>
+        endereco text<br>
+        capacidade_total int<br>
+        created_at, updated_at
+      </code>
+      <p style="font-size:10px; color:#a0c4b0; margin-top:8px">quartos e camas herdam o isolamento via FK em local_id</p>
+    </div>
+
+    <div style="background:#2D4A3E; color:#F7F4EF; border-radius:8px; padding:12px">
+      <p class="label" style="color:#C4923A; margin-bottom:6px">configuracao_evento (ajustado)</p>
+      <code style="font-size:11px; line-height:1.8; color:#E0D9CF; display:block">
+        id (uuid) PK<br>
+        evento_id → eventos<br>
+        papel varchar<br>
+        valor numeric<br>
+        created_at
+      </code>
+      <p style="font-size:10px; color:#a0c4b0; margin-top:8px">Isolamento herdado via evento_id (evento já tem org_id)</p>
+    </div>
+
+    <div style="background:#2D4A3E; color:#F7F4EF; border-radius:8px; padding:12px">
+      <p class="label" style="color:#C4923A; margin-bottom:6px">pagamentos (existente)</p>
+      <code style="font-size:11px; line-height:1.8; color:#E0D9CF; display:block">
+        id (uuid) PK<br>
+        inscricao_id → inscricoes<br>
+        valor numeric<br>
+        forma_pagamento<br>
+        data_pagamento<br>
+        comprovante_url<br>
+        registrado_por<br>
+        created_at
+      </code>
+      <p style="font-size:10px; color:#a0c4b0; margin-top:8px">Isolamento herdado via inscricao_id</p>
+    </div>
+
+  </div>
+</div>
+
+<!-- NOTA DE DECISÃO -->
+<div style="margin-top:20px; padding:14px; background:#f8f6f2; border-radius:8px; border-left:3px solid #C4923A; font-size:12px; color:#555">
+  <strong>Decisão de design:</strong> Tabelas que são sempre acessadas através de uma FK com org_id (quartos, camas, pagamentos, configuracao_evento) <em>não</em> precisam de organization_id próprio — o join garante o isolamento. Isso mantém o schema limpo sem duplicar a FK em toda parte.
+</div>
+
+<div style="margin-top:16px; padding:16px; background:#e8f4ee; border-radius:8px; border:1px solid #2D4A3E; font-size:13px">
+  <strong>A modelagem de domínio faz sentido?</strong> Confirme aqui antes de ir para os módulos do produto.
+</div>
