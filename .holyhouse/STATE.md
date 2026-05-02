@@ -8,11 +8,11 @@ This file is the current operating snapshot for AI agents.
 
 ## Active Work
 
-- Phase 8.5 Task 11 complete: BaseRepository now enforces tenant context via whereOrg() and withOrg() helpers.
+- Phase 8.5 Task 12 complete: PermissionResolver centralizes RBAC checks and pessoa/event visibility scopes.
 
 ## Next Step
 
-- Begin Phase 8.5 Task 12: add PermissionResolver and its RBAC matrix tests.
+- Begin Phase 8.5 Task 13: refactor repositories to extend BaseRepository and enforce org scoping.
 
 ## Blockers
 
