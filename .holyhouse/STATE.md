@@ -8,11 +8,11 @@ This file is the current operating snapshot for AI agents.
 
 ## Active Work
 
-- Phase 8.5 Task 3 complete: Better Auth Organizations session structure validated.
+- Phase 8.5 Task 4 complete: nullable tenant columns added to Drizzle schema and existing-DB manual migration.
 
 ## Next Step
 
-- Begin Phase 8.5 Task 4: add nullable tenant columns for domain tables using the existing-DB manual migration path.
+- Begin Phase 8.5 Task 5: backfill the default organization and assign nullable tenant columns.
 
 ## Blockers
 

@@ -36,6 +36,9 @@ export {
 // Tables
 export const pessoas = pgTable('pessoas', {
   id: uuid('id').primaryKey().defaultRandom(),
+  organization_id: text('organization_id'),
+  user_id: text('user_id'),
+  lider_pessoa_id: text('lider_pessoa_id'),
   nome: varchar('nome', { length: 200 }).notNull(),
   genero: varchar('genero', { length: 1 }).notNull(), // 'M' or 'F'
   data_nascimento: date('data_nascimento'),
@@ -68,6 +71,7 @@ export const pessoasTable = pessoas
 
 export const locais = pgTable('locais', {
   id: uuid('id').primaryKey().defaultRandom(),
+  organization_id: text('organization_id'),
   nome: varchar('nome', { length: 200 }).notNull(),
   endereco: text('endereco'),
   capacidade_total: integer('capacidade_total'),
@@ -96,6 +100,7 @@ export const camas = pgTable('camas', {
 
 export const eventos = pgTable('eventos', {
   id: uuid('id').primaryKey().defaultRandom(),
+  organization_id: text('organization_id'),
   nome: varchar('nome', { length: 200 }).notNull(),
   descricao: text('descricao'),
   data_inicio: date('data_inicio').notNull(),
@@ -119,6 +124,7 @@ export const configuracaoEvento = pgTable('configuracao_evento', {
 
 export const inscricoes = pgTable('inscricoes', {
   id: uuid('id').primaryKey().defaultRandom(),
+  organization_id: text('organization_id'),
   evento_id: uuid('evento_id').notNull().references(() => eventos.id),
   pessoa_id: uuid('pessoa_id').notNull().references(() => pessoas.id),
   papel: varchar('papel', { length: 20 }).notNull(), // 'encontrista', 'servo'
