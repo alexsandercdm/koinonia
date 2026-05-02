@@ -88,3 +88,10 @@ Record durable project knowledge here.
 - Context: Phase 8.5 Task 6 made root domain `organization_id` columns non-null before TenantMiddleware has been introduced into all write paths.
 - Rule: Until request-scoped tenant context is implemented, root domain creation flows must assign `DEFAULT_ORGANIZATION_ID` from `apps/api/src/db/default-organization.ts`; enrollment creation should inherit `organization_id` from its event.
 - Evidence: Type-check failed after `.notNull()` because `CreateLocalUseCase` and `CreateParticipanteUseCase` inserted rows without `organization_id`; adding the default tenant to local/participant/event creation and inheriting event org for inscriptions restored `pnpm --filter @koinonia/api type-check`.
+
+## ERROR_PATTERN - Composite FK columns must match UUID target types
+
+- Date: 2026-05-02
+- Context: Phase 8.5 Task 7 needed `(organization_id, lider_pessoa_id) -> pessoas(organization_id, id)`, but the phase plan's Task 4 snippet had introduced `lider_pessoa_id` as `text` while the design spec and live `pessoas.id` are `uuid`.
+- Correction: Convert `pessoas.lider_pessoa_id` to `uuid` before adding `fk_lider_pessoa_org`; keep the Drizzle schema as `uuid('lider_pessoa_id')`.
+- Evidence: A preflight query failed with `operator does not exist: uuid = text`; after migration `0009_tenant_step3_composite_fks.sql`, `information_schema` reported `lider_pessoa_id` as `uuid` and all four composite FK constraints existed.

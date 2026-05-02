@@ -38,7 +38,7 @@ export const pessoas = pgTable('pessoas', {
   id: uuid('id').primaryKey().defaultRandom(),
   organization_id: text('organization_id').notNull(),
   user_id: text('user_id'),
-  lider_pessoa_id: text('lider_pessoa_id'),
+  lider_pessoa_id: uuid('lider_pessoa_id'),
   nome: varchar('nome', { length: 200 }).notNull(),
   genero: varchar('genero', { length: 1 }).notNull(), // 'M' or 'F'
   data_nascimento: date('data_nascimento'),

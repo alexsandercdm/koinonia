@@ -8,11 +8,11 @@ This file is the current operating snapshot for AI agents.
 
 ## Active Work
 
-- Phase 8.5 Task 6 complete: tenant ownership is required and tenant indexes/foreign keys are applied.
+- Phase 8.5 Task 7 complete: same-tenant composite foreign keys are applied.
 
 ## Next Step
 
-- Begin Phase 8.5 Task 7: add same-tenant composite foreign keys for cross-table relationships.
+- Begin Phase 8.5 Task 8: add one-president partial index and no-self-leadership check.
 
 ## Blockers
 
