@@ -81,3 +81,10 @@ Record durable project knowledge here.
 - Correction: In API runtime and auth tests, set `BETTER_AUTH_URL` to the full mounted auth base path, e.g. `http://127.0.0.1:3137/api/v1/auth`, when exercising `/api/v1/auth/*` endpoints.
 - Risk: `apps/api/.env.example` currently still shows `BETTER_AUTH_URL="http://localhost:3001"` and must be aligned in a follow-up before relying on it as setup guidance.
 - Evidence: The same spike succeeded after using the full auth base path; sign-up/sign-in, organization create, set-active, and get-session all returned `200`.
+
+## PROJECT_RULE - Default tenant during Phase 8.5 transition
+
+- Date: 2026-05-02
+- Context: Phase 8.5 Task 6 made root domain `organization_id` columns non-null before TenantMiddleware has been introduced into all write paths.
+- Rule: Until request-scoped tenant context is implemented, root domain creation flows must assign `DEFAULT_ORGANIZATION_ID` from `apps/api/src/db/default-organization.ts`; enrollment creation should inherit `organization_id` from its event.
+- Evidence: Type-check failed after `.notNull()` because `CreateLocalUseCase` and `CreateParticipanteUseCase` inserted rows without `organization_id`; adding the default tenant to local/participant/event creation and inheriting event org for inscriptions restored `pnpm --filter @koinonia/api type-check`.

@@ -1,4 +1,5 @@
 import { Database } from '../../../db'
+import { DEFAULT_ORGANIZATION_ID } from '../../../db/default-organization'
 import { pessoas } from '../../../db/schema'
 import { eq } from 'drizzle-orm'
 import { CreatePessoa } from '../entities/pessoa'
@@ -33,7 +34,10 @@ export class CreateParticipanteUseCase {
 
     // Create participant
     const [participante] = await this.db.insert(pessoas)
-      .values(data)
+      .values({
+        ...data,
+        organization_id: DEFAULT_ORGANIZATION_ID,
+      })
       .returning()
 
     return participante

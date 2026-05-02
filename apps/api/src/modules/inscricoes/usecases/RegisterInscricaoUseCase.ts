@@ -40,6 +40,7 @@ export class RegisterInscricaoUseCase {
 
     // 3. Create Subscription
     const inscricao = await this.inscricaoRepository.create({
+      organization_id: evento.organization_id,
       evento_id,
       pessoa_id,
       papel,

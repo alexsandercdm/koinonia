@@ -1,10 +1,11 @@
 import 'dotenv/config'
 import { sql } from 'drizzle-orm'
 import { db } from '../db'
-
-const DEFAULT_ORG_ID = 'default-org-koinonia-seed'
-const DEFAULT_ORG_NAME = 'Igreja Padrão'
-const DEFAULT_ORG_SLUG = 'igreja-padrao'
+import {
+  DEFAULT_ORGANIZATION_ID,
+  DEFAULT_ORGANIZATION_NAME,
+  DEFAULT_ORGANIZATION_SLUG,
+} from '../db/default-organization'
 
 const tenantTables = ['pessoas', 'eventos', 'inscricoes', 'locais'] as const
 
@@ -19,9 +20,9 @@ async function backfill() {
   await db.execute(sql`
     INSERT INTO "organization" ("id", "name", "slug", "created_at", "updated_at")
     VALUES (
-      ${DEFAULT_ORG_ID},
-      ${DEFAULT_ORG_NAME},
-      ${DEFAULT_ORG_SLUG},
+      ${DEFAULT_ORGANIZATION_ID},
+      ${DEFAULT_ORGANIZATION_NAME},
+      ${DEFAULT_ORGANIZATION_SLUG},
       now(),
       now()
     )
@@ -30,12 +31,12 @@ async function backfill() {
           "slug" = EXCLUDED."slug",
           "updated_at" = now()
   `)
-  console.log(`  organization: seeded (id=${DEFAULT_ORG_ID})`)
+  console.log(`  organization: seeded (id=${DEFAULT_ORGANIZATION_ID})`)
 
   for (const table of tenantTables) {
     const result = await db.execute(sql`
       UPDATE ${sql.raw(`"${table}"`)}
-      SET "organization_id" = ${DEFAULT_ORG_ID}
+      SET "organization_id" = ${DEFAULT_ORGANIZATION_ID}
       WHERE "organization_id" IS NULL
     `)
 

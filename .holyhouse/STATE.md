@@ -8,11 +8,11 @@ This file is the current operating snapshot for AI agents.
 
 ## Active Work
 
-- Phase 8.5 Task 5 complete: default organization backfill ran and tenant columns are populated.
+- Phase 8.5 Task 6 complete: tenant ownership is required and tenant indexes/foreign keys are applied.
 
 ## Next Step
 
-- Begin Phase 8.5 Task 6: make `organization_id` required and add tenant indexes/foreign keys.
+- Begin Phase 8.5 Task 7: add same-tenant composite foreign keys for cross-table relationships.
 
 ## Blockers
 
