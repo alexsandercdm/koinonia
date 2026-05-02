@@ -8,11 +8,11 @@ This file is the current operating snapshot for AI agents.
 
 ## Active Work
 
-- Phase 8.5 Task 7 complete: same-tenant composite foreign keys are applied.
+- Phase 8.5 Task 8 complete: president uniqueness and no-self-leadership constraints are applied.
 
 ## Next Step
 
-- Begin Phase 8.5 Task 8: add one-president partial index and no-self-leadership check.
+- Begin Phase 8.5 Task 9: add tenant types and error classes.
 
 ## Blockers
 
