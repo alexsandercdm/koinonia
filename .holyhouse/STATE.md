@@ -8,11 +8,11 @@ This file is the current operating snapshot for AI agents.
 
 ## Active Work
 
-- Executing Phase 8.5 Task 9: add tenant types and error classes.
+- Phase 8.5 Task 10 complete: TenantMiddleware is registered and resolves active org from Better Auth sessions.
 
 ## Next Step
 
-- Type-check the tenant library additions, then review and commit Task 9.
+- Begin Phase 8.5 Task 11: add BaseRepository tenant helpers and their tests.
 
 ## Blockers
 

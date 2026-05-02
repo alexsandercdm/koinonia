@@ -6,6 +6,7 @@ import multipart from '@fastify/multipart'
 import staticFiles from '@fastify/static'
 import path from 'path'
 import { env } from './config/env'
+import { tenantMiddleware } from './middleware/tenant'
 import { acomodacaoRoutes } from './modules/acomodacoes/routes/acomodacoes'
 import { participanteRoutes } from './modules/pessoas/routes/participantes'
 import { inscricaoRoutes } from './modules/inscricoes/routes/inscricoes'
@@ -37,6 +38,7 @@ export const buildApp = () => {
   })
 
   app.register(multipart)
+  app.register(tenantMiddleware)
 
   // Use a fallback for dirname to avoid crashes during tests if paths mismatch
   const uploadsPath = path.join(__dirname, '../uploads')
