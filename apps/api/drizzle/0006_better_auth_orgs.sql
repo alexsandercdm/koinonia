@@ -79,6 +79,6 @@ BEGIN
   END IF;
 END $$;
 --> statement-breakpoint
-CREATE INDEX IF NOT EXISTS "member_orgId_idx" ON "member" USING btree ("organization_id");
+CREATE INDEX IF NOT EXISTS "member_organizationId_idx" ON "member" USING btree ("organization_id");
 --> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "member_userId_idx" ON "member" USING btree ("user_id");

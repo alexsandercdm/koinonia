@@ -40,3 +40,10 @@ Record durable project knowledge here.
 - Adjustment: Do not apply or commit the generated baseline against an existing database. A future agent must choose a migration strategy explicitly: either track a baseline for a fresh database, or author incremental manual migrations for the existing schema and include the required Drizzle metadata.
 - Evidence: Generated SQL contained `CREATE TABLE` for all existing domain tables, not only Better Auth organization changes.
 - Correction: User chose the existing-database path. Removed the generated baseline, unignored `apps/api/drizzle/`, authored `0006_better_auth_orgs.sql` as an incremental migration only for Better Auth organization tables/session column, and applied it successfully.
+
+## ERROR_PATTERN - Migration index names must match Drizzle schema names
+
+- Date: 2026-05-01
+- Context: Phase 8.5 Task 2 spec review found the manual migration created `member_orgId_idx` while `auth-schema.ts` declares `member_organizationId_idx`.
+- Correction: Use the exact Drizzle schema index names in manual migrations; renamed the local database index and migration SQL to `member_organizationId_idx`.
+- Evidence: PostgreSQL index check returned `member_organizationId_idx` and `member_userId_idx`.
