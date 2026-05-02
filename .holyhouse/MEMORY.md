@@ -109,3 +109,18 @@ Record durable project knowledge here.
 - Context: Phase 8.5 Task 13 type-check failed in `FinanceiroRepository` because `const where = eventoId ? and(this.whereOrg(...), eq(...)) : this.whereOrg(...)` inferred `SQL | undefined`, while the variable had been declared as `SQL`.
 - Correction: When assigning `and(...)` into a non-optional SQL variable inside tenant helpers, use a non-null assertion only when the operands are guaranteed to exist, or widen the variable type explicitly.
 - Evidence: Adding `!` to `and(this.whereOrg(inscricoes), eq(inscricoes.evento_id, eventoId))` restored `pnpm --filter @koinonia/api type-check`.
+
+## PROJECT_RULE - Pessoas endpoints use default tenant fallback during org-session transition
+
+- Date: 2026-05-02
+- Context: Phase 8.5 Task 14 migrated participant queries into `PessoasRepository`, but the current participant E2E/auth flows still do not activate a Better Auth organization in session before hitting `/api/v1/participantes/*`.
+- Rule: `ParticipanteController` should prefer `request.tenantCtx` when the tenant middleware resolved an active org, but may temporarily fall back to `DEFAULT_ORGANIZATION_ID` plus a legacy-role mapping (`admin -> PRESIDENTE`, `lider -> PASTOR_REDE`, `servo -> MEMBRO`) so pre-organization participant flows keep working against the backfilled default tenant.
+- Revisit: Remove this fallback once organization selection/onboarding is wired into the participant-facing auth flow and tests can reliably call the org activation endpoint first.
+- Evidence: After adding the fallback, participant route tests continued to pass while `PessoasRepository` enforced org scoping internally.
+
+## ERROR_PATTERN - Sourcing .env for child processes may require auto-export
+
+- Date: 2026-05-02
+- Context: Running `source apps/api/.env && pnpm exec vitest ...` did not populate `process.env` for Vitest because the shell variables from `.env` were not exported to child processes.
+- Correction: Use `set -a && source /path/to/.env && set +a` before spawning test commands that need those variables.
+- Evidence: The pessoas use case tests only saw `DATABASE_URL` and `JWT_SECRET` after rerunning Vitest with `set -a`.

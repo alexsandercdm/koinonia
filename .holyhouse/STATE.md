@@ -8,11 +8,11 @@ This file is the current operating snapshot for AI agents.
 
 ## Active Work
 
-- Phase 8.5 Task 13 complete: repositories that own tenant-sensitive flows now resolve request-scoped TenantContext and enforce org scoping through BaseRepository.
+- Phase 8.5 Task 14 complete: PessoasRepository now owns tenant-aware participant queries, subtree traversal, and pessoas use cases delegate through it.
 
 ## Next Step
 
-- Begin Phase 8.5 Task 14: add PessoasRepository with subtree traversal and tenant-aware participant queries.
+- Begin Phase 8.5 Task 15: add TransferPresidencyUseCase with atomic role transition.
 
 ## Blockers
 

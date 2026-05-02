@@ -1,6 +1,7 @@
-import { Database } from '../../../db'
-import { pessoas } from '../../../db/schema'
-import { ilike, and, isNull } from 'drizzle-orm'
+import { type Database } from '../../../db'
+import { PessoasRepository } from '../repositories/PessoasRepository'
+import { resolveTenantContext } from './tenant-context'
+import type { TenantContext } from '../../../lib/tenant/types'
 
 interface ListParticipantesParams {
   q?: string
@@ -9,44 +10,12 @@ interface ListParticipantesParams {
 }
 
 export class ListParticipantesUseCase {
-  constructor(private db: Database) {}
+  constructor(
+    private db: Database,
+    private ctx?: TenantContext,
+  ) {}
 
   async execute({ q, page, pageSize }: ListParticipantesParams) {
-    const offset = (page - 1) * pageSize
-
-    const conditions = [
-      isNull(pessoas.deleted_at)
-    ]
-
-    if (q) {
-      conditions.push(
-        ilike(pessoas.nome, `%${q}%`)
-      )
-    }
-
-    const whereClause = conditions.length > 1 ? and(...conditions) : conditions[0]
-
-    const [participantes, total] = await Promise.all([
-      this.db.select()
-        .from(pessoas)
-        .where(whereClause)
-        .limit(pageSize)
-        .offset(offset)
-        .orderBy(pessoas.nome),
-      this.db.select({ count: pessoas.id })
-        .from(pessoas)
-        .where(whereClause)
-        .then(result => result.length)
-    ])
-
-    return {
-      data: participantes,
-      pagination: {
-        page,
-        pageSize,
-        total,
-        totalPages: Math.ceil(total / pageSize)
-      }
-    }
+    return new PessoasRepository(this.db, resolveTenantContext(this.ctx)).list({ q, page, pageSize })
   }
 }
