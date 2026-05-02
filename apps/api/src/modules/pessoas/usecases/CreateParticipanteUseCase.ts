@@ -1,17 +1,16 @@
 import { type Database } from '../../../db'
+import type { TenantContext } from '../../../lib/tenant/types'
 import { CreatePessoa } from '../entities/pessoa'
 import { PessoasRepository } from '../repositories/PessoasRepository'
-import { resolveTenantContext } from './tenant-context'
-import type { TenantContext } from '../../../lib/tenant/types'
 
 export class CreateParticipanteUseCase {
   constructor(
     private db: Database,
-    private ctx?: TenantContext,
+    private ctx: TenantContext,
   ) {}
 
   async execute(data: CreatePessoa) {
-    const repository = new PessoasRepository(this.db, resolveTenantContext(this.ctx))
+    const repository = new PessoasRepository(this.db, this.ctx)
 
     // Check if email already exists
     if (data.email) {

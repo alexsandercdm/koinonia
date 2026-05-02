@@ -1,7 +1,6 @@
 import { type Database } from '../../../db'
-import { PessoasRepository } from '../repositories/PessoasRepository'
-import { resolveTenantContext } from './tenant-context'
 import type { TenantContext } from '../../../lib/tenant/types'
+import { PessoasRepository } from '../repositories/PessoasRepository'
 
 interface ListParticipantesParams {
   q?: string
@@ -12,10 +11,10 @@ interface ListParticipantesParams {
 export class ListParticipantesUseCase {
   constructor(
     private db: Database,
-    private ctx?: TenantContext,
+    private ctx: TenantContext,
   ) {}
 
   async execute({ q, page, pageSize }: ListParticipantesParams) {
-    return new PessoasRepository(this.db, resolveTenantContext(this.ctx)).list({ q, page, pageSize })
+    return new PessoasRepository(this.db, this.ctx).list({ q, page, pageSize })
   }
 }

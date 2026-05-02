@@ -1,9 +1,8 @@
 import { and, eq, isNull, ne } from 'drizzle-orm'
 import { type Database } from '../../../db'
+import type { TenantContext } from '../../../lib/tenant/types'
 import { AuditLogRepository } from '../repositories/AuditLogRepository'
 import { PessoasRepository } from '../repositories/PessoasRepository'
-import { resolveTenantContext } from './tenant-context'
-import type { TenantContext } from '../../../lib/tenant/types'
 
 export type UpdateParticipanteData = Partial<{
   nome: string
@@ -24,11 +23,11 @@ export class UpdateParticipanteUseCase {
   constructor(
     private db: Database,
     private auditLogRepo: AuditLogRepository,
-    private ctx?: TenantContext,
+    private ctx: TenantContext,
   ) {}
 
   async execute(id: string, user_id: string, data: UpdateParticipanteData) {
-    const repository = new PessoasRepository(this.db, resolveTenantContext(this.ctx))
+    const repository = new PessoasRepository(this.db, this.ctx)
 
     if (data.email) {
       const existing = await repository.findByEmail(data.email, id)

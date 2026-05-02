@@ -9,7 +9,7 @@ export class AcomodacaoRepository extends BaseRepository {
     super(db, ctx)
   }
 
-  async createLocal(data: typeof locais.$inferInsert) {
+  async createLocal(data: Omit<typeof locais.$inferInsert, 'organization_id'>) {
     const [local] = await this.db.insert(locais).values(this.withOrg(data)).returning()
     return local
   }

@@ -1,14 +1,13 @@
 import { type Database } from '../../../db'
+import type { TenantContext } from '../../../lib/tenant/types'
 import { AuditLogRepository } from '../repositories/AuditLogRepository'
 import { PessoasRepository } from '../repositories/PessoasRepository'
-import { resolveTenantContext } from './tenant-context'
-import type { TenantContext } from '../../../lib/tenant/types'
 
 export class UpdateParticipanteSaudeUseCase {
   constructor(
     private db: Database,
     private auditLogRepo: AuditLogRepository,
-    private ctx?: TenantContext,
+    private ctx: TenantContext,
   ) {}
 
   async execute(id: string, user_id: string, data: Partial<{
@@ -19,7 +18,7 @@ export class UpdateParticipanteSaudeUseCase {
     contato_emergencia_nome: string
     contato_emergencia_tel: string
   }>) {
-    const repository = new PessoasRepository(this.db, resolveTenantContext(this.ctx))
+    const repository = new PessoasRepository(this.db, this.ctx)
     const participante = await repository.update(id, data)
 
     if (participante) {

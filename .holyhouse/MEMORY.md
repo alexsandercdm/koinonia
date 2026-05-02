@@ -131,3 +131,10 @@ Record durable project knowledge here.
 - Context: Phase 8.5 Task 16 added organization invite and membership endpoints, but `auth.api.createInvitation(...)` still inferred the default Better Auth org roles (`owner | admin | member`) until the plugin configuration declared Koinonia's domain role set.
 - Rule: `apps/api/src/config/auth.ts` must configure `organizationPlugin({ creatorRole, roles })` with the domain `OrgRole` keys so organization API endpoints accept and persist `PRESIDENTE`, `PASTOR_PRINCIPAL`, `PASTOR_REDE`, `DISCIPULADOR`, `LIDER_CELULA`, and `MEMBRO`.
 - Evidence: After mapping `PRESIDENTE -> ownerAc`, `PASTOR_PRINCIPAL -> adminAc`, and the remaining roles to `memberAc`, `pnpm --filter @koinonia/api type-check` passed and `CreateOrganizationUseCase` no longer depended on default Better Auth role typings.
+
+## PROJECT_RULE - Transitional default tenant must stay at the controller boundary only
+
+- Date: 2026-05-02
+- Context: Early Phase 8.5 write paths used `DEFAULT_ORGANIZATION_ID` directly inside use cases to keep older participant flows alive before org activation is wired end-to-end.
+- Rule: During the transition, any default-org fallback should live only at the HTTP boundary (`ParticipanteController.resolveCtx`). Tenant-aware repositories and use cases should receive an explicit `TenantContext`, not silently manufacture one.
+- Evidence: After removing `resolveTenantContext()` and the hidden default-org path from `pessoas` use cases, `pnpm --filter @koinonia/api type-check` and the `pessoas` repository/use case Vitest suite still passed.

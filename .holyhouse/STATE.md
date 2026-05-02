@@ -8,11 +8,11 @@ This file is the current operating snapshot for AI agents.
 
 ## Active Work
 
-- Phase 8.5 Task 16 complete: organization endpoints are registered under `/api/v1/organization` and Better Auth org roles are aligned with domain `OrgRole` values.
+- Phase 8.5 Task 17 in progress: hidden tenant fallbacks were removed from `pessoas` use cases and `CreateLocalUseCase`, keeping the temporary default-org bridge only at the participant controller boundary.
 
 ## Next Step
 
-- Begin Phase 8.5 Task 17: update remaining endpoints and write paths to require request-scoped tenant context.
+- Finish Phase 8.5 Task 17 by auditing the remaining participant/auth flows and any route handlers that still rely on the default-org transition path.
 
 ## Blockers
 
