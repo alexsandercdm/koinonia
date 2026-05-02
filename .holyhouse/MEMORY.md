@@ -61,3 +61,23 @@ Record durable project knowledge here.
 - Context: `pnpm db:migrate:manual -- src/db/manual-migrations/0006_better_auth_orgs.sql` passed `--` through to the TS script as `process.argv[2]`, causing the runner to try opening a file literally named `--`.
 - Correction: Manual migration scripts should parse `process.argv.slice(2)` and ignore standalone `--` separators.
 - Evidence: Updated `apply-manual-migration.ts` to select the first non-`--` argument.
+
+## PROJECT_RULE - Better Auth organization session contract
+
+- Date: 2026-05-02
+- Context: Phase 8.5 Task 3 validated Better Auth Organizations behavior in the running Fastify API before implementing tenant middleware.
+- Rule: `require("better-auth/plugins").organization` is available and `typeof organization === "function"`.
+- Rule: The active organization is exposed at `session.activeOrganizationId` in both `GET /api/v1/auth/get-session` and `auth.api.getSession(...)`; there is no nested `session.session.activeOrganizationId` in the returned object.
+- Rule: Better Auth 1.6.2 uses singular organization routes. Use `POST /api/v1/auth/organization/set-active`; the plural `/api/v1/auth/organizations/set-active` returns `404`.
+- Rule: `auth.api.getSession({ headers })` accepted both a Web `Headers` instance and a plain Fastify-style headers object containing `authorization` and `cookie`.
+- Rule: Creating an organization automatically sets it active unless `keepCurrentActiveOrganization` is sent; unsetting with `{ "organizationId": null }` returns `null` and leaves `session.activeOrganizationId` as `null`.
+- Rule: Successful `POST /api/v1/auth/organization/set-active` returns the organization object with keys `createdAt`, `id`, `logo`, `metadata`, `name`, and `slug`, and the next `get-session` call reflects the selected organization id.
+- Evidence: Runtime spike signed up/signed in a temporary user, created an organization, unset/set active org, confirmed session shape, confirmed plural endpoint `404`, and cleaned up the temporary user/org records.
+
+## ERROR_PATTERN - Better Auth baseURL must include mounted auth prefix
+
+- Date: 2026-05-02
+- Context: Phase 8.5 Task 3 spike returned internal Better Auth `404` when `BETTER_AUTH_URL` was set to only the host/port while the Fastify handler is mounted under `/api/v1/auth`.
+- Correction: In API runtime and auth tests, set `BETTER_AUTH_URL` to the full mounted auth base path, e.g. `http://127.0.0.1:3137/api/v1/auth`, when exercising `/api/v1/auth/*` endpoints.
+- Risk: `apps/api/.env.example` currently still shows `BETTER_AUTH_URL="http://localhost:3001"` and must be aligned in a follow-up before relying on it as setup guidance.
+- Evidence: The same spike succeeded after using the full auth base path; sign-up/sign-in, organization create, set-active, and get-session all returned `200`.

@@ -8,11 +8,11 @@ This file is the current operating snapshot for AI agents.
 
 ## Active Work
 
-- Phase 8.5 Task 2 migration applied; awaiting spec and quality review.
+- Phase 8.5 Task 3 complete: Better Auth Organizations session structure validated.
 
 ## Next Step
 
-- Review Task 2, then continue to Phase 8.5 Task 3 if approved.
+- Begin Phase 8.5 Task 4: add nullable tenant columns for domain tables using the existing-DB manual migration path.
 
 ## Blockers
 
