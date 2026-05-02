@@ -8,11 +8,11 @@ This file is the current operating snapshot for AI agents.
 
 ## Active Work
 
-- Phase 8.5 Task 4 complete: nullable tenant columns added to Drizzle schema and existing-DB manual migration.
+- Phase 8.5 Task 5 complete: default organization backfill ran and tenant columns are populated.
 
 ## Next Step
 
-- Begin Phase 8.5 Task 5: backfill the default organization and assign nullable tenant columns.
+- Begin Phase 8.5 Task 6: make `organization_id` required and add tenant indexes/foreign keys.
 
 ## Blockers
 
