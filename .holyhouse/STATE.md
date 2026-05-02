@@ -8,11 +8,11 @@ This file is the current operating snapshot for AI agents.
 
 ## Active Work
 
-- Phase 8.5 Task 10 complete: TenantMiddleware is registered and resolves active org from Better Auth sessions.
+- Phase 8.5 Task 11 complete: BaseRepository now enforces tenant context via whereOrg() and withOrg() helpers.
 
 ## Next Step
 
-- Begin Phase 8.5 Task 11: add BaseRepository tenant helpers and their tests.
+- Begin Phase 8.5 Task 12: add PermissionResolver and its RBAC matrix tests.
 
 ## Blockers
 

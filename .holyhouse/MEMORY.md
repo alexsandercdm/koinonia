@@ -95,3 +95,10 @@ Record durable project knowledge here.
 - Context: Phase 8.5 Task 7 needed `(organization_id, lider_pessoa_id) -> pessoas(organization_id, id)`, but the phase plan's Task 4 snippet had introduced `lider_pessoa_id` as `text` while the design spec and live `pessoas.id` are `uuid`.
 - Correction: Convert `pessoas.lider_pessoa_id` to `uuid` before adding `fk_lider_pessoa_org`; keep the Drizzle schema as `uuid('lider_pessoa_id')`.
 - Evidence: A preflight query failed with `operator does not exist: uuid = text`; after migration `0009_tenant_step3_composite_fks.sql`, `information_schema` reported `lider_pessoa_id` as `uuid` and all four composite FK constraints existed.
+
+## ERROR_PATTERN - Drizzle eq helper needs a typed column in generic tenant helpers
+
+- Date: 2026-05-02
+- Context: Phase 8.5 Task 11 initially typed `whereOrg(table)` as `{ organization_id: unknown }`, which let the Vitest unit test pass but made `pnpm --filter @koinonia/api type-check` fail with `TS2769` because `eq()` requires a Drizzle column/SQL wrapper on the left side.
+- Correction: In generic repository helpers, type `organization_id` as `AnyColumn` from `drizzle-orm` before passing it to `eq(...)`.
+- Evidence: After changing `whereOrg(table: { organization_id: AnyColumn })`, the BaseRepository unit test still passed and the API type-check stopped failing on `base-repository.ts`.
