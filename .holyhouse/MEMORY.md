@@ -124,3 +124,10 @@ Record durable project knowledge here.
 - Context: Running `source apps/api/.env && pnpm exec vitest ...` did not populate `process.env` for Vitest because the shell variables from `.env` were not exported to child processes.
 - Correction: Use `set -a && source /path/to/.env && set +a` before spawning test commands that need those variables.
 - Evidence: The pessoas use case tests only saw `DATABASE_URL` and `JWT_SECRET` after rerunning Vitest with `set -a`.
+
+## PROJECT_RULE - Better Auth organization plugin must declare Koinonia org roles
+
+- Date: 2026-05-02
+- Context: Phase 8.5 Task 16 added organization invite and membership endpoints, but `auth.api.createInvitation(...)` still inferred the default Better Auth org roles (`owner | admin | member`) until the plugin configuration declared Koinonia's domain role set.
+- Rule: `apps/api/src/config/auth.ts` must configure `organizationPlugin({ creatorRole, roles })` with the domain `OrgRole` keys so organization API endpoints accept and persist `PRESIDENTE`, `PASTOR_PRINCIPAL`, `PASTOR_REDE`, `DISCIPULADOR`, `LIDER_CELULA`, and `MEMBRO`.
+- Evidence: After mapping `PRESIDENTE -> ownerAc`, `PASTOR_PRINCIPAL -> adminAc`, and the remaining roles to `memberAc`, `pnpm --filter @koinonia/api type-check` passed and `CreateOrganizationUseCase` no longer depended on default Better Auth role typings.

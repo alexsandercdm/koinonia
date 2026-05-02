@@ -1,9 +1,11 @@
 import { betterAuth } from "better-auth"
 import { drizzleAdapter } from "better-auth/adapters/drizzle"
 import { bearer, organization as organizationPlugin } from "better-auth/plugins"
+import { adminAc, memberAc, ownerAc } from "better-auth/plugins/organization/access"
 import { db } from "../db"
 import * as schema from "../db/schema"
 import { env } from "./env"
+import { OrgRole } from "../lib/tenant/types"
 
 const trustedOrigins = env.CORS_ORIGIN
   .split(',')
@@ -30,6 +32,15 @@ export const auth = betterAuth({
     bearer(),
     organizationPlugin({
       allowUserToCreateOrganization: true,
+      creatorRole: OrgRole.PRESIDENTE,
+      roles: {
+        [OrgRole.PRESIDENTE]: ownerAc,
+        [OrgRole.PASTOR_PRINCIPAL]: adminAc,
+        [OrgRole.PASTOR_REDE]: memberAc,
+        [OrgRole.DISCIPULADOR]: memberAc,
+        [OrgRole.LIDER_CELULA]: memberAc,
+        [OrgRole.MEMBRO]: memberAc,
+      },
     }),
   ],
   user: {

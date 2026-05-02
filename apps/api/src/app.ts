@@ -14,6 +14,7 @@ import { authRoutes } from './routes/auth'
 import { customAuthRoutes } from './routes/custom-auth'
 import { adminRoutes } from './modules/admin/routes/admin'
 import { financeiroRoutes } from './modules/financeiro/routes/financeiro'
+import { organizationRoutes } from './modules/organizations/routes/organizations'
 
 export const buildApp = () => {
   const app = Fastify({
@@ -64,6 +65,7 @@ export const buildApp = () => {
   app.register(acomodacaoRoutes, { prefix: '/api/v1' })
   app.register(adminRoutes, { prefix: '/api/v1' })
   app.register(financeiroRoutes, { prefix: '/api/v1' })
+  app.register(organizationRoutes, { prefix: '/api/v1/organization' })
 
   return app
 }

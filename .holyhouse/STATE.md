@@ -8,11 +8,11 @@ This file is the current operating snapshot for AI agents.
 
 ## Active Work
 
-- Phase 8.5 Task 15 complete: TransferPresidencyUseCase performs atomic presidency handoff with RBAC guardrails.
+- Phase 8.5 Task 16 complete: organization endpoints are registered under `/api/v1/organization` and Better Auth org roles are aligned with domain `OrgRole` values.
 
 ## Next Step
 
-- Begin Phase 8.5 Task 16: add organization endpoints and normalize org creation to PRESIDENTE.
+- Begin Phase 8.5 Task 17: update remaining endpoints and write paths to require request-scoped tenant context.
 
 ## Blockers
 
