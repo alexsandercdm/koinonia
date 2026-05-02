@@ -1,18 +1,22 @@
 import { and, count, eq, ne } from 'drizzle-orm'
-import { Database } from '../../../db'
-import { inscricoes, CreateInscricao } from '../../../db/schema'
+import { type Database } from '../../../db'
+import { type CreateInscricao, inscricoes } from '../../../db/schema'
+import { BaseRepository } from '../../../lib/tenant/base-repository'
+import type { TenantContext } from '../../../lib/tenant/types'
 
-export class InscricaoRepository {
-  constructor(private db: Database) {}
+export class InscricaoRepository extends BaseRepository {
+  constructor(db: Database, ctx: TenantContext) {
+    super(db, ctx)
+  }
 
-  async create(data: CreateInscricao) {
-    const [inscricao] = await this.db.insert(inscricoes).values(data).returning()
+  async create(data: Omit<CreateInscricao, 'organization_id'>) {
+    const [inscricao] = await this.db.insert(inscricoes).values(this.withOrg(data)).returning()
     return inscricao
   }
 
   async findById(id: string) {
     return await this.db.query.inscricoes.findFirst({
-      where: eq(inscricoes.id, id),
+      where: and(this.whereOrg(inscricoes), eq(inscricoes.id, id)),
       with: {
         pessoa: true,
         evento: true,
@@ -25,7 +29,7 @@ export class InscricaoRepository {
     const [inscricao] = await this.db
       .update(inscricoes)
       .set({ ...data, updated_at: new Date() })
-      .where(eq(inscricoes.id, id))
+      .where(and(this.whereOrg(inscricoes), eq(inscricoes.id, id)))
       .returning()
     return inscricao
   }
@@ -34,19 +38,13 @@ export class InscricaoRepository {
     const [result] = await this.db
       .select({ value: count() })
       .from(inscricoes)
-      .where(
-        and(
-          eq(inscricoes.evento_id, eventoId),
-          ne(inscricoes.status, 'CANCELADA'),
-          ne(inscricoes.status, 'LISTA_ESPERA'),
-        )
-      )
+      .where(and(this.whereOrg(inscricoes), eq(inscricoes.evento_id, eventoId), ne(inscricoes.status, 'CANCELADA'), ne(inscricoes.status, 'LISTA_ESPERA')))
     return result.value || 0
   }
 
   async findByEventoId(eventoId: string) {
     return await this.db.query.inscricoes.findMany({
-      where: eq(inscricoes.evento_id, eventoId),
+      where: and(this.whereOrg(inscricoes), eq(inscricoes.evento_id, eventoId)),
       with: {
         pessoa: true,
       },
@@ -55,10 +53,7 @@ export class InscricaoRepository {
 
   async findByEventoAndPessoa(eventoId: string, pessoaId: string) {
     return await this.db.query.inscricoes.findFirst({
-      where: and(
-        eq(inscricoes.evento_id, eventoId),
-        eq(inscricoes.pessoa_id, pessoaId),
-      ),
+      where: and(this.whereOrg(inscricoes), eq(inscricoes.evento_id, eventoId), eq(inscricoes.pessoa_id, pessoaId)),
     })
   }
 }

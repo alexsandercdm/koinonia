@@ -8,14 +8,13 @@ import { UpdateParticipanteSaudeUseCase } from '../usecases/UpdateParticipanteSa
 import { DeleteParticipanteUseCase } from '../usecases/DeleteParticipanteUseCase'
 import { AuditLogRepository } from '../repositories/AuditLogRepository'
 import { db } from '../../../db'
+import { requireTenantCtx } from '../../../middleware/tenant'
 
 export class ParticipanteController {
   private createUseCase: CreateParticipanteUseCase
   private listUseCase: ListParticipantesUseCase
   private getByIdUseCase: GetParticipanteByIdUseCase
   private getHistoricoUseCase: GetParticipanteHistoricoUseCase
-  private updateUseCase: UpdateParticipanteUseCase
-  private updateSaudeUseCase: UpdateParticipanteSaudeUseCase
   private deleteUseCase: DeleteParticipanteUseCase
 
   constructor() {
@@ -23,10 +22,6 @@ export class ParticipanteController {
     this.listUseCase = new ListParticipantesUseCase(db)
     this.getByIdUseCase = new GetParticipanteByIdUseCase(db)
     this.getHistoricoUseCase = new GetParticipanteHistoricoUseCase(db)
-    
-    const auditLogRepo = new AuditLogRepository(db)
-    this.updateUseCase = new UpdateParticipanteUseCase(db, auditLogRepo)
-    this.updateSaudeUseCase = new UpdateParticipanteSaudeUseCase(db, auditLogRepo)
     
     this.deleteUseCase = new DeleteParticipanteUseCase(db)
   }
@@ -90,7 +85,9 @@ export class ParticipanteController {
       const { id } = request.params as any
       const updateData = request.body as any
       const user_id = (request as any).user.id
-      const participante = await this.updateUseCase.execute(id, user_id, updateData)
+      const ctx = requireTenantCtx(request, reply)
+      const useCase = new UpdateParticipanteUseCase(db, new AuditLogRepository(db, ctx))
+      const participante = await useCase.execute(id, user_id, updateData)
       return reply.send(participante)
     } catch (error) {
       if (error instanceof Error) {
@@ -113,7 +110,9 @@ export class ParticipanteController {
       const { id } = request.params as any
       const updateData = request.body as any
       const user_id = (request as any).user.id
-      const participante = await this.updateSaudeUseCase.execute(id, user_id, updateData)
+      const ctx = requireTenantCtx(request, reply)
+      const useCase = new UpdateParticipanteSaudeUseCase(db, new AuditLogRepository(db, ctx))
+      const participante = await useCase.execute(id, user_id, updateData)
       return reply.send(participante)
     } catch (error) {
       if (error instanceof Error) {

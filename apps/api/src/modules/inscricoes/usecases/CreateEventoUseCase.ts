@@ -1,6 +1,4 @@
 import { EventoRepository } from '../repositories/EventoRepository'
-import { CreateEvento } from '../../../db/schema'
-import { DEFAULT_ORGANIZATION_ID } from '../../../db/default-organization'
 
 interface CreateEventoRequest {
   nome: string
@@ -26,9 +24,8 @@ export class CreateEventoUseCase {
     // Create the event
     const evento = await this.eventoRepository.create({
       ...eventoData,
-      organization_id: DEFAULT_ORGANIZATION_ID,
       status: 'rascunho',
-    } as CreateEvento)
+    })
 
     // Add configurations if provided
     if (configuracoes && configuracoes.length > 0) {

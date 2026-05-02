@@ -1,6 +1,5 @@
 import { InscricaoRepository } from '../repositories/InscricaoRepository'
 import { EventoRepository } from '../repositories/EventoRepository'
-import { CreateInscricao } from '../../../db/schema'
 
 interface RegisterInscricaoRequest {
   evento_id: string
@@ -40,14 +39,13 @@ export class RegisterInscricaoUseCase {
 
     // 3. Create Subscription
     const inscricao = await this.inscricaoRepository.create({
-      organization_id: evento.organization_id,
       evento_id,
       pessoa_id,
       papel,
       valor_total: config.valor,
       status,
       observacoes,
-    } as CreateInscricao)
+    })
 
     return inscricao
   }

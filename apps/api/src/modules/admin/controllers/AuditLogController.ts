@@ -1,12 +1,13 @@
-import { FastifyRequest, FastifyReply } from 'fastify'
+import { FastifyReply, FastifyRequest } from 'fastify'
 import { db } from '../../../db'
+import { requireTenantCtx } from '../../../middleware/tenant'
+import { AuditLogRepository } from '../repositories/AuditLogRepository'
 import { ListAuditLogsUseCase } from '../usecases/ListAuditLogsUseCase'
 
 export class AuditLogController {
-  private listUseCase: ListAuditLogsUseCase
-
-  constructor() {
-    this.listUseCase = new ListAuditLogsUseCase(db)
+  private buildUseCase(request: FastifyRequest, reply: FastifyReply) {
+    const ctx = requireTenantCtx(request, reply)
+    return new ListAuditLogsUseCase(new AuditLogRepository(db, ctx))
   }
 
   async list(request: FastifyRequest, reply: FastifyReply) {
@@ -21,7 +22,7 @@ export class AuditLogController {
       const page = Math.max(1, parseInt(query.page ?? '1', 10))
       const limit = Math.min(100, Math.max(1, parseInt(query.limit ?? '20', 10)))
 
-      const logs = await this.listUseCase.execute({
+      const logs = await this.buildUseCase(request, reply).execute({
         page,
         limit,
         action: query.action,

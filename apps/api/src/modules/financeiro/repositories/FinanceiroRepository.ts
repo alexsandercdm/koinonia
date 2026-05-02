@@ -1,6 +1,8 @@
-import { eq, sum, count, and, SQL } from 'drizzle-orm'
-import { Database } from '../../../db'
-import { inscricoes, pagamentos, despesas, configuracaoEvento, CreateDespesa } from '../../../db/schema'
+import { and, eq, type SQL } from 'drizzle-orm'
+import { type Database } from '../../../db'
+import { type CreateDespesa, despesas, eventos, inscricoes, pagamentos } from '../../../db/schema'
+import { BaseRepository } from '../../../lib/tenant/base-repository'
+import type { TenantContext } from '../../../lib/tenant/types'
 
 export interface MetricasResult {
   totalArrecadado: number
@@ -10,34 +12,27 @@ export interface MetricasResult {
   porStatus: Record<string, number>
 }
 
-export class FinanceiroRepository {
-  constructor(private db: Database) {}
+export class FinanceiroRepository extends BaseRepository {
+  constructor(db: Database, ctx: TenantContext) {
+    super(db, ctx)
+  }
 
   async getMetricas(eventoId?: string): Promise<MetricasResult> {
-    // Total arrecadado = soma dos pagamentos
-    const pagamentosWhere: SQL | undefined = eventoId
-      ? eq(inscricoes.evento_id, eventoId)
-      : undefined
+    if (eventoId) {
+      await this.ensureEventoOwned(eventoId)
+    }
 
-    // Sum pagamentos via join inscricoes
+    const inscricoesWhere: SQL = eventoId
+      ? and(this.whereOrg(inscricoes), eq(inscricoes.evento_id, eventoId))!
+      : this.whereOrg(inscricoes)
+
     const pagamentosRows = await this.db
       .select({ valor: pagamentos.valor, eventoId: inscricoes.evento_id })
       .from(pagamentos)
       .innerJoin(inscricoes, eq(pagamentos.inscricao_id, inscricoes.id))
-      .where(pagamentosWhere)
+      .where(inscricoesWhere)
 
-    const totalArrecadado = pagamentosRows.reduce(
-      (acc, r) => acc + parseFloat(r.valor ?? '0'),
-      0,
-    )
-
-    // Total previsto = soma valor_total das inscrições ativas
-    const inscricoesWhere: SQL | undefined = eventoId
-      ? and(
-          eq(inscricoes.evento_id, eventoId),
-          // exclude cancelled
-        )
-      : undefined
+    const totalArrecadado = pagamentosRows.reduce((acc, row) => acc + parseFloat(row.valor ?? '0'), 0)
 
     const inscricoesRows = await this.db
       .select({ status: inscricoes.status, valor_total: inscricoes.valor_total })
@@ -45,29 +40,21 @@ export class FinanceiroRepository {
       .where(inscricoesWhere)
 
     const totalPrevisto = inscricoesRows
-      .filter((r) => r.status !== 'CANCELADA' && r.status !== 'LISTA_ESPERA')
-      .reduce((acc, r) => acc + parseFloat(r.valor_total ?? '0'), 0)
+      .filter((row) => row.status !== 'CANCELADA' && row.status !== 'LISTA_ESPERA')
+      .reduce((acc, row) => acc + parseFloat(row.valor_total ?? '0'), 0)
 
-    // porStatus
     const porStatus: Record<string, number> = {}
     for (const row of inscricoesRows) {
       porStatus[row.status ?? 'unknown'] = (porStatus[row.status ?? 'unknown'] ?? 0) + 1
     }
 
-    // Total despesas
-    const despesasWhere: SQL | undefined = eventoId
-      ? eq(despesas.evento_id, eventoId)
-      : undefined
-
     const despesasRows = await this.db
       .select({ valor: despesas.valor })
       .from(despesas)
-      .where(despesasWhere)
+      .innerJoin(eventos, eq(eventos.id, despesas.evento_id))
+      .where(eventoId ? and(this.whereOrg(eventos), eq(eventos.id, eventoId)) : this.whereOrg(eventos))
 
-    const totalDespesas = despesasRows.reduce(
-      (acc, r) => acc + parseFloat(r.valor ?? '0'),
-      0,
-    )
+    const totalDespesas = despesasRows.reduce((acc, row) => acc + parseFloat(row.valor ?? '0'), 0)
 
     const breakEvenPct =
       totalDespesas > 0 ? Math.min(100, (totalArrecadado / totalDespesas) * 100) : 100
@@ -82,15 +69,35 @@ export class FinanceiroRepository {
   }
 
   async listDespesas(eventoId?: string) {
-    const whereClause: SQL | undefined = eventoId
-      ? eq(despesas.evento_id, eventoId)
-      : undefined
+    if (eventoId) {
+      await this.ensureEventoOwned(eventoId)
+    }
 
-    return this.db.select().from(despesas).where(whereClause).orderBy(despesas.created_at)
+    const rows = await this.db
+      .select({ despesa: despesas })
+      .from(despesas)
+      .innerJoin(eventos, eq(eventos.id, despesas.evento_id))
+      .where(eventoId ? and(this.whereOrg(eventos), eq(eventos.id, eventoId)) : this.whereOrg(eventos))
+      .orderBy(despesas.created_at)
+
+    return rows.map((row) => row.despesa)
   }
 
   async createDespesa(data: CreateDespesa) {
+    await this.ensureEventoOwned(data.evento_id)
+
     const [despesa] = await this.db.insert(despesas).values(data).returning()
     return despesa
+  }
+
+  private async ensureEventoOwned(eventoId: string) {
+    const evento = await this.db.query.eventos.findFirst({
+      where: and(this.whereOrg(eventos), eq(eventos.id, eventoId)),
+      columns: { id: true },
+    })
+
+    if (!evento) {
+      throw new Error('Evento não encontrado')
+    }
   }
 }

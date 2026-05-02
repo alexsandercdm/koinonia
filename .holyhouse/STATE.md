@@ -8,11 +8,11 @@ This file is the current operating snapshot for AI agents.
 
 ## Active Work
 
-- Phase 8.5 Task 12 complete: PermissionResolver centralizes RBAC checks and pessoa/event visibility scopes.
+- Phase 8.5 Task 13 complete: repositories that own tenant-sensitive flows now resolve request-scoped TenantContext and enforce org scoping through BaseRepository.
 
 ## Next Step
 
-- Begin Phase 8.5 Task 13: refactor repositories to extend BaseRepository and enforce org scoping.
+- Begin Phase 8.5 Task 14: add PessoasRepository with subtree traversal and tenant-aware participant queries.
 
 ## Blockers
 

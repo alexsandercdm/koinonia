@@ -1,26 +1,20 @@
-import { FastifyRequest, FastifyReply } from 'fastify'
+import { FastifyReply, FastifyRequest } from 'fastify'
 import { db } from '../../../db'
+import { requireTenantCtx } from '../../../middleware/tenant'
 import { EventoRepository } from '../repositories/EventoRepository'
 import { CreateEventoUseCase } from '../usecases/CreateEventoUseCase'
 import { ListEventosUseCase } from '../usecases/ListEventosUseCase'
 import { UpdateEventoUseCase } from '../usecases/UpdateEventoUseCase'
 
 export class EventoController {
-  private createUseCase: CreateEventoUseCase
-  private listUseCase: ListEventosUseCase
-  private updateUseCase: UpdateEventoUseCase
-  private repository: EventoRepository
-
-  constructor() {
-    this.repository = new EventoRepository(db)
-    this.createUseCase = new CreateEventoUseCase(this.repository)
-    this.listUseCase = new ListEventosUseCase(this.repository)
-    this.updateUseCase = new UpdateEventoUseCase(this.repository)
+  private buildRepository(request: FastifyRequest, reply: FastifyReply) {
+    return new EventoRepository(db, requireTenantCtx(request, reply))
   }
 
   async create(request: FastifyRequest, reply: FastifyReply) {
     try {
-      const evento = await this.createUseCase.execute(request.body as any)
+      const useCase = new CreateEventoUseCase(this.buildRepository(request, reply))
+      const evento = await useCase.execute(request.body as any)
       return reply.status(201).send(evento)
     } catch (error) {
       if (error instanceof Error) {
@@ -32,9 +26,10 @@ export class EventoController {
 
   async list(request: FastifyRequest, reply: FastifyReply) {
     try {
-      const eventos = await this.listUseCase.execute()
+      const useCase = new ListEventosUseCase(this.buildRepository(request, reply))
+      const eventos = await useCase.execute()
       return reply.send(eventos)
-    } catch (error) {
+    } catch (_error) {
       return reply.status(500).send({ error: 'Internal server error' })
     }
   }
@@ -42,7 +37,8 @@ export class EventoController {
   async update(request: FastifyRequest, reply: FastifyReply) {
     try {
       const { id } = request.params as any
-      const evento = await this.updateUseCase.execute({
+      const useCase = new UpdateEventoUseCase(this.buildRepository(request, reply))
+      const evento = await useCase.execute({
         id,
         ...(request.body as any),
       })
@@ -61,12 +57,12 @@ export class EventoController {
   async getById(request: FastifyRequest, reply: FastifyReply) {
     try {
       const { id } = request.params as any
-      const evento = await this.repository.findById(id)
+      const evento = await this.buildRepository(request, reply).findById(id)
       if (!evento) {
         return reply.status(404).send({ error: 'Evento não encontrado' })
       }
       return reply.send(evento)
-    } catch (error) {
+    } catch (_error) {
       return reply.status(500).send({ error: 'Internal server error' })
     }
   }

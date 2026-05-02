@@ -1,30 +1,27 @@
 import { FastifyReply, FastifyRequest } from 'fastify'
 import { db } from '../../../db'
+import { requireTenantCtx } from '../../../middleware/tenant'
 import { AcomodacaoError, isAcomodacaoError } from '../errors'
 import { AcomodacaoRepository } from '../repositories/AcomodacaoRepository'
-import { CreateLocalUseCase } from '../usecases/CreateLocalUseCase'
-import { UpdateLocalUseCase } from '../usecases/UpdateLocalUseCase'
-import { CreateQuartoUseCase } from '../usecases/CreateQuartoUseCase'
-import { UpdateQuartoUseCase } from '../usecases/UpdateQuartoUseCase'
 import { CreateCamaUseCase } from '../usecases/CreateCamaUseCase'
-import { UpdateCamaUseCase } from '../usecases/UpdateCamaUseCase'
+import { CreateLocalUseCase } from '../usecases/CreateLocalUseCase'
+import { CreateQuartoUseCase } from '../usecases/CreateQuartoUseCase'
 import { ListLocaisEstruturaUseCase } from '../usecases/ListLocaisEstruturaUseCase'
+import { UpdateCamaUseCase } from '../usecases/UpdateCamaUseCase'
+import { UpdateLocalUseCase } from '../usecases/UpdateLocalUseCase'
+import { UpdateQuartoUseCase } from '../usecases/UpdateQuartoUseCase'
 
 export class AcomodacaoStructureController {
-  private readonly repository = new AcomodacaoRepository(db)
-  private readonly listLocaisEstruturaUseCase = new ListLocaisEstruturaUseCase(this.repository)
-  private readonly createLocalUseCase = new CreateLocalUseCase(this.repository)
-  private readonly updateLocalUseCase = new UpdateLocalUseCase(this.repository)
-  private readonly createQuartoUseCase = new CreateQuartoUseCase(this.repository)
-  private readonly updateQuartoUseCase = new UpdateQuartoUseCase(this.repository)
-  private readonly createCamaUseCase = new CreateCamaUseCase(this.repository)
-  private readonly updateCamaUseCase = new UpdateCamaUseCase(this.repository)
+  private buildRepository(request: FastifyRequest, reply: FastifyReply) {
+    return new AcomodacaoRepository(db, requireTenantCtx(request, reply))
+  }
 
-  async listLocais(_request: FastifyRequest, reply: FastifyReply) {
+  async listLocais(request: FastifyRequest, reply: FastifyReply) {
     try {
-      const locais = await this.listLocaisEstruturaUseCase.execute()
+      const useCase = new ListLocaisEstruturaUseCase(this.buildRepository(request, reply))
+      const locais = await useCase.execute()
       return reply.send(locais)
-    } catch (error) {
+    } catch (_error) {
       return reply.status(500).send({ error: 'Internal server error' })
     }
   }
@@ -32,14 +29,13 @@ export class AcomodacaoStructureController {
   async listQuartosByLocal(request: FastifyRequest, reply: FastifyReply) {
     try {
       const { localId } = request.params as { localId: string }
-      const locais = await this.listLocaisEstruturaUseCase.execute()
-      const local = locais.find(l => l.id === localId)
+      const useCase = new ListLocaisEstruturaUseCase(this.buildRepository(request, reply))
+      const locais = await useCase.execute()
+      const local = locais.find((item) => item.id === localId)
       if (!local) {
         throw new AcomodacaoError('Local não encontrado', 404)
       }
-      // Extrai quartos da estrutura aninhada
-      const quartos = local.quartos ?? []
-      return reply.send(quartos)
+      return reply.send(local.quartos ?? [])
     } catch (error) {
       return this.handleError(error, reply)
     }
@@ -48,16 +44,13 @@ export class AcomodacaoStructureController {
   async listCamasByQuarto(request: FastifyRequest, reply: FastifyReply) {
     try {
       const { quartoId } = request.params as { quartoId: string }
-      const locais = await this.listLocaisEstruturaUseCase.execute()
-      const quarto = locais
-        .flatMap(l => l.quartos ?? [])
-        .find(q => q.id === quartoId)
+      const useCase = new ListLocaisEstruturaUseCase(this.buildRepository(request, reply))
+      const locais = await useCase.execute()
+      const quarto = locais.flatMap((item) => item.quartos ?? []).find((item) => item.id === quartoId)
       if (!quarto) {
         throw new AcomodacaoError('Quarto não encontrado', 404)
       }
-      // Extrai camas da estrutura aninhada
-      const camas = quarto.camas ?? []
-      return reply.send(camas)
+      return reply.send(quarto.camas ?? [])
     } catch (error) {
       return this.handleError(error, reply)
     }
@@ -65,7 +58,8 @@ export class AcomodacaoStructureController {
 
   async createLocal(request: FastifyRequest, reply: FastifyReply) {
     try {
-      const local = await this.createLocalUseCase.execute(request.body as any)
+      const useCase = new CreateLocalUseCase(this.buildRepository(request, reply))
+      const local = await useCase.execute(request.body as any)
       return reply.status(201).send(local)
     } catch (error) {
       return this.handleError(error, reply)
@@ -75,7 +69,8 @@ export class AcomodacaoStructureController {
   async updateLocal(request: FastifyRequest, reply: FastifyReply) {
     try {
       const { localId } = request.params as { localId: string }
-      const local = await this.updateLocalUseCase.execute({
+      const useCase = new UpdateLocalUseCase(this.buildRepository(request, reply))
+      const local = await useCase.execute({
         localId,
         ...(request.body as object),
       })
@@ -89,7 +84,8 @@ export class AcomodacaoStructureController {
     try {
       const { localId } = request.params as { localId: string }
       const body = request.body as Record<string, unknown>
-      const quarto = await this.createQuartoUseCase.execute({
+      const useCase = new CreateQuartoUseCase(this.buildRepository(request, reply))
+      const quarto = await useCase.execute({
         localId,
         nome: body.nome as string,
         genero_permitido: body.genero_permitido as 'M' | 'F' | 'MISTO',
@@ -104,7 +100,7 @@ export class AcomodacaoStructureController {
   async deleteQuarto(request: FastifyRequest, reply: FastifyReply) {
     try {
       const { quartoId } = request.params as { quartoId: string }
-      await this.repository.deleteQuarto(quartoId)
+      await this.buildRepository(request, reply).deleteQuarto(quartoId)
       return reply.status(204).send()
     } catch (error) {
       return this.handleError(error, reply)
@@ -115,7 +111,8 @@ export class AcomodacaoStructureController {
     try {
       const { quartoId } = request.params as { quartoId: string }
       const body = request.body as Record<string, unknown>
-      const quarto = await this.updateQuartoUseCase.execute({
+      const useCase = new UpdateQuartoUseCase(this.buildRepository(request, reply))
+      const quarto = await useCase.execute({
         quartoId,
         nome: body.nome as string | undefined,
         genero_permitido: body.genero_permitido as 'M' | 'F' | 'MISTO' | undefined,
@@ -131,7 +128,8 @@ export class AcomodacaoStructureController {
     try {
       const { quartoId } = request.params as { quartoId: string }
       const body = request.body as Record<string, unknown>
-      const cama = await this.createCamaUseCase.execute({
+      const useCase = new CreateCamaUseCase(this.buildRepository(request, reply))
+      const cama = await useCase.execute({
         quartoId,
         identificacao: body.identificacao as string,
         tipo: body.tipo as 'solteiro' | 'beliche_superior' | 'beliche_inferior' | 'casal',
@@ -147,7 +145,8 @@ export class AcomodacaoStructureController {
     try {
       const { camaId } = request.params as { camaId: string }
       const body = request.body as Record<string, unknown>
-      const cama = await this.updateCamaUseCase.execute({
+      const useCase = new UpdateCamaUseCase(this.buildRepository(request, reply))
+      const cama = await useCase.execute({
         camaId,
         identificacao: body.identificacao as string | undefined,
         tipo: body.tipo as 'solteiro' | 'beliche_superior' | 'beliche_inferior' | 'casal' | undefined,
