@@ -8,11 +8,11 @@ This file is the current operating snapshot for AI agents.
 
 ## Active Work
 
-- Phase 8.5 Task 8 complete: president uniqueness and no-self-leadership constraints are applied.
+- Executing Phase 8.5 Task 9: add tenant types and error classes.
 
 ## Next Step
 
-- Begin Phase 8.5 Task 9: add tenant types and error classes.
+- Type-check the tenant library additions, then review and commit Task 9.
 
 ## Blockers
 
