@@ -8,11 +8,11 @@ This file is the current operating snapshot for AI agents.
 
 ## Active Work
 
-- Phase 8.5 Task 14 complete: PessoasRepository now owns tenant-aware participant queries, subtree traversal, and pessoas use cases delegate through it.
+- Phase 8.5 Task 15 complete: TransferPresidencyUseCase performs atomic presidency handoff with RBAC guardrails.
 
 ## Next Step
 
-- Begin Phase 8.5 Task 15: add TransferPresidencyUseCase with atomic role transition.
+- Begin Phase 8.5 Task 16: add organization endpoints and normalize org creation to PRESIDENTE.
 
 ## Blockers
 
