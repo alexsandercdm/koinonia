@@ -13,6 +13,7 @@
     "test:watch": "vitest --watch",
     "db:test:migrate": "tsx src/scripts/test-migrate.ts",
     "db:migrate": "drizzle-kit migrate",
+    "db:migrate:manual": "tsx src/scripts/apply-manual-migration.ts",
     "db:generate": "drizzle-kit generate",
     "db:studio": "drizzle-kit studio",
     "db:seed": "tsx src/scripts/seed.ts",

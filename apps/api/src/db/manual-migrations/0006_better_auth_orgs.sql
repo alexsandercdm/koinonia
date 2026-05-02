@@ -1,3 +1,9 @@
+-- Existing-database migration for Phase 8.5.
+--
+-- This repository did not have a tracked Drizzle migration baseline when
+-- multi-tenancy was introduced. Keep this migration outside apps/api/drizzle
+-- so it does not become a broken canonical Drizzle stream for clean databases.
+
 ALTER TABLE "session" ADD COLUMN IF NOT EXISTS "active_organization_id" text;
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "organization" (

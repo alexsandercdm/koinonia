@@ -47,3 +47,17 @@ Record durable project knowledge here.
 - Context: Phase 8.5 Task 2 spec review found the manual migration created `member_orgId_idx` while `auth-schema.ts` declares `member_organizationId_idx`.
 - Correction: Use the exact Drizzle schema index names in manual migrations; renamed the local database index and migration SQL to `member_organizationId_idx`.
 - Evidence: PostgreSQL index check returned `member_organizationId_idx` and `member_userId_idx`.
+
+## GATE_ADJUSTMENT - Incremental tenant migration is existing-DB-only
+
+- Date: 2026-05-02
+- Context: Task 2 quality review found that tracking only incremental `0006` inside `apps/api/drizzle/` would break clean DB migrations and future Drizzle generation because no historical baseline/snapshots exist.
+- Adjustment: Keep `apps/api/drizzle/` ignored as before and store the Phase 8.5 organization migration under `apps/api/src/db/manual-migrations/` with an explicit manual runner.
+- Evidence: Added `apps/api/src/scripts/apply-manual-migration.ts` and `db:migrate:manual`; clean DB Drizzle stream remains unchanged while existing DB migration remains reproducible.
+
+## ERROR_PATTERN - pnpm script args may include `--`
+
+- Date: 2026-05-02
+- Context: `pnpm db:migrate:manual -- src/db/manual-migrations/0006_better_auth_orgs.sql` passed `--` through to the TS script as `process.argv[2]`, causing the runner to try opening a file literally named `--`.
+- Correction: Manual migration scripts should parse `process.argv.slice(2)` and ignore standalone `--` separators.
+- Evidence: Updated `apply-manual-migration.ts` to select the first non-`--` argument.
