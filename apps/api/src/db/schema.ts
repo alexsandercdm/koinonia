@@ -2,8 +2,36 @@ import { pgTable, uuid, varchar, text, date, numeric, integer, timestamp, boolea
 import { relations } from 'drizzle-orm'
 
 // Import Better Auth schema
-import { user, session, account, verification, userRelations, sessionRelations, accountRelations } from './auth-schema'
-export { user, session, account, verification, userRelations, sessionRelations, accountRelations }
+import {
+  user,
+  session,
+  account,
+  verification,
+  organization,
+  member,
+  invitation,
+  userRelations,
+  sessionRelations,
+  accountRelations,
+  organizationRelations,
+  memberRelations,
+  invitationRelations,
+} from './auth-schema'
+export {
+  user,
+  session,
+  account,
+  verification,
+  organization,
+  member,
+  invitation,
+  userRelations,
+  sessionRelations,
+  accountRelations,
+  organizationRelations,
+  memberRelations,
+  invitationRelations,
+}
 
 // Tables
 export const pessoas = pgTable('pessoas', {
@@ -238,3 +266,6 @@ export type Despesa = typeof despesas.$inferSelect
 export type CreateDespesa = typeof despesas.$inferInsert
 export type AuditLog = typeof auditLogs.$inferSelect
 export type CreateAuditLog = typeof auditLogs.$inferInsert
+export type Organization = typeof organization.$inferSelect
+export type Member = typeof member.$inferSelect
+export type Invitation = typeof invitation.$inferSelect
