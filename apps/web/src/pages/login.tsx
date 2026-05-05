@@ -35,7 +35,7 @@ export function LoginPage() {
     try {
       setError('')
       await login(data.email, data.password)
-      navigate('/dashboard')
+      navigate('/setup/organization')
     } catch (err: any) {
       const errorMsg = err.message || 'Erro ao fazer login'
       // Provide user-friendly error messages

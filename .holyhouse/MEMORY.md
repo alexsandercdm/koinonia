@@ -172,63 +172,64 @@ Record durable project knowledge here.
 - Commits: 5 new feature commits + cleanup, all passing conventional format
 - Risk: Transition between unscoped and org-scoped queries requires careful testing end-to-end before merging to main
 
-## CORRECTION - Phase 8.5 Onboarding Organization Creation (2026-05-05)
+## COMPLETION_RECORD - Role Mapping Audit Plan Task 1
 
 - Date: 2026-05-05
-- Issue: Organization creation in /onboarding was failing
-- Root Cause: Missing defensive checks on organization client API methods
-- Fix: Added method existence validation and dual method name support
-- Commit: 2c8d5e8
-- Status: ✅ Fixed
+- Task: Document Current Role State (Task 1 from role mapping audit plan)
+- Output: `.holyhouse/ROLE-AUDIT.md` created with 4 main sections:
+  1. **Koinonia Org Roles**: All 6 roles documented with purposes and domain meaning
+  2. **Current Role Mapping Strategy**: Better Auth plugin mapping (PRESIDENTE→ownerAc, PASTOR_PRINCIPAL→adminAc, others→memberAc)
+  3. **Role Sources**: API layer via TenantContext and tenant middleware; Web layer via OrgContext and useActiveMember hook
+  4. **Authorization Pattern Summary**: Two-tier system (org/session + domain RBAC), request flow, permissions matrix, visibility scopes, event status rules
+- Evidence: File contains code snippets from auth.ts, tenant.ts, permission-resolver.ts, org-context.tsx with accurate line references and current state
+- Key findings:
+  - All 6 Koinonia roles properly declared in OrgRole type
+  - Better Auth organization plugin correctly configured with Koinonia roles as creatorRole and roles mapping
+  - TenantMiddleware validates membership and populates userRole from member.role column
+  - Web layer accesses role via useActiveMember hook (currently typed as `string | null`, not `OrgRole | null`)
+  - RBAC matrix covers 11 domain operations with role-specific permissions
+  - Resource visibility scoped by role (ALL_ORG → DIRECT_CHILDREN → SELF_ONLY)
+  - Temporary participant controller fallback documented with revisit condition
+- Ready for Task 2-3 (API endpoints + Web authorization inventory)
 
-## ERROR_PATTERN - Authorization: org roles not mapped to auth roles
-
-- Date: 2026-05-05
-- Context: EventosPage "Novo Evento" button not visible despite user being PRESIDENTE
-- Root Cause: TenantMiddleware loads org role into tenantCtx.userRole, but doesn't set request.user.role; requireRole('admin') checks request.user.role and finds undefined/mismatched value
-- Correction: Map Koinonia org roles to admin/member in TenantMiddleware:
-  - PRESIDENTE → 'admin'
-  - PASTOR_PRINCIPAL → 'admin'
-  - Others → 'member'
-- Evidence: After mapping, EventosPage canWrite check works and button appears
-- Lesson: When loading org roles from database, must also set them on request.user for downstream auth middleware
-
-## AUDIT - Phase 8.5 Events and Tenant Scoping (2026-05-05)
-
-- Date: 2026-05-05
-- Issue: Type-check failing + auditing event creation flow
-- Root Cause: `AcomodacaoRepository.deleteQuarto()` referenced `quartos.organization_id` but schema has no such field (quartos inherits tenant via local_id chain per plan)
-- Correction: Removed invalid `quartos.organization_id` reference from delete query; ensureQuartoOwned() validates ownership via local_id chain
-- Evidence: After removal, `pnpm --filter @koinonia/api type-check` passed
-- Schema Validation: Confirmed per Phase 8.5 plan:
-  - ✅ With explicit organization_id: pessoas, eventos, inscricoes, locais
-  - ❌ Inherited via chain (acknowledged v1.1 limitation): quartos, camas, configuracaoEvento, pagamentos, despesas
-- Event Flow: EventosPage → EventoForm → useCreateEvento hook → POST /api/v1/eventos → EventoController → CreateEventoUseCase → EventoRepository
-  - Frontend: Query keys org-scoped ✅, enabled guard on activeOrgId ✅
-  - API: Routes authenticated ✅, requireAdmin for create ✅, TenantMiddleware via requireTenantCtx ✅
-- Status: ✅ No blocking issues found; events infrastructure is tenant-scoped correctly; all type-checks passing
-- Gaps Found: None blocking Phase 8.5 completion
-- Final Verification: `pnpm --filter @koinonia/api type-check` ✅ and `pnpm --filter @koinonia/web type-check` ✅
-
-## COMPLETION_RECORD - Task 7: Role Authorization Matrix
+## COMPLETION_RECORD - Role Mapping Audit Plan Task 2
 
 - Date: 2026-05-05
-- Task: Create comprehensive role authorization matrix
-- Input: Phase 8.5 permission resolver (`apps/api/src/lib/tenant/permission-resolver.ts`) with 12 operations and 6 org roles
-- Output: `.holyhouse/ROLE-MATRIX.md` with:
-  - Quick reference matrix table (6 roles × 13 features/operations)
-  - Detailed operation descriptions with sources (file + line numbers)
-  - Resource visibility scopes per role (`ALL_ORG`, `OWN_SUBTREE`, `DIRECT_CHILDREN`, `SELF_ONLY`)
-  - Developer guidelines for adding new features
-  - Code reviewer checklist
-  - Testing and verification notes
-  - Known limitations and gaps during Phase 8.5 transition
-- Key Findings:
-  - ✅ 12 distinct operations defined and fully permission-mapped
-  - ✅ All operations have sources cited in permission-resolver.ts and role-mapper.ts
-  - ✅ Admin roles (PRESIDENTE, PASTOR_PRINCIPAL) control event/member management
-  - ✅ Leadership roles (+ PASTOR_REDE, DISCIPULADOR) can create/edit pessoas
-  - ✅ All roles can self-enroll; view limited by event status and resource scope
-  - ✅ Matrix cross-references actual implementation files (routes, components, permission logic)
-- Evidence: Commit fceb3f5 (`docs: create role authorization matrix`)
-- Status: ✅ Complete
+- Task: Audit API Authorization Checks (Task 2 from role mapping audit plan)
+- Method: Comprehensive search of API codebase using grep patterns for middleware calls, use-case checks, and role comparisons
+- Output: Added "API Authorization Inventory" section to `.holyhouse/ROLE-AUDIT.md` (467 lines total)
+- Evidence: Commit 71e8889 with complete inventory table and analysis
+- Key findings:
+  - **Total endpoints audited**: 38 across 6 modules (organizations, pessoas, inscricoes, acomodacoes, admin, financeiro)
+  - **Authorization patterns identified**: 3 distinct patterns in use
+    1. Legacy requireRole('admin'|'lider'): 29 endpoints (76%) - generic roles without domain RBAC
+    2. TenantCtx + canPerform(): 5 endpoints (13%) - organizations module only, with domain operations
+    3. TenantCtx fallback with legacy mapping: ParticipanteController only, temporary during org transition
+  - **Critical gaps documented**: 7 specific gaps
+    1. 29 endpoints (76%) lack domain operation checks (no canPerform() calls)
+    2. All legacy requireRole routes ignore Koinonia role distinctions (PRESIDENTE treated as 'admin', etc.)
+    3. Resource visibility scopes (PESSOAS_SCOPE, event status visibility) not applied to legacy routes
+    4. ParticipanteController uses DEFAULT_ORGANIZATION_ID fallback instead of failing on missing tenant
+    5. Mixing of two different authorization patterns across codebase
+    6. No explicit operation checks for write operations in participantes, inscricoes, acomodacoes
+    7. No domain RBAC enforcement in financeiro or admin modules
+  - **Inventory format**: Created comprehensive tables showing:
+    - Line-by-line endpoint inventory with middleware and use-case checks
+    - Use-case level authorization checks (3 use cases with canPerform)
+    - Pattern analysis with status, modules affected, and risk assessment
+    - Gap type, location, description, and severity for each inconsistency
+  - **Architecture insight**: API is in transition between legacy 'admin'/'lider' pattern and new multi-tenant TenantCtx + canPerform pattern
+- Risks identified and documented:
+  - No Koinonia domain RBAC on 76% of endpoints creates security risk (no distinction between roles)
+  - Visibility scopes not enforced means users may see resources outside their scope
+  - Fallback to DEFAULT_ORGANIZATION_ID in ParticipanteController can bypass org boundaries during transition
+- Task 2 status: ✅ COMPLETE - All authorization checks found, documented, and analyzed
+
+## PROJECT_RULE - Role Mapping Pattern
+
+- Date: 2026-05-05
+- Context: Role Mapping Audit Plan Task 6 documented the two-layer role system pattern
+- Rule: Koinonia org roles (PRESIDENTE, PASTOR_PRINCIPAL, etc.) must be mapped to Better Auth roles for authorization middleware to work. Web layer uses OrgContext with Koinonia roles directly; API layer uses TenantMiddleware to map and populate request.user.role.
+- Rule: On API, `request.user.role` contains the mapped Better Auth role (admin/member) for middleware checks; on Web, `OrgContext.userRole` contains the native Koinonia domain role for UI decisions.
+- Rule: New role checks on API must use `mapOrgRoleToAuthRole()` utility in `role-mapper.ts`, never inline role logic.
+- Evidence: Documented in `.holyhouse/memories/role_mapping_pattern.md` with implementation details, references, and decision rationale

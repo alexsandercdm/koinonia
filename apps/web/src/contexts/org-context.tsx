@@ -7,7 +7,9 @@ interface OrgContextType {
   activeOrgId: string | null
   userRole: string | null
   isLoading: boolean
+  organizations: Array<{ id: string; name: string; slug: string }>
   setActiveOrg: (orgId: string) => Promise<void>
+  createOrganization: (input: { name: string; slug: string }) => Promise<void>
 }
 
 const OrgContext = createContext<OrgContextType | undefined>(undefined)
@@ -29,6 +31,13 @@ export function OrgProvider({ children }: { children: ReactNode }) {
   const activeMember = activeMemberQuery?.data ?? null
   const userRole = activeMember?.role ?? null
 
+  const orgListQuery = authClient.useListOrganizations?.()
+  const organizations = (orgListQuery?.data ?? []).map((org: any) => ({
+    id: org.id,
+    name: org.name,
+    slug: org.slug,
+  }))
+
   async function setActiveOrg(orgId: string) {
     const organizationApi = authClient.organization ?? {}
     const setActive =
@@ -44,8 +53,32 @@ export function OrgProvider({ children }: { children: ReactNode }) {
     navigate('/dashboard')
   }
 
+  async function createOrganization(input: { name: string; slug: string }) {
+    const organizationApi = authClient.organization ?? {}
+    const createOrganizationAction =
+      organizationApi.createOrganization ??
+      organizationApi.create
+
+    if (typeof createOrganizationAction !== 'function') {
+      throw new Error('Organization client is not available')
+    }
+
+    await createOrganizationAction(input)
+    queryClient.clear()
+    navigate('/dashboard')
+  }
+
   return (
-    <OrgContext.Provider value={{ activeOrgId, userRole, isLoading, setActiveOrg }}>
+    <OrgContext.Provider
+      value={{
+        activeOrgId,
+        userRole,
+        isLoading,
+        organizations,
+        setActiveOrg,
+        createOrganization,
+      }}
+    >
       {children}
     </OrgContext.Provider>
   )

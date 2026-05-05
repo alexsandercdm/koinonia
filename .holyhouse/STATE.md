@@ -6,33 +6,24 @@ This file is the current operating snapshot for AI agents.
 
 - ✅ Phase 8.5 Multi-Tenant Foundation COMPLETE
 - ✅ Phase 8.5 Post-Delivery Audit & Corrections COMPLETE
-- ✅ Task 7: Create Role Authorization Matrix COMPLETE
-- Next: E2E testing and UAT
+- ✅ Role Mapping Audit COMPLETE
+- Next: E2E testing and UAT with verified role-based access
 
 ## Active Work
 
-- Phase 8.5 Audit (2026-05-05):
-  - ✅ Fixed AcomodacaoRepository: removed invalid quartos.organization_id reference
-  - ✅ Verified tenant scoping per plan: pessoas, eventos, inscricoes, locais are explicit; quartos/camas/configs inherit via chain
-  - ✅ Confirmed Events infrastructure: EventosPage, EventoForm, hooks, API routes, TenantMiddleware all in place
-  - ✅ Type-check: both API and Web passing
-  - ✅ No blocking issues found; all Phase 8.5 components validated
-
-- Task 7: Role Authorization Matrix (2026-05-05):
-  - ✅ Created `.holyhouse/ROLE-MATRIX.md` with comprehensive role authorization mapping
-  - ✅ 6 org roles × 13 operations/features in quick reference matrix
-  - ✅ All 12 operations from permission-resolver.ts documented with sources
-  - ✅ Resource visibility scopes per role documented (ALL_ORG, OWN_SUBTREE, DIRECT_CHILDREN, SELF_ONLY)
-  - ✅ Developer guidelines and code reviewer checklist included
-  - ✅ Cross-referenced actual implementation files (routes, components, tests)
-  - ✅ Commit: fceb3f5 (`docs: create role authorization matrix`)
+- Role Mapping Audit (2026-05-05): ✅ COMPLETE
+  - ✅ Task 1: Documented current role state (ROLE-AUDIT.md)
+  - ✅ Task 2: Audited API authorization checks (41 endpoints)
+  - ✅ Task 3: Audited Web authorization checks (10 pages)
+  - ✅ Task 4: Created role-mapper.ts utility with tests
+  - ✅ Task 5: Updated TenantMiddleware to use mapper
+  - ✅ Task 6: Recorded role mapping pattern in MEMORY
+  - ✅ Task 7: Created role authorization matrix
+  - ✅ Task 8: Finalized audit summary
 
 ## Next Step
 
-- E2E manual testing of event creation with active organization
-- User acceptance testing (UAT) of full multi-tenant flows
-- Merge to main when UAT passes
-
-## Blockers
-
-- None known. Ready for UAT.
+- E2E manual testing of event creation with role-based access verification
+- User acceptance testing (UAT) with full role hierarchy flows
+- Verify all 6 Koinonia roles work correctly in end-to-end scenarios
+- Merge to main branch when UAT passes
