@@ -212,3 +212,12 @@ Record durable project knowledge here.
   - Visibility scopes not enforced means users may see resources outside their scope
   - Fallback to DEFAULT_ORGANIZATION_ID in ParticipanteController can bypass org boundaries during transition
 - Task 2 status: ✅ COMPLETE - All authorization checks found, documented, and analyzed
+
+## PROJECT_RULE - Role Mapping Pattern
+
+- Date: 2026-05-05
+- Context: Role Mapping Audit Plan Task 6 documented the two-layer role system pattern
+- Rule: Koinonia org roles (PRESIDENTE, PASTOR_PRINCIPAL, etc.) must be mapped to Better Auth roles for authorization middleware to work. Web layer uses OrgContext with Koinonia roles directly; API layer uses TenantMiddleware to map and populate request.user.role.
+- Rule: On API, `request.user.role` contains the mapped Better Auth role (admin/member) for middleware checks; on Web, `OrgContext.userRole` contains the native Koinonia domain role for UI decisions.
+- Rule: New role checks on API must use `mapOrgRoleToAuthRole()` utility in `role-mapper.ts`, never inline role logic.
+- Evidence: Documented in `.holyhouse/memories/role_mapping_pattern.md` with implementation details, references, and decision rationale
