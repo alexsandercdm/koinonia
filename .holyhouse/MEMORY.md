@@ -146,6 +146,18 @@ Record durable project knowledge here.
 - Rule: Web queries for tenant-owned resources must include `activeOrgId` in their `queryKey`, and `useQuery` calls must be disabled until an active organization exists. On org switch, clear the query cache before navigating.
 - Evidence: Added `OrgProvider` in `apps/web/src/contexts/org-context.tsx`, wired `organizationClient()` in `apps/web/src/lib/auth.ts`, and updated core hooks plus dashboard/financeiro page queries to prefix cache keys with `['org', activeOrgId, ...]`; `pnpm --filter @koinonia/web type-check` passed.
 
+## ERROR_PATTERN - OnboardingPage organization API validation
+
+- Date: 2026-05-05
+- Context: OnboardingPage.tsx called `authClient.organization.setActive()` without checking if the method existed or trying alternative names.
+- Correction: Add defensive checks before calling organization API methods:
+  - Extract `organizationApi = authClient.organization ?? {}`
+  - Validate method exists with `typeof create !== 'function'`
+  - Try both method names: `setActiveOrganization ?? setActive`
+  - This pattern matches working code in `OrgContext`
+- Evidence: After adding defensive checks, organization creation call succeeds and follows the same pattern as verified working code
+- Lesson: Better Auth organizationClient plugin has ambiguous method naming; always try both variants and validate availability
+
 ## COMPLETION_RECORD - Phase 8.5 Multi-Tenant Foundation
 
 - Date: 2026-05-04
@@ -159,3 +171,29 @@ Record durable project knowledge here.
 - Test suites added for isolation, RBAC, and presidency transfer
 - Commits: 5 new feature commits + cleanup, all passing conventional format
 - Risk: Transition between unscoped and org-scoped queries requires careful testing end-to-end before merging to main
+
+## CORRECTION - Phase 8.5 Onboarding Organization Creation (2026-05-05)
+
+- Date: 2026-05-05
+- Issue: Organization creation in /onboarding was failing
+- Root Cause: Missing defensive checks on organization client API methods
+- Fix: Added method existence validation and dual method name support
+- Commit: 2c8d5e8
+- Status: ✅ Fixed
+
+## AUDIT - Phase 8.5 Events and Tenant Scoping (2026-05-05)
+
+- Date: 2026-05-05
+- Issue: Type-check failing + auditing event creation flow
+- Root Cause: `AcomodacaoRepository.deleteQuarto()` referenced `quartos.organization_id` but schema has no such field (quartos inherits tenant via local_id chain per plan)
+- Correction: Removed invalid `quartos.organization_id` reference from delete query; ensureQuartoOwned() validates ownership via local_id chain
+- Evidence: After removal, `pnpm --filter @koinonia/api type-check` passed
+- Schema Validation: Confirmed per Phase 8.5 plan:
+  - ✅ With explicit organization_id: pessoas, eventos, inscricoes, locais
+  - ❌ Inherited via chain (acknowledged v1.1 limitation): quartos, camas, configuracaoEvento, pagamentos, despesas
+- Event Flow: EventosPage → EventoForm → useCreateEvento hook → POST /api/v1/eventos → EventoController → CreateEventoUseCase → EventoRepository
+  - Frontend: Query keys org-scoped ✅, enabled guard on activeOrgId ✅
+  - API: Routes authenticated ✅, requireAdmin for create ✅, TenantMiddleware via requireTenantCtx ✅
+- Status: ✅ No blocking issues found; events infrastructure is tenant-scoped correctly; all type-checks passing
+- Gaps Found: None blocking Phase 8.5 completion
+- Final Verification: `pnpm --filter @koinonia/api type-check` ✅ and `pnpm --filter @koinonia/web type-check` ✅

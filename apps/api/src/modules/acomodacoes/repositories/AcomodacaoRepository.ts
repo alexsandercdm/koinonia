@@ -23,7 +23,7 @@ export class AcomodacaoRepository extends BaseRepository {
     await this.db.delete(camas).where(eq(camas.quarto_id, quartoId))
     await this.db
       .delete(quartos)
-      .where(and(eq(quartos.id, quartoId), eq(quartos.organization_id, this.orgId)))
+      .where(eq(quartos.id, quartoId))
   }
 
   async updateLocal(localId: string, data: Partial<typeof locais.$inferInsert>) {
