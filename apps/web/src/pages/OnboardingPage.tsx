@@ -38,7 +38,14 @@ export function OnboardingPage() {
 
     try {
       // Call Better Auth's organization.create()
-      const result = await (authClient as any).organization.create({ name, slug })
+      const organizationApi = authClient.organization ?? {}
+      const create = organizationApi.create
+
+      if (typeof create !== 'function') {
+        throw new Error('Organização API não disponível')
+      }
+
+      const result = await create({ name, slug })
 
       if (result?.error) {
         throw new Error(result.error.message || 'Erro ao criar organização')
@@ -49,8 +56,16 @@ export function OnboardingPage() {
         throw new Error('ID da organização não retornado')
       }
 
-      // Set the organization as active
-      await (authClient as any).organization.setActive({ organizationId: orgId })
+      // Set the organization as active (try both method names for compatibility)
+      const setActive =
+        organizationApi.setActiveOrganization ??
+        organizationApi.setActive
+
+      if (typeof setActive !== 'function') {
+        throw new Error('Organization client is not available')
+      }
+
+      await setActive({ organizationId: orgId })
 
       // Navigate to dashboard
       navigate('/dashboard')
