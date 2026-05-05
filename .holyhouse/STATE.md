@@ -22,13 +22,19 @@ This file is the current operating snapshot for AI agents.
     - Migration path identified for future work
     - Issue fixes applied: corrected endpoint count, CREATE_PESSOA permissions, TenantCtx characterization
   - Task 3: ⏳ TODO - Inventory Web Layer Authorization Patterns
+  - Task 4: ✅ Create Role Mapper Utility with Tests - COMPLETE
+    - Created `apps/api/src/lib/tenant/role-mapper.ts` with 4 utility functions
+    - Created `apps/api/src/lib/tenant/__tests__/role-mapper.test.ts` with 24 comprehensive tests
+    - All 24 tests passing (mapOrgRoleToAuthRole, canCreateEvents, canManageOrganization, canManageMembers)
+    - No TypeScript errors in implementation
+    - Committed with 0a53ae7
 
 ## Next Step
 
-- Task 3: Audit Web layer authorization patterns
-  - Map UI routes to required role(s)
-  - Verify useOrgContext() role checks
-  - Document missing guards
+- Task 5: Refactor TenantMiddleware to use role mapper utility
+  - Replace scattered authorization logic with centralized role mapper
+  - Simplify middleware code
+  - Ensure all 24 tests still pass
 
 ## Blockers
 
