@@ -94,9 +94,9 @@ When adding new authorization checks to web pages:
 
 ## References
 
-- **API role mapping**: `apps/api/src/lib/role-mapper.ts`
+- **API role mapping**: `apps/api/src/lib/tenant/role-mapper.ts`
 - **Middleware population**: `apps/api/src/middleware/tenant.ts` (sets `request.user.role`)
-- **Permission resolver**: `apps/api/src/lib/permission-resolver.ts` (domain RBAC)
+- **Permission resolver**: `apps/api/src/lib/tenant/permission-resolver.ts` (domain RBAC)
 - **Web org context**: `apps/web/src/contexts/org-context.tsx` (stores Koinonia role directly)
 - **Better Auth config**: `apps/api/src/config/auth.ts` (organization plugin with Koinonia roles)
 
