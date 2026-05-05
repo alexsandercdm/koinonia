@@ -456,6 +456,168 @@ The 7 "no check" routes do populate `request.tenantCtx` with organization scope 
 
 ---
 
+## Web Authorization Inventory
+
+**Audit Date:** 2026-05-05  
+**Scope:** All page components and UI components with role-based authorization checks
+
+### Summary
+
+The Web layer currently uses **two distinct role sources** with inconsistent patterns:
+
+1. **Legacy Auth Layer Roles** (`user.role` from auth context):
+   - Used in: ParticipantsPage, AcomodacoesPage, EventosPage
+   - Role values: `'admin'`, `'lider'`, `'servo'`
+   - Pattern: Direct role comparison in page components
+   - Note: These are generic auth roles, NOT Koinonia OrgRoles
+
+2. **Organization Context Roles** (`useOrgContext().userRole` from Better Auth member):
+   - Used in: MembersPage, FinanceiroPage
+   - Role values: `'PRESIDENTE'`, `'PASTOR_PRINCIPAL'`, `'PASTOR_REDE'`, `'DISCIPULADOR'`, `'LIDER_CELULA'`, `'MEMBRO'`
+   - Pattern: OrgContext hook providing organization-scoped roles
+   - Note: This is the correct role source for domain RBAC
+
+### Authorization Inventory by Page
+
+| File | Line | Checked Role(s) | UI/Operation | Pattern Used | Role Source |
+|------|------|-----------------|--------------|--------------|-------------|
+| src/pages/MembersPage.tsx | 35, 43 | PRESIDENTE, PASTOR_PRINCIPAL | Show invite form, show role selector | `useOrgContext().userRole === 'PRESIDENTE' \|\| 'PASTOR_PRINCIPAL'` | **OrgContext** (correct) |
+| src/pages/MembersPage.tsx | 155 | PRESIDENTE | Show role change dropdown (not PRESIDENTE itself) | `canManage && member.role !== 'PRESIDENTE'` | **OrgContext** (correct) |
+| src/pages/EventosPage.tsx | 33 | admin | Show "Novo Evento" button, enable evento form | `user?.role === 'admin'` | **Auth Layer** (legacy) |
+| src/pages/EventosPage.tsx | 84, 119 | admin | Gate create/edit operations | `canWrite` based on admin role | **Auth Layer** (legacy) |
+| src/pages/ParticipantsPage.tsx | 51-55 | admin, lider | Determine canWrite, canDelete capabilities | `user?.role === 'admin' \|\| 'lider'` then `canWrite = 'admin' \|\| 'lider'`, `canDelete = 'admin'` | **Auth Layer** (legacy) |
+| src/pages/ParticipantsPage.tsx | 88 | lider, admin | Show "Novo Participante" button | `disabled={!canWrite}` where canWrite = admin/lider | **Auth Layer** (legacy) |
+| src/pages/AcomodacoesPage.tsx | 19-20 | admin, lider | Determine userRole for component props | `user?.role === 'admin' \|\| 'lider' ? role : 'servo'` | **Auth Layer** (legacy) |
+| src/pages/AcomodacoesPage.tsx | 44 | admin, lider | Show assign/release buttons | `canWrite = userRole === 'admin' \|\| 'lider'` | **Auth Layer** (legacy) |
+| src/pages/AcomodacoesPage.tsx | 84 | servo | Show "Estrutura (leitura)" vs "Estrutura" label | `userRole === 'servo'` | **Auth Layer** (legacy) |
+| src/pages/AcomodacoesPage.tsx | 136 | servo | Show read-only warning message | `userRole === 'servo'` | **Auth Layer** (legacy) |
+| src/pages/FinanceiroPage.tsx | (no checks) | (none) | All authenticated users can view | No role check; uses activeOrgId only | **OrgContext** (implicit auth) |
+| src/pages/InscricoesPage.tsx | (no checks) | (none) | All authenticated users can view | No role check; uses activeOrgId only | **OrgContext** (implicit auth) |
+| src/pages/OnboardingPage.tsx | (no checks) | (none) | All authenticated users can access | No role check | (N/A - onboarding) |
+| src/pages/login.tsx | (no checks) | (none) | Public; no role check | N/A | (N/A - public) |
+| src/pages/register.tsx | (no checks) | (none) | Public; no role check | N/A | (N/A - public) |
+| src/pages/dashboard.tsx | (no checks) | (none) | Requires authentication only | No role check | (N/A - dashboard) |
+| src/components/acomodacoes/EstruturaAcomodacaoPanel.tsx | 417 | admin, lider | Show edit buttons for estrutura | `canEdit = userRole === 'admin' \|\| 'lider'` | **Auth Layer** (legacy) |
+| src/components/acomodacoes/AssignCamaSheet.tsx | 101 | admin, lider | Show assign/release buttons in sheet | `canWrite = userRole === 'admin' \|\| 'lider'` | **Auth Layer** (legacy) |
+| src/components/participantes/ParticipanteFichaSheet.tsx | (props) | (depends on parent) | canWrite, canDelete passed as props | Props `canWrite`, `canDelete` from parent | **Auth Layer** (legacy) |
+| src/components/protected-route.tsx | 25 | (any) | Check requiredRole against user.role | `user?.role !== requiredRole && user?.role !== 'admin'` | **Auth Layer** (legacy) |
+| src/contexts/org-context.tsx | 30 | (all roles) | Provide userRole from Better Auth member | `userRole = activeMember?.role ?? null` | **OrgContext** (correct) |
+
+### Authorization Pattern Analysis
+
+#### Pattern 1: Legacy Auth Layer Role Checks
+**Pattern:** `user?.role === 'admin'` or `user?.role === 'lider'`  
+**Status:** ACTIVE - Used in 5 out of 10 main pages  
+**Modules:** ParticipantsPage, AcomodacoesPage, EventosPage  
+**Risk:** 
+- Uses generic auth layer roles, NOT Koinonia OrgRoles
+- No enforcement of PRESIDENTE vs PASTOR_PRINCIPAL distinction
+- Cannot enforce operation-level RBAC (e.g., CREATE_EVENTO vs EDIT_EVENTO)
+- No visibility scoping (PESSOAS_SCOPE, event status visibility)
+**Files:**
+- Used in: ParticipantsPage.tsx (lines 51-55, 88), AcomodacoesPage.tsx (lines 19-20, 44, 84, 136), EventosPage.tsx (lines 33, 84, 119)
+- Components: EstruturaAcomodacaoPanel.tsx (line 417), AssignCamaSheet.tsx (line 101), ParticipanteFichaSheet.tsx (props)
+
+#### Pattern 2: Organization Context Role Checks
+**Pattern:** `useOrgContext().userRole === 'PRESIDENTE'` or `'PASTOR_PRINCIPAL'`  
+**Status:** ACTIVE but INCOMPLETE - Only used in MembersPage  
+**Modules:** MembersPage, FinanceiroPage (implicit)  
+**Benefits:**
+- Uses correct Koinonia OrgRoles
+- Provides organization-scoped authorization
+- Properly distinguishes role hierarchy
+**Gap:** Only MembersPage uses it explicitly; other pages don't leverage org role hierarchy  
+**Files:**
+- Used in: MembersPage.tsx (lines 35, 43, 155)
+- OrgContext provider: contexts/org-context.tsx (lines 28-30)
+
+#### Pattern 3: No Role Check (Implicit Auth)
+**Pattern:** No explicit role check; relies on authentication + OrgContext activeOrgId  
+**Status:** ACTIVE in FinanceiroPage, InscricoesPage  
+**Modules:** FinanceiroPage, InscricoesPage  
+**Characteristics:**
+- All authenticated users with selected organization can view
+- No write operations guarded
+- No role-based filtering of data
+**Files:**
+- FinanceiroPage.tsx (no role checks)
+- InscricoesPage.tsx (no role checks)
+
+### Authorization Gaps & Inconsistencies
+
+| Gap Type | Location | Description | Severity |
+|----------|----------|-------------|----------|
+| **Mixed Role Sources** | ParticipantsPage, AcomodacoesPage, EventosPage | Use `user.role` (auth layer) instead of `useOrgContext().userRole` (org layer) | HIGH |
+| **No OrgRole Enforcement** | ParticipantsPage, AcomodacoesPage, EventosPage | Role checks use generic 'admin'/'lider', not Koinonia roles; cannot enforce PRESIDENTE vs PASTOR_PRINCIPAL distinction | HIGH |
+| **No Operation Checks** | All pages except MembersPage | No enforcement of fine-grained operations (e.g., CREATE_EVENTO vs EDIT_EVENTO); binary canWrite/canDelete only | HIGH |
+| **No Visibility Scoping** | All pages | Do not enforce PESSOAS_SCOPE (ALL_ORG, OWN_SUBTREE, DIRECT_CHILDREN, SELF_ONLY) for data filtering | HIGH |
+| **No Event Status Visibility** | EventosPage | Do not enforce event status visibility rules (planning status visible to PRESIDENTE/PASTOR_PRINCIPAL only) | MEDIUM |
+| **Incomplete Write Guards** | FinanceiroPage, InscricoesPage | No canWrite/canDelete checks; all authenticated org members can perform write operations | MEDIUM |
+| **Type Safety** | org-context.tsx | `userRole` typed as `string \| null` instead of `OrgRole \| null` | LOW |
+| **Component Props** | ParticipanteFichaSheet | Receives `canWrite`, `canDelete` as props; no role source clarity in component | MEDIUM |
+
+### Page-by-Page Authorization Summary
+
+**MembersPage** ✅ Correct Pattern
+- Uses `useOrgContext().userRole` (org context)
+- Checks for PRESIDENTE or PASTOR_PRINCIPAL
+- Shows/hides invite form and role selector based on role
+- **Status:** Correct; follows multi-tenant pattern
+
+**EventosPage** ❌ Wrong Role Source
+- Uses `user?.role === 'admin'` (auth layer)
+- Should use `useOrgContext().userRole` with check for PRESIDENTE or PASTOR_PRINCIPAL
+- **Status:** Legacy pattern; migration needed
+
+**ParticipantsPage** ❌ Wrong Role Source
+- Uses `user?.role` (auth layer) with values 'admin', 'lider', 'servo'
+- Should use `useOrgContext().userRole` with Koinonia roles
+- **Status:** Legacy pattern; migration needed
+
+**AcomodacoesPage** ❌ Wrong Role Source
+- Uses `user?.role` (auth layer) with values 'admin', 'lider', 'servo'
+- Shows different UI label based on userRole (e.g., 'Estrutura (leitura)' for servo)
+- Should use `useOrgContext().userRole` with Koinonia roles
+- **Status:** Legacy pattern; migration needed
+
+**FinanceiroPage** ✅ Implicit Auth (Acceptable)
+- No explicit role checks
+- Relies on authentication + activeOrgId
+- All authenticated org members can create/view
+- **Status:** Acceptable for financial overview; may need write guards in future
+
+**InscricoesPage** ✅ Implicit Auth (Acceptable)
+- No explicit role checks
+- Relies on authentication + activeOrgId
+- All authenticated org members can view
+- **Status:** Acceptable for read-only listing; matches API behavior
+
+### Authorization Inventory Summary
+
+**Total Pages Audited:** 10 (including auth pages)  
+**Pages with Role Checks:** 5 (MembersPage, EventosPage, ParticipantsPage, AcomodacoesPage, ProtectedRoute)  
+**Pages with Correct Role Source (OrgContext):** 1 (MembersPage only)  
+**Pages with Legacy Role Source (Auth Layer):** 4 (EventosPage, ParticipantsPage, AcomodacoesPage, ProtectedRoute)  
+**Pages with No Role Check:** 2 (FinanceiroPage, InscricoesPage)  
+
+**Pattern Distribution:**
+- **OrgContext roles (correct):** 1 page (10%)
+- **Auth layer roles (legacy):** 4 pages (40%)
+- **No role check (implicit auth):** 2 pages (20%)
+- **Auth/dashboard pages:** 3 pages (30%)
+
+### Component-Level Authorization
+
+| Component | File | Pattern | Role Source |
+|-----------|------|---------|-------------|
+| EstruturaAcomodacaoPanel | src/components/acomodacoes/EstruturaAcomodacaoPanel.tsx | `canEdit = userRole === 'admin' \|\| 'lider'` | Auth layer (legacy) |
+| AssignCamaSheet | src/components/acomodacoes/AssignCamaSheet.tsx | `canWrite = userRole === 'admin' \|\| 'lider'` | Auth layer (legacy) |
+| ParticipanteFichaSheet | src/components/participantes/ParticipanteFichaSheet.tsx | Props: `canWrite`, `canDelete` | Auth layer (legacy) |
+| EventoCard | src/components/eventos/EventoCard.tsx | Prop: `canWrite` (boolean) | Parent determines (EventosPage uses auth layer) |
+| ProtectedRoute | src/components/protected-route.tsx | `user?.role !== requiredRole && user?.role !== 'admin'` | Auth layer (legacy) |
+
+---
+
 ## Extension Points for Future Tasks
 
 This audit establishes the foundation for:
@@ -466,15 +628,25 @@ This audit establishes the foundation for:
    - ✅ Identify gaps and inconsistencies
    - ✅ Create API Authorization Inventory table with 41 endpoints
 
-2. **Task 3**: Inventory Web layer authorization patterns
-   - Map UI routes to required role(s)
-   - Verify useOrgContext() role checks
-   - Document missing guards
+2. **Task 3 (COMPLETE)**: ✅ Inventory Web layer authorization patterns
+   - ✅ Map UI pages to role checks
+   - ✅ Identify role sources (OrgContext vs Auth layer)
+   - ✅ Document patterns and gaps
+   - ✅ Create Web Authorization Inventory with 20 pages/components
 
 3. **Future Enhancements (Post-Audit)**:
-   - **Migrate legacy routes** to use TenantCtx + canPerform() pattern
-   - **Add operation checks** to participantes, inscricoes, acomodacoes routes
-   - **Implement visibility scoping** (PESSOAS_SCOPE, event status visibility)
+   - **Migrate Web pages to OrgContext** (EventosPage, ParticipantsPage, AcomodacoesPage)
+     - Replace `user.role` checks with `useOrgContext().userRole`
+     - Use Koinonia OrgRole values (PRESIDENTE, PASTOR_PRINCIPAL, etc.)
+   - **Implement operation-level RBAC** in Web
+     - Add fine-grained operations (CREATE_EVENTO, EDIT_EVENTO, etc.) to operation guards
+     - Enforce via `canPerform()` checks similar to API layer
+   - **Add visibility scoping** to data queries
+     - Filter participants by PESSOAS_SCOPE based on user role
+     - Filter events by status visibility rules
+   - **Migrate legacy routes** to use TenantCtx + canPerform() pattern (API)
+   - **Add operation checks** to participantes, inscricoes, acomodacoes API routes
+   - **Implement visibility scoping** in API queries (PESSOAS_SCOPE, event status visibility)
    - **Remove ParticipanteController fallback** once org activation is end-to-end
-   - **Refine Web layer type safety** (`string | null` → `OrgRole | null`)
+   - **Refine Web layer type safety** (`string | null` → `OrgRole | null` in OrgContext)
    - **Consider permission caching** if RBAC becomes performance-critical
