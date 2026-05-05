@@ -464,7 +464,7 @@ This audit establishes the foundation for:
    - ✅ Map each route to required operation(s)
    - ✅ Document authorization patterns found
    - ✅ Identify gaps and inconsistencies
-   - ✅ Create API Authorization Inventory table with 38 endpoints
+   - ✅ Create API Authorization Inventory table with 41 endpoints
 
 2. **Task 3**: Inventory Web layer authorization patterns
    - Map UI routes to required role(s)
