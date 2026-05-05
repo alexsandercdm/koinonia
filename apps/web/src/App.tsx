@@ -11,7 +11,7 @@ import { EventosPage } from './pages/EventosPage'
 import { AcomodacoesPage } from './pages/AcomodacoesPage'
 import { InscricoesPage } from './pages/InscricoesPage'
 import { FinanceiroPage } from './pages/FinanceiroPage'
-import { MembersPage } from './pages/MembersPage'
+import { OrganizationSetupPage } from './pages/OrganizationSetupPage'
 
 function App() {
   return (
@@ -21,6 +21,14 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/onboarding" element={<OnboardingPage />} />
+          <Route
+            path="/setup/organization"
+            element={
+              <ProtectedRoute>
+                <OrganizationSetupPage />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/dashboard"
             element={

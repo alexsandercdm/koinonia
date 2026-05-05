@@ -5,6 +5,7 @@ import { FastifyInstance } from 'fastify'
 import { db } from '../../../db'
 import { schema } from '../../../db'
 import { eq } from 'drizzle-orm'
+import { signInWithActiveOrg } from '../../../tests/helpers/authWithOrg'
 
 describe('UpdateParticipanteSaudeUseCase (Integração E2E com Audit Log)', () => {
   let app: FastifyInstance
@@ -26,22 +27,12 @@ describe('UpdateParticipanteSaudeUseCase (Integração E2E com Audit Log)', () =
 
   async function setupAuth() {
     const email = 'lider_saude@example.com'
-    await fetch('http://localhost:3006/api/v1/auth/sign-up/email', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password: 'Password123!', name: 'Test Lider' })
+    liderToken = await signInWithActiveOrg({
+      baseUrl: 'http://localhost:3006',
+      email,
+      name: 'Test Lider',
+      role: 'lider',
     })
-
-    await db.update(schema.user).set({ role: 'lider' }).where(eq(schema.user.email, email))
-
-    const signInResponse = await fetch('http://localhost:3006/api/v1/auth/sign-in/email', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password: 'Password123!' })
-    })
-
-    const body = await signInResponse.json() as any
-    liderToken = body.token
   }
 
   beforeEach(async () => {

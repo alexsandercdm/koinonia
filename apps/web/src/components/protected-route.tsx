@@ -1,6 +1,7 @@
 import React from 'react'
-import { Navigate } from 'react-router-dom'
+import { Navigate, useLocation } from 'react-router-dom'
 import { useAuthContext } from '../contexts/auth-context'
+import { useOrgContext } from '../contexts/org-context'
 
 interface ProtectedRouteProps {
   children: React.ReactNode
@@ -9,8 +10,10 @@ interface ProtectedRouteProps {
 
 export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) {
   const { isAuthenticated, isLoading, user } = useAuthContext()
+  const { activeOrgId, isLoading: orgLoading } = useOrgContext()
+  const location = useLocation()
 
-  if (isLoading) {
+  if (isLoading || orgLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
@@ -20,6 +23,14 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />
+  }
+
+  if (!activeOrgId && location.pathname !== '/setup/organization') {
+    return <Navigate to="/setup/organization" replace />
+  }
+
+  if (activeOrgId && location.pathname === '/setup/organization') {
+    return <Navigate to="/dashboard" replace />
   }
 
   if (requiredRole && user?.role !== requiredRole && user?.role !== 'admin') {
