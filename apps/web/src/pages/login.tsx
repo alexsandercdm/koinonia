@@ -37,7 +37,15 @@ export function LoginPage() {
       await login(data.email, data.password)
       navigate('/dashboard')
     } catch (err: any) {
-      setError(err.message || 'Erro ao fazer login')
+      const errorMsg = err.message || 'Erro ao fazer login'
+      // Provide user-friendly error messages
+      if (errorMsg.includes('Invalid email or password')) {
+        setError('Email ou senha incorretos. Tente novamente.')
+      } else if (errorMsg.includes('404') || errorMsg.includes('not found')) {
+        setError('Email não registrado. Crie uma conta para continuar.')
+      } else {
+        setError(errorMsg)
+      }
     }
   }
 

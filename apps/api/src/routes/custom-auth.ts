@@ -1,6 +1,6 @@
 import { FastifyInstance, FastifyRequest } from 'fastify'
 import { db } from '../db'
-import { user } from '../db/schema'
+import { user, session } from '../db/schema'
 import { eq } from 'drizzle-orm'
 import { authMiddleware, AuthenticatedRequest } from '../middleware/auth'
 

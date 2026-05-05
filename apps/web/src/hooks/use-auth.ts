@@ -31,21 +31,32 @@ export function useAuth() {
   })
 
   const registerMutation = useMutation({
-    mutationFn: async ({ 
-      email, 
-      password, 
-      name 
-    }: { 
-      email: string; 
-      password: string; 
-      name: string 
+    mutationFn: async ({
+      email,
+      password,
+      name
+    }: {
+      email: string;
+      password: string;
+      name: string
     }) => {
-      const result = await authClient.signUp.email({
+      // Step 1: Sign up
+      const signupResult = await authClient.signUp.email({
         email,
         password,
         name,
       })
-      return result
+
+      // Step 2: If signup succeeded, sign in automatically
+      if (signupResult && 'user' in signupResult && signupResult.user) {
+        const signinResult = await authClient.signIn.email({
+          email,
+          password,
+        })
+        return signinResult
+      }
+
+      return signupResult
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['auth', 'session'] })
