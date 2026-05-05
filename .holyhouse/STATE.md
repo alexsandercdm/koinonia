@@ -5,22 +5,29 @@ This file is the current operating snapshot for AI agents.
 ## Current Goal
 
 - ✅ Phase 8.5 Multi-Tenant Foundation COMPLETE
-- Next: Code review and integration testing
+- 🔄 Role Mapping Audit Plan: In Progress
 
 ## Active Work
 
-- Phase 8.5 Tasks 19-23: All tasks completed via subagent-driven development:
-  - Task 19: ✅ Org-scoped query keys with enabled guards
-  - Task 20: ✅ OrgSwitcher dropdown with queryClient.clear()
-  - Task 21: ✅ OnboardingPage for self-service org creation
-  - Task 22: ✅ MembersPage with invite and role management
-  - Task 23: ✅ Comprehensive test suites (isolation, RBAC, presidency transfer)
+- **Role Mapping Audit Plan** (Started 2026-05-05)
+  - Task 1: ✅ Document Current Role State - COMPLETE
+    - All 6 Koinonia org roles documented
+    - Better Auth plugin mapping defined
+    - Role sources (API + Web) documented
+    - Authorization pattern summary with permissions matrix
+  - Task 2: ✅ Audit API Authorization Checks - COMPLETE
+    - Comprehensive inventory of 38 API endpoints across 6 modules
+    - 3 authorization patterns identified (legacy requireRole, TenantCtx+canPerform, TenantCtx fallback)
+    - 7 critical gaps and inconsistencies documented
+    - Migration path identified for future work
+  - Task 3: ⏳ TODO - Inventory Web Layer Authorization Patterns
 
 ## Next Step
 
-- Code review and integration verification
-- End-to-end testing of multi-tenant flows
-- Merge to main when ready
+- Task 3: Audit Web layer authorization patterns
+  - Map UI routes to required role(s)
+  - Verify useOrgContext() role checks
+  - Document missing guards
 
 ## Blockers
 

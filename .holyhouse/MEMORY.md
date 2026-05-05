@@ -159,3 +159,56 @@ Record durable project knowledge here.
 - Test suites added for isolation, RBAC, and presidency transfer
 - Commits: 5 new feature commits + cleanup, all passing conventional format
 - Risk: Transition between unscoped and org-scoped queries requires careful testing end-to-end before merging to main
+
+## COMPLETION_RECORD - Role Mapping Audit Plan Task 1
+
+- Date: 2026-05-05
+- Task: Document Current Role State (Task 1 from role mapping audit plan)
+- Output: `.holyhouse/ROLE-AUDIT.md` created with 4 main sections:
+  1. **Koinonia Org Roles**: All 6 roles documented with purposes and domain meaning
+  2. **Current Role Mapping Strategy**: Better Auth plugin mapping (PRESIDENTE→ownerAc, PASTOR_PRINCIPAL→adminAc, others→memberAc)
+  3. **Role Sources**: API layer via TenantContext and tenant middleware; Web layer via OrgContext and useActiveMember hook
+  4. **Authorization Pattern Summary**: Two-tier system (org/session + domain RBAC), request flow, permissions matrix, visibility scopes, event status rules
+- Evidence: File contains code snippets from auth.ts, tenant.ts, permission-resolver.ts, org-context.tsx with accurate line references and current state
+- Key findings:
+  - All 6 Koinonia roles properly declared in OrgRole type
+  - Better Auth organization plugin correctly configured with Koinonia roles as creatorRole and roles mapping
+  - TenantMiddleware validates membership and populates userRole from member.role column
+  - Web layer accesses role via useActiveMember hook (currently typed as `string | null`, not `OrgRole | null`)
+  - RBAC matrix covers 11 domain operations with role-specific permissions
+  - Resource visibility scoped by role (ALL_ORG → DIRECT_CHILDREN → SELF_ONLY)
+  - Temporary participant controller fallback documented with revisit condition
+- Ready for Task 2-3 (API endpoints + Web authorization inventory)
+
+## COMPLETION_RECORD - Role Mapping Audit Plan Task 2
+
+- Date: 2026-05-05
+- Task: Audit API Authorization Checks (Task 2 from role mapping audit plan)
+- Method: Comprehensive search of API codebase using grep patterns for middleware calls, use-case checks, and role comparisons
+- Output: Added "API Authorization Inventory" section to `.holyhouse/ROLE-AUDIT.md` (467 lines total)
+- Evidence: Commit 71e8889 with complete inventory table and analysis
+- Key findings:
+  - **Total endpoints audited**: 38 across 6 modules (organizations, pessoas, inscricoes, acomodacoes, admin, financeiro)
+  - **Authorization patterns identified**: 3 distinct patterns in use
+    1. Legacy requireRole('admin'|'lider'): 29 endpoints (76%) - generic roles without domain RBAC
+    2. TenantCtx + canPerform(): 5 endpoints (13%) - organizations module only, with domain operations
+    3. TenantCtx fallback with legacy mapping: ParticipanteController only, temporary during org transition
+  - **Critical gaps documented**: 7 specific gaps
+    1. 29 endpoints (76%) lack domain operation checks (no canPerform() calls)
+    2. All legacy requireRole routes ignore Koinonia role distinctions (PRESIDENTE treated as 'admin', etc.)
+    3. Resource visibility scopes (PESSOAS_SCOPE, event status visibility) not applied to legacy routes
+    4. ParticipanteController uses DEFAULT_ORGANIZATION_ID fallback instead of failing on missing tenant
+    5. Mixing of two different authorization patterns across codebase
+    6. No explicit operation checks for write operations in participantes, inscricoes, acomodacoes
+    7. No domain RBAC enforcement in financeiro or admin modules
+  - **Inventory format**: Created comprehensive tables showing:
+    - Line-by-line endpoint inventory with middleware and use-case checks
+    - Use-case level authorization checks (3 use cases with canPerform)
+    - Pattern analysis with status, modules affected, and risk assessment
+    - Gap type, location, description, and severity for each inconsistency
+  - **Architecture insight**: API is in transition between legacy 'admin'/'lider' pattern and new multi-tenant TenantCtx + canPerform pattern
+- Risks identified and documented:
+  - No Koinonia domain RBAC on 76% of endpoints creates security risk (no distinction between roles)
+  - Visibility scopes not enforced means users may see resources outside their scope
+  - Fallback to DEFAULT_ORGANIZATION_ID in ParticipanteController can bypass org boundaries during transition
+- Task 2 status: ✅ COMPLETE - All authorization checks found, documented, and analyzed
