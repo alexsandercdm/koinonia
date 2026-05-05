@@ -4,6 +4,7 @@ import { OrgProvider } from './contexts/org-context'
 import { ProtectedRoute } from './components/protected-route'
 import { LoginPage } from './pages/login'
 import { RegisterPage } from './pages/register'
+import { OnboardingPage } from './pages/OnboardingPage'
 import { DashboardPage } from './pages/dashboard'
 import { ParticipantsPage } from './pages/ParticipantsPage'
 import { EventosPage } from './pages/EventosPage'
@@ -19,6 +20,7 @@ function App() {
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/onboarding" element={<OnboardingPage />} />
           <Route
             path="/setup/organization"
             element={
@@ -72,6 +74,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <FinanceiroPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/membros"
+            element={
+              <ProtectedRoute>
+                <MembersPage />
               </ProtectedRoute>
             }
           />

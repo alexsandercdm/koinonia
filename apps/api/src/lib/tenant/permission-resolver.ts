@@ -27,14 +27,17 @@ const PESSOAS_SCOPE: Record<OrgRole, ResourceScope> = {
   [OrgRole.MEMBRO]: 'SELF_ONLY',
 }
 
+/** Check if a role can perform a specific operation. */
 export function canPerform(role: OrgRole, operation: Operation): boolean {
   return PERMISSIONS[operation]?.includes(role) ?? false
 }
 
+/** Get the resource visibility scope for a role when viewing pessoas. */
 export function canViewPessoas(role: OrgRole): ResourceScope {
   return PESSOAS_SCOPE[role]
 }
 
+/** Check if a role can view an evento with a specific status. Planejamento is admin-only. */
 export function canViewEvento(role: OrgRole, status: string): boolean {
   if (status === 'planejamento') {
     return ADMIN_ROLES.includes(role)

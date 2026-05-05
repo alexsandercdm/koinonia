@@ -32,3 +32,19 @@ export function useInviteMember() {
     },
   })
 }
+
+export function useUpdateMemberRole() {
+  const { activeOrgId } = useOrgContext()
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (payload: { userId: string; role: string }) =>
+      apiFetch(`/api/v1/organization/members/${payload.userId}/role`, {
+        method: 'PATCH',
+        body: JSON.stringify({ role: payload.role }),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: orgKeys.members(activeOrgId) })
+    },
+  })
+}
