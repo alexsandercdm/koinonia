@@ -209,8 +209,10 @@ HTTP Response (401 if no tenant, 403 if unauthorized, 200 if allowed)
 **Owner-Only Operations** (available to `PRESIDENTE` only):
 - `TRANSFER_PRESIDENCY`: Transfer PRESIDENTE role to another member
 
-**Extended Permissions** (available to `PRESIDENTE`, `PASTOR_PRINCIPAL`, `PASTOR_REDE`, `DISCIPULADOR`):
+**Extended Permissions** (available to `PRESIDENTE`, `PASTOR_PRINCIPAL`, `PASTOR_REDE`):
 - `CREATE_PESSOA`: Create people records
+
+**Extended Permissions** (available to `PRESIDENTE`, `PASTOR_PRINCIPAL`, `PASTOR_REDE`, `DISCIPULADOR`):
 - `EDIT_PESSOA`: Edit people records
 - `ENROLL_OTHER`: Enroll others in events
 
@@ -429,17 +431,28 @@ The API uses two primary middleware patterns for authorization:
 
 ### Summary
 
-**Total Routes Audited:** 38  
-**With TenantCtx + canPerform():** 5 (13% - organizations module only)  
-**With Legacy requireRole() Only:** 29 (76%)  
-**With No Authorization Check:** 4 (11% - unauthenticated GET routes for listing)  
+**Total Routes Audited:** 41  
+**With TenantCtx + canPerform():** 5 (12% - organizations module only)  
+**With Legacy requireRole() Only:** 29 (71%)  
+**With No Authorization Check (TenantCtx only):** 7 (17% - unauthenticated GET routes for listing)  
 
 **Critical Finding:**
-The API is in a transition state. The organizations module uses the new multi-tenant pattern with domain RBAC (`canPerform()`), but 29 of 38 endpoints (76%) still use legacy role-based middleware without Koinonia domain operation checks. This means:
-- PRESIDENTE and PASTOR_PRINCIPAL are treated identically to 'admin'
-- PASTOR_REDE, DISCIPULADOR, LIDER_CELULA are all treated as 'lider'
-- The 12 defined Koinonia operations (INVITE_MEMBER, UPDATE_MEMBER_ROLE, etc.) are not checked
-- Resource visibility scopes (ALL_ORG, OWN_SUBTREE, DIRECT_CHILDREN, SELF_ONLY) are not enforced
+The API is in a transition state with two distinct patterns:
+
+**Pattern Distribution (41 total endpoints):**
+- 5 endpoints (12%): organizations module uses `TenantCtx + canPerform()` — full multi-tenant domain RBAC
+- 7 endpoints (17%): read-only routes use `TenantCtx` only — populate tenant context but no operation checks
+- 29 endpoints (71%): legacy routes use `requireRole()` — generic 'admin'/'lider' roles, no Koinonia domain RBAC
+
+**Impact of Legacy Pattern:**
+- PRESIDENTE and PASTOR_PRINCIPAL are treated identically to generic 'admin'
+- PASTOR_REDE, DISCIPULADOR, LIDER_CELULA are all treated as generic 'lider'
+- The 12 defined Koinonia operations (CREATE_PESSOA, EDIT_PESSOA, etc.) are not enforced on legacy routes
+- Resource visibility scopes (ALL_ORG, OWN_SUBTREE, DIRECT_CHILDREN, SELF_ONLY) are not enforced on legacy routes
+- Only 5 organization endpoints apply domain-specific operation checks
+
+**Note on TenantCtx Routes:**
+The 7 "no check" routes do populate `request.tenantCtx` with organization scope and user role, providing foundational multi-tenant isolation. However, they lack operation-level authorization checks via `canPerform()`, which means all authenticated users can access them regardless of role.
 
 ---
 

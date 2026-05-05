@@ -16,10 +16,11 @@ This file is the current operating snapshot for AI agents.
     - Role sources (API + Web) documented
     - Authorization pattern summary with permissions matrix
   - Task 2: ✅ Audit API Authorization Checks - COMPLETE
-    - Comprehensive inventory of 38 API endpoints across 6 modules
+    - Comprehensive inventory of 41 API endpoints across 6 modules
     - 3 authorization patterns identified (legacy requireRole, TenantCtx+canPerform, TenantCtx fallback)
     - 7 critical gaps and inconsistencies documented
     - Migration path identified for future work
+    - Issue fixes applied: corrected endpoint count, CREATE_PESSOA permissions, TenantCtx characterization
   - Task 3: ⏳ TODO - Inventory Web Layer Authorization Patterns
 
 ## Next Step
