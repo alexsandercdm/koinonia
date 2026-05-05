@@ -146,6 +146,18 @@ Record durable project knowledge here.
 - Rule: Web queries for tenant-owned resources must include `activeOrgId` in their `queryKey`, and `useQuery` calls must be disabled until an active organization exists. On org switch, clear the query cache before navigating.
 - Evidence: Added `OrgProvider` in `apps/web/src/contexts/org-context.tsx`, wired `organizationClient()` in `apps/web/src/lib/auth.ts`, and updated core hooks plus dashboard/financeiro page queries to prefix cache keys with `['org', activeOrgId, ...]`; `pnpm --filter @koinonia/web type-check` passed.
 
+## ERROR_PATTERN - OnboardingPage organization API validation
+
+- Date: 2026-05-05
+- Context: OnboardingPage.tsx called `authClient.organization.setActive()` without checking if the method existed or trying alternative names.
+- Correction: Add defensive checks before calling organization API methods:
+  - Extract `organizationApi = authClient.organization ?? {}`
+  - Validate method exists with `typeof create !== 'function'`
+  - Try both method names: `setActiveOrganization ?? setActive`
+  - This pattern matches working code in `OrgContext`
+- Evidence: After adding defensive checks, organization creation call succeeds and follows the same pattern as verified working code
+- Lesson: Better Auth organizationClient plugin has ambiguous method naming; always try both variants and validate availability
+
 ## COMPLETION_RECORD - Phase 8.5 Multi-Tenant Foundation
 
 - Date: 2026-05-04

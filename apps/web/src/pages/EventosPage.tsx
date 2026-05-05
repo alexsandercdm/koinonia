@@ -16,7 +16,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from '../components/ui/sheet'
-import { useAuthContext } from '../contexts/auth-context'
+import { useOrgContext } from '../contexts/org-context'
 import { useCreateEvento, useEventos, useUpdateEvento } from '../hooks/use-eventos'
 
 type EventoFilter = 'todos' | StatusEvento
@@ -29,8 +29,8 @@ function normalizeSearchText(value?: string | null): string {
 }
 
 export function EventosPage() {
-  const { user } = useAuthContext()
-  const canWrite = user?.role === 'admin'
+  const { userRole } = useOrgContext()
+  const canWrite = userRole === 'PRESIDENTE' || userRole === 'PASTOR_PRINCIPAL'
   const eventosQuery = useEventos()
   const createEvento = useCreateEvento()
   const updateEvento = useUpdateEvento()
