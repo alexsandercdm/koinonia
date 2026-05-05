@@ -35,7 +35,7 @@ export function LoginPage() {
     try {
       setError('')
       await login(data.email, data.password)
-      navigate('/dashboard')
+      navigate('/setup/organization')
     } catch (err: any) {
       setError(err.message || 'Erro ao fazer login')
     }

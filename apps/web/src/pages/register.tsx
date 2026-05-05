@@ -41,7 +41,7 @@ export function RegisterPage() {
     try {
       setError('')
       await registerUser(data.email, data.password, data.name)
-      navigate('/dashboard')
+      navigate('/setup/organization')
     } catch (err: any) {
       setError(err.message || 'Erro ao criar conta')
     }

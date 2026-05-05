@@ -24,4 +24,4 @@ This file is the current operating snapshot for AI agents.
 
 ## Blockers
 
-- None known.
+- API E2E verification is currently blocked for two reasons: there is no reachable Postgres test instance on `localhost:5432` for `apps/api/.env.test`, and `src/scripts/test-migrate.ts` still expects a Drizzle `meta/_journal.json` history that no longer exists in this repo.
