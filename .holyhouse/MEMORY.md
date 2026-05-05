@@ -145,3 +145,17 @@ Record durable project knowledge here.
 - Context: Phase 8.5 Tasks 18-19 introduced client-side organization switching. Without org-scoped query keys, TanStack Query can replay stale data from one organization into another after `setActiveOrganization`.
 - Rule: Web queries for tenant-owned resources must include `activeOrgId` in their `queryKey`, and `useQuery` calls must be disabled until an active organization exists. On org switch, clear the query cache before navigating.
 - Evidence: Added `OrgProvider` in `apps/web/src/contexts/org-context.tsx`, wired `organizationClient()` in `apps/web/src/lib/auth.ts`, and updated core hooks plus dashboard/financeiro page queries to prefix cache keys with `['org', activeOrgId, ...]`; `pnpm --filter @koinonia/web type-check` passed.
+
+## COMPLETION_RECORD - Phase 8.5 Multi-Tenant Foundation
+
+- Date: 2026-05-04
+- Tasks Completed: 23/23 (API foundation + web UI)
+  - Tasks 1-18: Already merged via codex/phase-8-5-multi-tenant-foundation branch
+  - Tasks 19-23: Completed via subagent-driven development in this session
+- Method: Merged codex branch, then dispatched fresh subagents per task with spec + code quality reviews
+- All tasks passed type-check and integration verification
+- Web components: OrgContext, OrgSwitcher, OnboardingPage, MembersPage created
+- Frontend hooks updated with org-scoped query keys and enabled guards
+- Test suites added for isolation, RBAC, and presidency transfer
+- Commits: 5 new feature commits + cleanup, all passing conventional format
+- Risk: Transition between unscoped and org-scoped queries requires careful testing end-to-end before merging to main

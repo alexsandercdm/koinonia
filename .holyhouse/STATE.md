@@ -4,15 +4,23 @@ This file is the current operating snapshot for AI agents.
 
 ## Current Goal
 
-- Implement Phase 8.5 — Multi-Tenant Foundation before Phase 8 Eventos CRUD UI.
+- ✅ Phase 8.5 Multi-Tenant Foundation COMPLETE
+- Next: Code review and integration testing
 
 ## Active Work
 
-- Phase 8.5 Task 22 (Members Management Page): Created MembersPage component with member list, invite form, and role management UI. Added useUpdateMemberRole hook to use-org.ts. Route /membros added to App.tsx.
+- Phase 8.5 Tasks 19-23: All tasks completed via subagent-driven development:
+  - Task 19: ✅ Org-scoped query keys with enabled guards
+  - Task 20: ✅ OrgSwitcher dropdown with queryClient.clear()
+  - Task 21: ✅ OnboardingPage for self-service org creation
+  - Task 22: ✅ MembersPage with invite and role management
+  - Task 23: ✅ Comprehensive test suites (isolation, RBAC, presidency transfer)
 
 ## Next Step
 
-- Phase 8.5 Task 23-24: Add more admin features or move forward with additional Phase 8.5 tasks.
+- Code review and integration verification
+- End-to-end testing of multi-tenant flows
+- Merge to main when ready
 
 ## Blockers
 
