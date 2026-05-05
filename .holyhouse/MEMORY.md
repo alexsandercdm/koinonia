@@ -181,6 +181,18 @@ Record durable project knowledge here.
 - Commit: 2c8d5e8
 - Status: ✅ Fixed
 
+## ERROR_PATTERN - Authorization: org roles not mapped to auth roles
+
+- Date: 2026-05-05
+- Context: EventosPage "Novo Evento" button not visible despite user being PRESIDENTE
+- Root Cause: TenantMiddleware loads org role into tenantCtx.userRole, but doesn't set request.user.role; requireRole('admin') checks request.user.role and finds undefined/mismatched value
+- Correction: Map Koinonia org roles to admin/member in TenantMiddleware:
+  - PRESIDENTE → 'admin'
+  - PASTOR_PRINCIPAL → 'admin'
+  - Others → 'member'
+- Evidence: After mapping, EventosPage canWrite check works and button appears
+- Lesson: When loading org roles from database, must also set them on request.user for downstream auth middleware
+
 ## AUDIT - Phase 8.5 Events and Tenant Scoping (2026-05-05)
 
 - Date: 2026-05-05
