@@ -8,12 +8,12 @@ This file is the current operating snapshot for AI agents.
 
 ## Active Work
 
-- Phase 8.5 Tasks 18-19 in progress: web now has an `OrgProvider`, org-aware Better Auth client setup, and org-scoped query keys across core hooks plus dashboard/financeiro queries.
+- Phase 8.5 onboarding/switcher flow is in progress: web now has org setup + selection paths, and backend participants now require `tenantCtx` instead of the default-org fallback.
 
 ## Next Step
 
-- Use the new org context in onboarding/switcher flows, then remove the temporary default-org fallback from `ParticipanteController` to finish the backend transition cleanly.
+- Resume verification once the API test database is reachable on `localhost:5432`, then run the updated tenant-aware API suites and commit the backend/web transition slice.
 
 ## Blockers
 
-- None known.
+- API E2E verification is currently blocked for two reasons: there is no reachable Postgres test instance on `localhost:5432` for `apps/api/.env.test`, and `src/scripts/test-migrate.ts` still expects a Drizzle `meta/_journal.json` history that no longer exists in this repo.

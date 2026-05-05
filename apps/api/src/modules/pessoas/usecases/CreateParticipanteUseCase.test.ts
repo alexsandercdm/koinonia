@@ -6,6 +6,7 @@ import { db } from '../../../db'
 import { schema } from '../../../db'
 import { eq } from 'drizzle-orm'
 import { pessoas } from '../../../db/schema'
+import { signInWithActiveOrg } from '../../../tests/helpers/authWithOrg'
 
 describe('CreateParticipanteUseCase (Integração E2E)', () => {
   let app: FastifyInstance
@@ -22,11 +23,12 @@ describe('CreateParticipanteUseCase (Integração E2E)', () => {
   let adminToken: string
   async function setupAuth() {
     const email = 'admin_' + Date.now() + Math.random().toString(36).substring(7) + '@example.com'
-    await fetch('http://localhost:3005/api/v1/auth/sign-up/email', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password: 'Password123!', name: 'Admin' }) })
-    await db.update(schema.user).set({ role: 'admin' }).where(eq(schema.user.email, email))
-    const res = await fetch('http://localhost:3005/api/v1/auth/sign-in/email', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password: 'Password123!' }) })
-    const body = await res.json()
-    adminToken = body.token
+    adminToken = await signInWithActiveOrg({
+      baseUrl: 'http://localhost:3005',
+      email,
+      name: 'Admin',
+      role: 'admin',
+    })
   }
 
   beforeEach(async () => {

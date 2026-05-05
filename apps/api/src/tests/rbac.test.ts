@@ -1,7 +1,8 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest'
 import { buildApp } from '../app'
-import { db, schema } from '../db'
-import { eq } from 'drizzle-orm'
+import { db } from '../db'
+import { sql } from 'drizzle-orm'
+import { signInWithActiveOrg } from './helpers/authWithOrg'
 
 describe('RBAC E2E', { timeout: 30000 }, () => {
   const app = buildApp()
@@ -20,10 +21,19 @@ describe('RBAC E2E', { timeout: 30000 }, () => {
   })
 
   async function clearTables() {
-    await db.delete(schema.session)
-    await db.delete(schema.account)
-    await db.delete(schema.user)
-    await db.delete(schema.pessoas)
+    await db.execute(sql`
+      TRUNCATE TABLE
+        audit_logs,
+        pessoas,
+        invitation,
+        member,
+        organization,
+        session,
+        account,
+        verification,
+        "user"
+      RESTART IDENTITY CASCADE;
+    `)
   }
 
   beforeEach(async () => {
@@ -31,34 +41,12 @@ describe('RBAC E2E', { timeout: 30000 }, () => {
   })
 
   async function getAuthToken(email: string, role: string = 'servo') {
-    // 1. Signup
-    await fetch(`${baseUrl}/api/v1/auth/sign-up/email`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        email,
-        password: 'Password123!',
-        name: 'Test User'
-      })
+    return signInWithActiveOrg({
+      baseUrl,
+      email,
+      name: 'Test User',
+      role: role as 'admin' | 'lider' | 'servo',
     })
-
-    // 2. Update Role in DB (Better Auth doesn't allow role in signup)
-    await db.update(schema.user)
-      .set({ role })
-      .where(eq(schema.user.email, email))
-
-    // 3. Signin to get fresh token with role
-    const signInResponse = await fetch(`${baseUrl}/api/v1/auth/sign-in/email`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password: 'Password123!' })
-    })
-
-    const body = await signInResponse.json() as any
-    if (signInResponse.status !== 200) {
-      console.error(`Signin Failed for ${email}:`, body)
-    }
-    return body.token
   }
 
   it('should allow LIDER to list participants', async () => {

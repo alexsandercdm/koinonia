@@ -10,6 +10,7 @@ import { EventosPage } from './pages/EventosPage'
 import { AcomodacoesPage } from './pages/AcomodacoesPage'
 import { InscricoesPage } from './pages/InscricoesPage'
 import { FinanceiroPage } from './pages/FinanceiroPage'
+import { OrganizationSetupPage } from './pages/OrganizationSetupPage'
 
 function App() {
   return (
@@ -18,6 +19,14 @@ function App() {
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route
+            path="/setup/organization"
+            element={
+              <ProtectedRoute>
+                <OrganizationSetupPage />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/dashboard"
             element={

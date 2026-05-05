@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { LogOut, Menu, X } from 'lucide-react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuthContext } from '../../contexts/auth-context'
+import { useOrgContext } from '../../contexts/org-context'
 import { Badge } from '../ui/badge'
 import { useEventos } from '../../hooks/use-eventos'
 import type { EventoListItem } from '@koinonia/shared'
@@ -77,10 +78,45 @@ function EventPill({
   )
 }
 
+function OrganizationPill({
+  organizations,
+  activeOrgId,
+  isLoading,
+  onSelect,
+}: {
+  organizations: Array<{ id: string; name: string; slug: string }>
+  activeOrgId: string | null
+  isLoading: boolean
+  onSelect: (orgId: string) => void
+}) {
+  return (
+    <div className="hidden max-w-full items-center gap-1.5 rounded-[8px] border border-border bg-surface-raised px-2 py-1 text-xs text-text-secondary ring-warm-gold-light focus-within:ring-[3px] xl:inline-flex">
+      <span className="material-symbols-rounded text-[13px] text-warm-gold">domain</span>
+      <select
+        value={activeOrgId ?? ''}
+        onChange={(event) => onSelect(event.target.value)}
+        disabled={isLoading || organizations.length === 0}
+        className="min-w-0 max-w-[220px] bg-transparent text-[12px] font-medium text-foreground outline-none disabled:text-text-secondary"
+        aria-label="Selecionar organizacao ativa"
+      >
+        {isLoading ? <option value="">Carregando organizacoes</option> : null}
+        {!isLoading && organizations.length === 0 ? <option value="">Sem organizacao</option> : null}
+        {organizations.map((org) => (
+          <option key={org.id} value={org.id}>
+            {org.name}
+          </option>
+        ))}
+      </select>
+      <span className="material-symbols-rounded text-[14px] text-text-tertiary">expand_more</span>
+    </div>
+  )
+}
+
 export function AppLayout({ children, title, actions }: AppLayoutProps) {
   const navigate = useNavigate()
   const location = useLocation()
   const { user, logout } = useAuthContext()
+  const { organizations, activeOrgId, setActiveOrg, isLoading: orgLoading } = useOrgContext()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const { data: eventos = [], isLoading: eventosLoading } = useEventos()
   const [selectedEventoId, setSelectedEventoId] = useState(() => {
@@ -119,6 +155,14 @@ export function AppLayout({ children, title, actions }: AppLayoutProps) {
   const handleEventoSelect = (eventoId: string) => {
     setSelectedEventoId(eventoId)
     window.localStorage.setItem(SELECTED_EVENT_KEY, eventoId)
+  }
+
+  const handleOrgSelect = (orgId: string) => {
+    if (!orgId || orgId === activeOrgId) {
+      return
+    }
+
+    void setActiveOrg(orgId)
   }
 
   return (
@@ -195,6 +239,12 @@ export function AppLayout({ children, title, actions }: AppLayoutProps) {
             </button>
             <h2 className="truncate text-[15px] font-semibold text-foreground">{title ?? 'Koinonia'}</h2>
             <div className="hidden h-[18px] w-px bg-border sm:block" />
+            <OrganizationPill
+              organizations={organizations}
+              activeOrgId={activeOrgId}
+              isLoading={orgLoading}
+              onSelect={handleOrgSelect}
+            />
             <EventPill
               eventos={availableEventos}
               selectedEventoId={selectedEventoId}

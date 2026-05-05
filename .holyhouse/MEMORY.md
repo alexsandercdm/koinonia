@@ -145,3 +145,24 @@ Record durable project knowledge here.
 - Context: Phase 8.5 Tasks 18-19 introduced client-side organization switching. Without org-scoped query keys, TanStack Query can replay stale data from one organization into another after `setActiveOrganization`.
 - Rule: Web queries for tenant-owned resources must include `activeOrgId` in their `queryKey`, and `useQuery` calls must be disabled until an active organization exists. On org switch, clear the query cache before navigating.
 - Evidence: Added `OrgProvider` in `apps/web/src/contexts/org-context.tsx`, wired `organizationClient()` in `apps/web/src/lib/auth.ts`, and updated core hooks plus dashboard/financeiro page queries to prefix cache keys with `['org', activeOrgId, ...]`; `pnpm --filter @koinonia/web type-check` passed.
+
+## GATE_ADJUSTMENT - Tenant-aware API E2E verification depends on reachable DATABASE_URL
+
+- Date: 2026-05-04
+- Context: After removing the participant controller's default-org fallback and updating API tests to create an active organization during auth setup, `vitest` could not verify behavior because the database from `apps/api/.env` refused connections before the suites reached their assertions.
+- Adjustment: Treat current backend tenant transition as code-complete but verification-blocked until the configured Postgres instance is reachable again; the immediate failure is infra (`ECONNREFUSED`), not a route-level tenant assertion.
+- Evidence: Direct invocation of `clearDatabase()` via `pnpm exec tsx -e ...` failed with `DrizzleQueryError` whose root cause was `AggregateError [ECONNREFUSED]`.
+
+## ERROR_PATTERN - API Vitest loads `.env.test`, not `.env`
+
+- Date: 2026-05-04
+- Context: The API Vitest setup (`apps/api/src/tests/setup.ts`) and `db:test:migrate` script both load `apps/api/.env.test`. This worktree was missing that file, which made ad-hoc test runs fall back to whichever shell environment happened to be active.
+- Correction: Keep a local `apps/api/.env.test` aligned with the canonical checkout before debugging API tests, so the suite targets `postgresql://test:test@localhost:5432/koinonia_test` and `BETTER_AUTH_URL=http://localhost:3005/api/v1/auth`.
+- Evidence: `/Users/alexsandercdm/Projetos/koinonia/apps/api/.env.test` exists with the expected test values, while the worktree did not until it was recreated locally.
+
+## ERROR_PATTERN - `db:test:migrate` still assumes Drizzle journal-based migrations
+
+- Date: 2026-05-04
+- Context: Running `node --import tsx src/scripts/test-migrate.ts` in `apps/api` no longer reaches database setup; it fails immediately because `drizzle/meta/_journal.json` is missing.
+- Correction: Do not assume `pnpm --filter @koinonia/api db:test:migrate` can bootstrap a fresh test database in this repo. The script still points at `migrate(db, { migrationsFolder: 'drizzle' })`, but Phase 8.5 moved tracked incremental SQL into `src/db/manual-migrations/` and the Drizzle journal is absent.
+- Evidence: Current failure is `Can't find meta/_journal.json file` before any DB assertions run.

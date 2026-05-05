@@ -4,6 +4,7 @@ import { clearDatabase } from './helpers/setupTestDB'
 import { FastifyInstance } from 'fastify'
 import { db, schema } from '../db'
 import { eq } from 'drizzle-orm'
+import { signInWithActiveOrg } from './helpers/authWithOrg'
 
 describe('Unified Pessoas E2E (PES-01 to PES-05)', () => {
   let app: FastifyInstance
@@ -26,23 +27,13 @@ describe('Unified Pessoas E2E (PES-01 to PES-05)', () => {
   beforeEach(async () => {
     await clearDatabase()
 
-    // Setup Auth
     const email = 'admin_e2e@example.com'
-    await fetch('http://localhost:3007/api/v1/auth/sign-up/email', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password: 'Password123!', name: 'Admin E2E' })
+    adminToken = await signInWithActiveOrg({
+      baseUrl: 'http://localhost:3007',
+      email,
+      name: 'Admin E2E',
+      role: 'admin',
     })
-
-    await db.update(schema.user).set({ role: 'admin' }).where(eq(schema.user.email, email))
-
-    const res = await fetch('http://localhost:3007/api/v1/auth/sign-in/email', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password: 'Password123!' })
-    })
-    const body = await res.json() as any
-    adminToken = body.token
   })
 
   it('PES-01: Deve criar participante com contato de emergência', async () => {

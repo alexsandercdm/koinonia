@@ -4,6 +4,7 @@ import { eq } from 'drizzle-orm'
 import { buildApp } from '../../../app'
 import { db, schema } from '../../../db'
 import { clearDatabase } from '../../../tests/helpers/setupTestDB'
+import { signInWithActiveOrg } from '../../../tests/helpers/authWithOrg'
 
 describe('UpdateParticipanteUseCase (Integração E2E)', () => {
   let app: FastifyInstance
@@ -26,23 +27,12 @@ describe('UpdateParticipanteUseCase (Integração E2E)', () => {
 
   async function createUser(role: 'admin' | 'lider' | 'servo') {
     const email = `${role}_${Date.now()}_${Math.random().toString(36).slice(2)}@example.com`
-
-    await fetch('http://localhost:3010/api/v1/auth/sign-up/email', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password: 'Password123!', name: `Test ${role}` }),
+    return signInWithActiveOrg({
+      baseUrl: 'http://localhost:3010',
+      email,
+      name: `Test ${role}`,
+      role,
     })
-
-    await db.update(schema.user).set({ role }).where(eq(schema.user.email, email))
-
-    const signInResponse = await fetch('http://localhost:3010/api/v1/auth/sign-in/email', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password: 'Password123!' }),
-    })
-
-    const body = await signInResponse.json() as any
-    return body.token as string
   }
 
   async function createParticipante(token: string, payload: Record<string, unknown>) {
