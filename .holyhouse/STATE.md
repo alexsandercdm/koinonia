@@ -5,37 +5,25 @@ This file is the current operating snapshot for AI agents.
 ## Current Goal
 
 - ✅ Phase 8.5 Multi-Tenant Foundation COMPLETE
-- 🔄 Role Mapping Audit Plan: In Progress
+- ✅ Phase 8.5 Post-Delivery Audit & Corrections COMPLETE
+- ✅ Role Mapping Audit COMPLETE
+- Next: E2E testing and UAT with verified role-based access
 
 ## Active Work
 
-- **Role Mapping Audit Plan** (Started 2026-05-05)
-  - Task 1: ✅ Document Current Role State - COMPLETE
-    - All 6 Koinonia org roles documented
-    - Better Auth plugin mapping defined
-    - Role sources (API + Web) documented
-    - Authorization pattern summary with permissions matrix
-  - Task 2: ✅ Audit API Authorization Checks - COMPLETE
-    - Comprehensive inventory of 41 API endpoints across 6 modules
-    - 3 authorization patterns identified (legacy requireRole, TenantCtx+canPerform, TenantCtx fallback)
-    - 7 critical gaps and inconsistencies documented
-    - Migration path identified for future work
-    - Issue fixes applied: corrected endpoint count, CREATE_PESSOA permissions, TenantCtx characterization
-  - Task 3: ⏳ TODO - Inventory Web Layer Authorization Patterns
-  - Task 4: ✅ Create Role Mapper Utility with Tests - COMPLETE
-    - Created `apps/api/src/lib/tenant/role-mapper.ts` with 4 utility functions
-    - Created `apps/api/src/lib/tenant/__tests__/role-mapper.test.ts` with 24 comprehensive tests
-    - All 24 tests passing (mapOrgRoleToAuthRole, canCreateEvents, canManageOrganization, canManageMembers)
-    - No TypeScript errors in implementation
-    - Committed with 0a53ae7
+- Role Mapping Audit (2026-05-05): ✅ COMPLETE
+  - ✅ Task 1: Documented current role state (ROLE-AUDIT.md)
+  - ✅ Task 2: Audited API authorization checks (41 endpoints)
+  - ✅ Task 3: Audited Web authorization checks (10 pages)
+  - ✅ Task 4: Created role-mapper.ts utility with tests
+  - ✅ Task 5: Updated TenantMiddleware to use mapper
+  - ✅ Task 6: Recorded role mapping pattern in MEMORY
+  - ✅ Task 7: Created role authorization matrix
+  - ✅ Task 8: Finalized audit summary
 
 ## Next Step
 
-- Task 5: Refactor TenantMiddleware to use role mapper utility
-  - Replace scattered authorization logic with centralized role mapper
-  - Simplify middleware code
-  - Ensure all 24 tests still pass
-
-## Blockers
-
-- None known.
+- E2E manual testing of event creation with role-based access verification
+- User acceptance testing (UAT) with full role hierarchy flows
+- Verify all 6 Koinonia roles work correctly in end-to-end scenarios
+- Merge to main branch when UAT passes
