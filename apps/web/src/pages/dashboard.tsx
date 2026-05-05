@@ -14,6 +14,7 @@ import { Badge } from '../components/ui/badge'
 import { Button } from '../components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { EmptyState } from '../components/ui/empty-state'
+import { useOrgContext } from '../contexts/org-context'
 import { apiFetch } from '../lib/api'
 import type { InscricaoListItem, EventoListItem } from '../hooks/use-inscricoes'
 import type { MapaAcomodacao } from '@koinonia/shared'
@@ -72,40 +73,44 @@ const quickLinks = [
 
 export function DashboardPage() {
   const navigate = useNavigate()
+  const { activeOrgId } = useOrgContext()
 
   const { data: participantesData } = useQuery({
-    queryKey: ['participantes-count'],
+    queryKey: ['org', activeOrgId, 'dashboard', 'participantes-count'],
     queryFn: () => apiFetch<ParticipantesListResponse | unknown[]>('/api/v1/participantes'),
+    enabled: !!activeOrgId,
     retry: 1,
   })
 
   const { data: metricas } = useQuery({
-    queryKey: ['financeiro-metricas'],
+    queryKey: ['org', activeOrgId, 'dashboard', 'financeiro-metricas'],
     queryFn: () => apiFetch<MetricasFinanceiro>('/api/v1/financeiro/metricas'),
+    enabled: !!activeOrgId,
     retry: 1,
   })
 
   const { data: eventos } = useQuery({
-    queryKey: ['eventos'],
+    queryKey: ['org', activeOrgId, 'dashboard', 'eventos'],
     queryFn: () => apiFetch<EventoListItem[]>('/api/v1/eventos'),
+    enabled: !!activeOrgId,
     retry: 1,
   })
 
   const primeiroEvento = eventos?.[0]
 
   const { data: inscricoes } = useQuery({
-    queryKey: ['inscricoes-dashboard', primeiroEvento?.id],
+    queryKey: ['org', activeOrgId, 'dashboard', 'inscricoes', primeiroEvento?.id],
     queryFn: () =>
       apiFetch<InscricaoListItem[]>(`/api/v1/inscricoes?evento_id=${primeiroEvento!.id}`),
-    enabled: !!primeiroEvento?.id,
+    enabled: !!activeOrgId && !!primeiroEvento?.id,
     retry: 1,
   })
 
   const { data: mapa } = useQuery({
-    queryKey: ['mapa-acomodacao-dashboard', primeiroEvento?.id],
+    queryKey: ['org', activeOrgId, 'dashboard', 'mapa-acomodacao', primeiroEvento?.id],
     queryFn: () =>
       apiFetch<MapaAcomodacao>(`/api/v1/eventos/${primeiroEvento!.id}/mapa-acomodacao`),
-    enabled: !!primeiroEvento?.id,
+    enabled: !!activeOrgId && !!primeiroEvento?.id,
     retry: 1,
   })
 

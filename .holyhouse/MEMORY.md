@@ -138,3 +138,10 @@ Record durable project knowledge here.
 - Context: Early Phase 8.5 write paths used `DEFAULT_ORGANIZATION_ID` directly inside use cases to keep older participant flows alive before org activation is wired end-to-end.
 - Rule: During the transition, any default-org fallback should live only at the HTTP boundary (`ParticipanteController.resolveCtx`). Tenant-aware repositories and use cases should receive an explicit `TenantContext`, not silently manufacture one.
 - Evidence: After removing `resolveTenantContext()` and the hidden default-org path from `pessoas` use cases, `pnpm --filter @koinonia/api type-check` and the `pessoas` repository/use case Vitest suite still passed.
+
+## PROJECT_RULE - Web query cache must be org-scoped
+
+- Date: 2026-05-04
+- Context: Phase 8.5 Tasks 18-19 introduced client-side organization switching. Without org-scoped query keys, TanStack Query can replay stale data from one organization into another after `setActiveOrganization`.
+- Rule: Web queries for tenant-owned resources must include `activeOrgId` in their `queryKey`, and `useQuery` calls must be disabled until an active organization exists. On org switch, clear the query cache before navigating.
+- Evidence: Added `OrgProvider` in `apps/web/src/contexts/org-context.tsx`, wired `organizationClient()` in `apps/web/src/lib/auth.ts`, and updated core hooks plus dashboard/financeiro page queries to prefix cache keys with `['org', activeOrgId, ...]`; `pnpm --filter @koinonia/web type-check` passed.

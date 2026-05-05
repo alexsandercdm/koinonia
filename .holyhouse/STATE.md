@@ -8,11 +8,11 @@ This file is the current operating snapshot for AI agents.
 
 ## Active Work
 
-- Phase 8.5 Task 17 in progress: hidden tenant fallbacks were removed from `pessoas` use cases and `CreateLocalUseCase`, keeping the temporary default-org bridge only at the participant controller boundary.
+- Phase 8.5 Tasks 18-19 in progress: web now has an `OrgProvider`, org-aware Better Auth client setup, and org-scoped query keys across core hooks plus dashboard/financeiro queries.
 
 ## Next Step
 
-- Finish Phase 8.5 Task 17 by auditing the remaining participant/auth flows and any route handlers that still rely on the default-org transition path.
+- Use the new org context in onboarding/switcher flows, then remove the temporary default-org fallback from `ParticipanteController` to finish the backend transition cleanly.
 
 ## Blockers
 

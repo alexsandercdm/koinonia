@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { apiFetch } from '../lib/api'
+import { useOrgContext } from '../contexts/org-context'
 import type { Local, Quarto, Cama, MapaAcomodacao, InscricaoDisponivel } from '@koinonia/shared'
 export { useEventos } from './use-eventos'
 export type { EventoListItem } from '@koinonia/shared'
@@ -51,20 +52,23 @@ export interface QuartoMapaItem {
 // --------------- Query Keys ---------------
 
 export const acomodacoesKeys = {
-  all: ['acomodacoes'] as const,
-  locais: () => [...acomodacoesKeys.all, 'locais'] as const,
-  local: (id: string) => [...acomodacoesKeys.locais(), id] as const,
-  quartos: (localId: string) => [...acomodacoesKeys.all, 'quartos', localId] as const,
-  camas: (quartoId: string) => [...acomodacoesKeys.all, 'camas', quartoId] as const,
-  mapa: (eventoId: string) => [...acomodacoesKeys.all, 'mapa', eventoId] as const,
+  all: (orgId: string | null) => ['org', orgId, 'acomodacoes'] as const,
+  locais: (orgId: string | null) => [...acomodacoesKeys.all(orgId), 'locais'] as const,
+  local: (orgId: string | null, id: string) => [...acomodacoesKeys.locais(orgId), id] as const,
+  quartos: (orgId: string | null, localId: string) => [...acomodacoesKeys.all(orgId), 'quartos', localId] as const,
+  camas: (orgId: string | null, quartoId: string) => [...acomodacoesKeys.all(orgId), 'camas', quartoId] as const,
+  mapa: (orgId: string | null, eventoId: string) => [...acomodacoesKeys.all(orgId), 'mapa', eventoId] as const,
 }
 
 // --------------- Locais Queries ---------------
 
 export function useLocais() {
+  const { activeOrgId } = useOrgContext()
+
   return useQuery({
-    queryKey: acomodacoesKeys.locais(),
+    queryKey: acomodacoesKeys.locais(activeOrgId),
     queryFn: () => apiFetch<Local[]>('/api/v1/acomodacoes/locais'),
+    enabled: !!activeOrgId,
     staleTime: 1000 * 60 * 5, // 5 minutes — offline grace
   })
 }
@@ -72,10 +76,12 @@ export function useLocais() {
 // --------------- Quartos Queries ---------------
 
 export function useQuartos(localId: string) {
+  const { activeOrgId } = useOrgContext()
+
   return useQuery({
-    queryKey: acomodacoesKeys.quartos(localId),
+    queryKey: acomodacoesKeys.quartos(activeOrgId, localId),
     queryFn: () => apiFetch<Quarto[]>(`/api/v1/acomodacoes/locais/${localId}/quartos`),
-    enabled: !!localId,
+    enabled: !!activeOrgId && !!localId,
     staleTime: 1000 * 60 * 5,
   })
 }
@@ -83,10 +89,12 @@ export function useQuartos(localId: string) {
 // --------------- Camas Queries ---------------
 
 export function useCamas(quartoId: string) {
+  const { activeOrgId } = useOrgContext()
+
   return useQuery({
-    queryKey: acomodacoesKeys.camas(quartoId),
+    queryKey: acomodacoesKeys.camas(activeOrgId, quartoId),
     queryFn: () => apiFetch<Cama[]>(`/api/v1/acomodacoes/quartos/${quartoId}/camas`),
-    enabled: !!quartoId,
+    enabled: !!activeOrgId && !!quartoId,
     staleTime: 1000 * 60 * 5,
   })
 }
@@ -94,11 +102,13 @@ export function useCamas(quartoId: string) {
 // --------------- Mapa Query ---------------
 
 export function useMapaAcomodacao(eventoId: string) {
+  const { activeOrgId } = useOrgContext()
+
   return useQuery({
-    queryKey: acomodacoesKeys.mapa(eventoId),
+    queryKey: acomodacoesKeys.mapa(activeOrgId, eventoId),
     queryFn: () =>
       apiFetch<MapaAcomodacao>(`/api/v1/eventos/${eventoId}/mapa-acomodacao`),
-    enabled: !!eventoId,
+    enabled: !!activeOrgId && !!eventoId,
     staleTime: 1000 * 60 * 5, // 5 minutes — offline grace for field operations
   })
 }
@@ -106,6 +116,7 @@ export function useMapaAcomodacao(eventoId: string) {
 // --------------- Local Mutations ---------------
 
 export function useCreateLocal() {
+  const { activeOrgId } = useOrgContext()
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (payload: LocalPayload) =>
@@ -114,12 +125,13 @@ export function useCreateLocal() {
         body: JSON.stringify(payload),
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: acomodacoesKeys.locais() })
+      queryClient.invalidateQueries({ queryKey: acomodacoesKeys.all(activeOrgId) })
     },
   })
 }
 
 export function useUpdateLocal() {
+  const { activeOrgId } = useOrgContext()
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: ({ id, payload }: { id: string; payload: Partial<LocalPayload> }) =>
@@ -128,8 +140,8 @@ export function useUpdateLocal() {
         body: JSON.stringify(payload),
       }),
     onSuccess: (_data, { id }) => {
-      queryClient.invalidateQueries({ queryKey: acomodacoesKeys.locais() })
-      queryClient.invalidateQueries({ queryKey: acomodacoesKeys.local(id) })
+      queryClient.invalidateQueries({ queryKey: acomodacoesKeys.all(activeOrgId) })
+      queryClient.invalidateQueries({ queryKey: acomodacoesKeys.local(activeOrgId, id) })
     },
   })
 }
@@ -137,6 +149,7 @@ export function useUpdateLocal() {
 // --------------- Quarto Mutations ---------------
 
 export function useCreateQuarto() {
+  const { activeOrgId } = useOrgContext()
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: ({ localId, payload }: { localId: string; payload: Omit<QuartoPayload, 'local_id'> }) =>
@@ -145,12 +158,13 @@ export function useCreateQuarto() {
         body: JSON.stringify(payload),
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: acomodacoesKeys.locais() })
+      queryClient.invalidateQueries({ queryKey: acomodacoesKeys.all(activeOrgId) })
     },
   })
 }
 
 export function useUpdateQuarto() {
+  const { activeOrgId } = useOrgContext()
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: ({
@@ -167,7 +181,7 @@ export function useUpdateQuarto() {
         body: JSON.stringify(payload),
       }),
     onSuccess: (_data, { localId: _localId }) => {
-      queryClient.invalidateQueries({ queryKey: acomodacoesKeys.locais() })
+      queryClient.invalidateQueries({ queryKey: acomodacoesKeys.all(activeOrgId) })
     },
   })
 }
@@ -178,20 +192,22 @@ export function useUpdateQuarto() {
 // O tipo do shared tem os campos corretos: { id, nome, genero, papel, status }
 
 export const inscricoesSemCamaKeys = {
-  list: (eventoId: string, q?: string) =>
-    ['inscricoes-sem-cama', eventoId, q ?? ''] as const,
+  list: (orgId: string | null, eventoId: string, q?: string) =>
+    ['org', orgId, 'inscricoes-sem-cama', eventoId, q ?? ''] as const,
 }
 
 export function useInscricoesSemCama(eventoId: string, q: string, enabled = true) {
+  const { activeOrgId } = useOrgContext()
+
   return useQuery({
-    queryKey: inscricoesSemCamaKeys.list(eventoId, q),
+    queryKey: inscricoesSemCamaKeys.list(activeOrgId, eventoId, q),
     queryFn: () => {
       const params = q ? `?q=${encodeURIComponent(q)}` : ''
       return apiFetch<InscricaoDisponivel[]>(
         `/api/v1/eventos/${eventoId}/inscricoes-sem-cama${params}`
       )
     },
-    enabled: enabled && !!eventoId,
+    enabled: enabled && !!activeOrgId && !!eventoId,
     staleTime: 0,
   })
 }
@@ -199,6 +215,7 @@ export function useInscricoesSemCama(eventoId: string, q: string, enabled = true
 // --------------- Atribuir / Liberar cama ---------------
 
 export function useAtribuirCama(eventoId: string) {
+  const { activeOrgId } = useOrgContext()
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: ({
@@ -213,13 +230,14 @@ export function useAtribuirCama(eventoId: string) {
         body: JSON.stringify({ inscricao_id: inscricaoId }),
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: acomodacoesKeys.mapa(eventoId) })
-      queryClient.invalidateQueries({ queryKey: inscricoesSemCamaKeys.list(eventoId) })
+      queryClient.invalidateQueries({ queryKey: acomodacoesKeys.mapa(activeOrgId, eventoId) })
+      queryClient.invalidateQueries({ queryKey: inscricoesSemCamaKeys.list(activeOrgId, eventoId) })
     },
   })
 }
 
 export function useLiberarCama(eventoId: string) {
+  const { activeOrgId } = useOrgContext()
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: ({ camaId }: { camaId: string }) =>
@@ -227,8 +245,8 @@ export function useLiberarCama(eventoId: string) {
         method: 'DELETE',
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: acomodacoesKeys.mapa(eventoId) })
-      queryClient.invalidateQueries({ queryKey: inscricoesSemCamaKeys.list(eventoId) })
+      queryClient.invalidateQueries({ queryKey: acomodacoesKeys.mapa(activeOrgId, eventoId) })
+      queryClient.invalidateQueries({ queryKey: inscricoesSemCamaKeys.list(activeOrgId, eventoId) })
     },
   })
 }
@@ -236,13 +254,14 @@ export function useLiberarCama(eventoId: string) {
 // --------------- Quarto Delete ---------------
 
 export function useDeleteQuarto(localId: string) {
+  const { activeOrgId } = useOrgContext()
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (quartoId: string) =>
       apiFetch<void>(`/api/v1/acomodacoes/quartos/${quartoId}`, { method: 'DELETE' }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: acomodacoesKeys.locais() })
-      queryClient.invalidateQueries({ queryKey: acomodacoesKeys.quartos(localId) })
+      queryClient.invalidateQueries({ queryKey: acomodacoesKeys.all(activeOrgId) })
+      queryClient.invalidateQueries({ queryKey: acomodacoesKeys.quartos(activeOrgId, localId) })
     },
   })
 }
@@ -250,6 +269,7 @@ export function useDeleteQuarto(localId: string) {
 // --------------- Cama Mutations ---------------
 
 export function useCreateCama() {
+  const { activeOrgId } = useOrgContext()
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: ({ quartoId, payload }: { quartoId: string; payload: Omit<CamaPayload, 'quarto_id'> }) =>
@@ -258,12 +278,13 @@ export function useCreateCama() {
         body: JSON.stringify(payload),
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: acomodacoesKeys.locais() })
+      queryClient.invalidateQueries({ queryKey: acomodacoesKeys.all(activeOrgId) })
     },
   })
 }
 
 export function useUpdateCama() {
+  const { activeOrgId } = useOrgContext()
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: ({
@@ -280,7 +301,7 @@ export function useUpdateCama() {
         body: JSON.stringify(payload),
       }),
     onSuccess: (_data, { quartoId: _quartoId }) => {
-      queryClient.invalidateQueries({ queryKey: acomodacoesKeys.locais() })
+      queryClient.invalidateQueries({ queryKey: acomodacoesKeys.all(activeOrgId) })
     },
   })
 }

@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { apiFetch } from '../lib/api'
+import { useOrgContext } from '../contexts/org-context'
 export { useEvento, useEventos } from './use-eventos'
 export type { EventoListItem } from '@koinonia/shared'
 
@@ -44,18 +45,20 @@ export interface InadimplenteItem {
 // --------------- Query Keys ---------------
 
 export const inscricoesKeys = {
-  all: ['inscricoes'] as const,
-  byEvento: (eventoId: string) => [...inscricoesKeys.all, 'evento', eventoId] as const,
-  inadimplentes: (eventoId: string) => [...inscricoesKeys.all, 'inadimplentes', eventoId] as const,
+  all: (orgId: string | null) => ['org', orgId, 'inscricoes'] as const,
+  byEvento: (orgId: string | null, eventoId: string) => [...inscricoesKeys.all(orgId), 'evento', eventoId] as const,
+  inadimplentes: (orgId: string | null, eventoId: string) => [...inscricoesKeys.all(orgId), 'inadimplentes', eventoId] as const,
 }
 
 // --------------- Inscrições por Evento ---------------
 
 export function useInscricoes(eventoId: string) {
+  const { activeOrgId } = useOrgContext()
+
   return useQuery({
-    queryKey: inscricoesKeys.byEvento(eventoId),
+    queryKey: inscricoesKeys.byEvento(activeOrgId, eventoId),
     queryFn: () => apiFetch<InscricaoListItem[]>(`/api/v1/inscricoes?evento_id=${eventoId}`),
-    enabled: !!eventoId,
+    enabled: !!activeOrgId && !!eventoId,
     staleTime: 0,
   })
 }
@@ -63,10 +66,12 @@ export function useInscricoes(eventoId: string) {
 // --------------- Inadimplentes por Evento ---------------
 
 export function useInadimplentes(eventoId: string) {
+  const { activeOrgId } = useOrgContext()
+
   return useQuery({
-    queryKey: inscricoesKeys.inadimplentes(eventoId),
+    queryKey: inscricoesKeys.inadimplentes(activeOrgId, eventoId),
     queryFn: () => apiFetch<InadimplenteItem[]>(`/api/v1/eventos/${eventoId}/inadimplentes`),
-    enabled: !!eventoId,
+    enabled: !!activeOrgId && !!eventoId,
     staleTime: 0,
   })
 }

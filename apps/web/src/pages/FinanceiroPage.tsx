@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { FormField } from '../components/ui/form-field'
 import { Input } from '../components/ui/input'
 import { Select } from '../components/ui/select'
+import { useOrgContext } from '../contexts/org-context'
 import { apiFetch, apiFetchList } from '../lib/api'
 import type { EventoListItem } from '../hooks/use-inscricoes'
 
@@ -135,32 +136,36 @@ function NovaDespesaModal({ onClose, onSave, isLoading }: { onClose: () => void;
 
 export function FinanceiroPage() {
   const [modalOpen, setModalOpen] = useState(false)
+  const { activeOrgId } = useOrgContext()
   const queryClient = useQueryClient()
 
   const { data: metricas, isLoading: metricasLoading } = useQuery({
-    queryKey: ['financeiro-metricas'],
+    queryKey: ['org', activeOrgId, 'financeiro', 'metricas'],
     queryFn: () => apiFetch<MetricasFinanceiro>('/api/v1/financeiro/metricas'),
+    enabled: !!activeOrgId,
     retry: 1,
   })
 
   const { data: despesas = [], isLoading: despesasLoading } = useQuery({
-    queryKey: ['financeiro-despesas'],
+    queryKey: ['org', activeOrgId, 'financeiro', 'despesas'],
     queryFn: () => apiFetchList<Despesa>('/api/v1/financeiro/despesas'),
+    enabled: !!activeOrgId,
     retry: 1,
   })
 
   const { data: eventos } = useQuery({
-    queryKey: ['eventos'],
+    queryKey: ['org', activeOrgId, 'financeiro', 'eventos'],
     queryFn: () => apiFetch<EventoListItem[]>('/api/v1/eventos'),
+    enabled: !!activeOrgId,
     retry: 1,
   })
 
   const primeiroEvento = eventos?.[0]
 
   const { data: inscricoes = [] } = useQuery({
-    queryKey: ['inscricoes-financeiro', primeiroEvento?.id],
+    queryKey: ['org', activeOrgId, 'financeiro', 'inscricoes', primeiroEvento?.id],
     queryFn: () => apiFetch<InscricaoResumo[]>(`/api/v1/inscricoes?evento_id=${primeiroEvento!.id}&limit=8`),
-    enabled: !!primeiroEvento?.id,
+    enabled: !!activeOrgId && !!primeiroEvento?.id,
     retry: 1,
   })
 
@@ -171,8 +176,8 @@ export function FinanceiroPage() {
         body: JSON.stringify(payload),
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['financeiro-despesas'] })
-      queryClient.invalidateQueries({ queryKey: ['financeiro-metricas'] })
+      queryClient.invalidateQueries({ queryKey: ['org', activeOrgId, 'financeiro', 'despesas'] })
+      queryClient.invalidateQueries({ queryKey: ['org', activeOrgId, 'financeiro', 'metricas'] })
       setModalOpen(false)
     },
   })
