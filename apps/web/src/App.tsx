@@ -11,6 +11,7 @@ import { EventosPage } from './pages/EventosPage'
 import { AcomodacoesPage } from './pages/AcomodacoesPage'
 import { InscricoesPage } from './pages/InscricoesPage'
 import { FinanceiroPage } from './pages/FinanceiroPage'
+import { MembersPage } from './pages/MembersPage'
 
 function App() {
   return (
@@ -65,6 +66,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <FinanceiroPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/membros"
+            element={
+              <ProtectedRoute>
+                <MembersPage />
               </ProtectedRoute>
             }
           />
