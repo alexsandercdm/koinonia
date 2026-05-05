@@ -1,13 +1,14 @@
-import { Database } from '../../../db'
-import { pessoas } from '../../../db/schema'
-import { eq, isNull, and } from 'drizzle-orm'
+import { type Database } from '../../../db'
+import type { TenantContext } from '../../../lib/tenant/types'
+import { PessoasRepository } from '../repositories/PessoasRepository'
 
 export class DeleteParticipanteUseCase {
-  constructor(private db: Database) {}
+  constructor(
+    private db: Database,
+    private ctx: TenantContext,
+  ) {}
 
   async execute(id: string) {
-    await this.db.update(pessoas)
-      .set({ deleted_at: new Date() })
-      .where(and(eq(pessoas.id, id), isNull(pessoas.deleted_at)))
+    await new PessoasRepository(this.db, this.ctx).softDelete(id)
   }
 }

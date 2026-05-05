@@ -1,7 +1,8 @@
 import { and, eq, isNull, ne } from 'drizzle-orm'
-import { Database } from '../../../db'
-import { pessoas } from '../../../db/schema'
+import { type Database } from '../../../db'
+import type { TenantContext } from '../../../lib/tenant/types'
 import { AuditLogRepository } from '../repositories/AuditLogRepository'
+import { PessoasRepository } from '../repositories/PessoasRepository'
 
 export type UpdateParticipanteData = Partial<{
   nome: string
@@ -19,38 +20,32 @@ export type UpdateParticipanteData = Partial<{
 }>
 
 export class UpdateParticipanteUseCase {
-  constructor(private db: Database, private auditLogRepo: AuditLogRepository) {}
+  constructor(
+    private db: Database,
+    private auditLogRepo: AuditLogRepository,
+    private ctx: TenantContext,
+  ) {}
 
   async execute(id: string, user_id: string, data: UpdateParticipanteData) {
-    if (data.email) {
-      const existing = await this.db.select()
-        .from(pessoas)
-        .where(and(eq(pessoas.email, data.email), ne(pessoas.id, id)))
-        .limit(1)
+    const repository = new PessoasRepository(this.db, this.ctx)
 
-      if (existing.length > 0) {
+    if (data.email) {
+      const existing = await repository.findByEmail(data.email, id)
+
+      if (existing) {
         throw new Error('Email already exists')
       }
     }
 
     if (data.telefone) {
-      const existing = await this.db.select()
-        .from(pessoas)
-        .where(and(eq(pessoas.telefone, data.telefone), ne(pessoas.id, id)))
-        .limit(1)
+      const existing = await repository.findByPhone(data.telefone, id)
 
-      if (existing.length > 0) {
+      if (existing) {
         throw new Error('Phone already exists')
       }
     }
 
-    const [participante] = await this.db.update(pessoas)
-      .set({
-        ...data,
-        updated_at: new Date(),
-      })
-      .where(and(eq(pessoas.id, id), isNull(pessoas.deleted_at)))
-      .returning()
+    const participante = await repository.update(id, data)
 
     if (!participante) {
       throw new Error('Participante not found')

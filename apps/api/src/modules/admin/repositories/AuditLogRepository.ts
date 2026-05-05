@@ -1,6 +1,8 @@
-import { desc, eq, and, SQL } from 'drizzle-orm'
-import { Database } from '../../../db'
-import { auditLogs } from '../../../db/schema'
+import { and, desc, eq, type SQL } from 'drizzle-orm'
+import { type Database } from '../../../db'
+import { auditLogs, pessoas } from '../../../db/schema'
+import { BaseRepository } from '../../../lib/tenant/base-repository'
+import type { TenantContext } from '../../../lib/tenant/types'
 
 export interface ListAuditLogsParams {
   page: number
@@ -9,8 +11,10 @@ export interface ListAuditLogsParams {
   userId?: string
 }
 
-export class AuditLogRepository {
-  constructor(private db: Database) {}
+export class AuditLogRepository extends BaseRepository {
+  constructor(db: Database, ctx: TenantContext) {
+    super(db, ctx)
+  }
 
   async insert(data: {
     user_id: string
@@ -18,6 +22,15 @@ export class AuditLogRepository {
     action: string
     changes?: Record<string, unknown> | null
   }) {
+    const target = await this.db.query.pessoas.findFirst({
+      where: and(this.whereOrg(pessoas), eq(pessoas.id, data.target_id)),
+      columns: { id: true },
+    })
+
+    if (!target) {
+      throw new Error('Participante not found')
+    }
+
     const [log] = await this.db.insert(auditLogs).values(data).returning()
     return log
   }
@@ -33,13 +46,14 @@ export class AuditLogRepository {
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined
 
     const rows = await this.db
-      .select()
+      .select({ log: auditLogs })
       .from(auditLogs)
-      .where(whereClause)
+      .innerJoin(pessoas, eq(pessoas.id, auditLogs.target_id))
+      .where(whereClause ? and(this.whereOrg(pessoas), whereClause) : this.whereOrg(pessoas))
       .orderBy(desc(auditLogs.created_at))
       .limit(limit)
       .offset(offset)
 
-    return rows
+    return rows.map((row) => row.log)
   }
 }

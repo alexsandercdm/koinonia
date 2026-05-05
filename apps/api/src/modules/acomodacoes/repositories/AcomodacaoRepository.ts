@@ -1,80 +1,117 @@
 import { and, asc, eq, ilike, isNull, ne, sql } from 'drizzle-orm'
-import { Database } from '../../../db'
+import { type Database } from '../../../db'
 import { camas, eventos, inscricoes, locais, pessoas, quartos } from '../../../db/schema'
+import { BaseRepository } from '../../../lib/tenant/base-repository'
+import type { TenantContext } from '../../../lib/tenant/types'
 
-export class AcomodacaoRepository {
-  constructor(private readonly db: Database) {}
+export class AcomodacaoRepository extends BaseRepository {
+  constructor(db: Database, ctx: TenantContext) {
+    super(db, ctx)
+  }
 
-  async createLocal(data: typeof locais.$inferInsert) {
-    const [local] = await this.db.insert(locais).values(data).returning()
+  async createLocal(data: Omit<typeof locais.$inferInsert, 'organization_id'>) {
+    const [local] = await this.db.insert(locais).values(this.withOrg(data)).returning()
     return local
   }
 
   async deleteQuarto(quartoId: string) {
+    const quarto = await this.findQuartoById(quartoId)
+    if (!quarto) {
+      throw new Error('Quarto não encontrado')
+    }
+
     await this.db.delete(camas).where(eq(camas.quarto_id, quartoId))
-    await this.db.delete(quartos).where(eq(quartos.id, quartoId))
+    await this.db
+      .delete(quartos)
+      .where(and(eq(quartos.id, quartoId), eq(quartos.organization_id, this.orgId)))
   }
 
   async updateLocal(localId: string, data: Partial<typeof locais.$inferInsert>) {
     const [local] = await this.db
       .update(locais)
       .set({ ...data, updated_at: new Date() })
-      .where(eq(locais.id, localId))
+      .where(and(this.whereOrg(locais), eq(locais.id, localId)))
       .returning()
 
     return local
   }
 
   async createQuarto(data: typeof quartos.$inferInsert) {
+    await this.ensureLocalOwned(data.local_id)
+
     const [quarto] = await this.db.insert(quartos).values(data).returning()
     return quarto
   }
 
   async updateQuarto(quartoId: string, data: Partial<typeof quartos.$inferInsert>) {
-    const [quarto] = await this.db
+    const quarto = await this.findQuartoById(quartoId)
+    if (!quarto) {
+      throw new Error('Quarto não encontrado')
+    }
+
+    const [updatedQuarto] = await this.db
       .update(quartos)
       .set({ ...data, updated_at: new Date() })
       .where(eq(quartos.id, quartoId))
       .returning()
 
-    return quarto
+    return updatedQuarto
   }
 
   async createCama(data: typeof camas.$inferInsert) {
+    await this.ensureQuartoOwned(data.quarto_id)
+
     const [cama] = await this.db.insert(camas).values(data).returning()
     return cama
   }
 
   async updateCama(camaId: string, data: Partial<typeof camas.$inferInsert>) {
-    const [cama] = await this.db
+    const cama = await this.findCamaById(camaId)
+    if (!cama) {
+      throw new Error('Cama não encontrada')
+    }
+
+    const [updatedCama] = await this.db
       .update(camas)
       .set(data)
       .where(eq(camas.id, camaId))
       .returning()
 
-    return cama
+    return updatedCama
   }
 
   async findLocalById(localId: string) {
     return this.db.query.locais.findFirst({
-      where: eq(locais.id, localId),
+      where: and(this.whereOrg(locais), eq(locais.id, localId)),
     })
   }
 
   async findQuartoById(quartoId: string) {
-    return this.db.query.quartos.findFirst({
-      where: eq(quartos.id, quartoId),
-    })
+    const [row] = await this.db
+      .select({ quarto: quartos })
+      .from(quartos)
+      .innerJoin(locais, eq(locais.id, quartos.local_id))
+      .where(and(eq(quartos.id, quartoId), this.whereOrg(locais)))
+      .limit(1)
+
+    return row?.quarto ?? null
   }
 
   async findCamaById(camaId: string) {
-    return this.db.query.camas.findFirst({
-      where: eq(camas.id, camaId),
-    })
+    const [row] = await this.db
+      .select({ cama: camas })
+      .from(camas)
+      .innerJoin(quartos, eq(quartos.id, camas.quarto_id))
+      .innerJoin(locais, eq(locais.id, quartos.local_id))
+      .where(and(eq(camas.id, camaId), this.whereOrg(locais)))
+      .limit(1)
+
+    return row?.cama ?? null
   }
 
   async listLocaisWithStructure() {
     const locaisRows = await this.db.query.locais.findMany({
+      where: this.whereOrg(locais),
       with: {
         quartos: {
           with: {
@@ -97,6 +134,8 @@ export class AcomodacaoRepository {
   }
 
   async listQuartosByLocalId(localId: string) {
+    await this.ensureLocalOwned(localId)
+
     return this.db.query.quartos.findMany({
       where: eq(quartos.local_id, localId),
       with: {
@@ -107,6 +146,8 @@ export class AcomodacaoRepository {
   }
 
   async listCamasByQuartoId(quartoId: string) {
+    await this.ensureQuartoOwned(quartoId)
+
     return this.db.query.camas.findMany({
       where: eq(camas.quarto_id, quartoId),
       orderBy: [asc(camas.identificacao)],
@@ -115,13 +156,13 @@ export class AcomodacaoRepository {
 
   async findEventoById(eventoId: string) {
     return this.db.query.eventos.findFirst({
-      where: eq(eventos.id, eventoId),
+      where: and(this.whereOrg(eventos), eq(eventos.id, eventoId)),
     })
   }
 
   async getMapaAcomodacao(eventoId: string) {
     const evento = await this.db.query.eventos.findFirst({
-      where: eq(eventos.id, eventoId),
+      where: and(this.whereOrg(eventos), eq(eventos.id, eventoId)),
       with: {
         local: {
           with: {
@@ -152,13 +193,7 @@ export class AcomodacaoRepository {
       })
       .from(inscricoes)
       .innerJoin(pessoas, eq(pessoas.id, inscricoes.pessoa_id))
-      .where(
-        and(
-          eq(inscricoes.evento_id, eventoId),
-          ne(inscricoes.status, 'CANCELADA'),
-          sql`${inscricoes.cama_id} is not null`,
-        ),
-      )
+      .where(and(this.whereOrg(inscricoes), eq(inscricoes.evento_id, eventoId), ne(inscricoes.status, 'CANCELADA'), sql`${inscricoes.cama_id} is not null`))
 
     return {
       evento,
@@ -169,6 +204,7 @@ export class AcomodacaoRepository {
 
   async listInscricoesDisponiveis(eventoId: string, query?: string) {
     const filters = [
+      this.whereOrg(inscricoes),
       eq(inscricoes.evento_id, eventoId),
       isNull(inscricoes.cama_id),
       ne(inscricoes.status, 'CANCELADA'),
@@ -207,7 +243,9 @@ export class AcomodacaoRepository {
         q.genero_permitido
       from ${camas} c
       left join ${quartos} q on q.id = c.quarto_id
+      left join ${locais} l on l.id = q.local_id
       where c.id = ${camaId}
+        and l.organization_id = ${this.orgId}
       for update
     `)
 
@@ -230,6 +268,9 @@ export class AcomodacaoRepository {
       inner join ${eventos} e on e.id = i.evento_id
       inner join ${pessoas} p on p.id = i.pessoa_id
       where i.id = ${inscricaoId}
+        and i.organization_id = ${this.orgId}
+        and e.organization_id = ${this.orgId}
+        and p.organization_id = ${this.orgId}
       for update
     `)
 
@@ -242,6 +283,7 @@ export class AcomodacaoRepository {
       from ${inscricoes}
       where evento_id = ${eventoId}
         and cama_id = ${camaId}
+        and organization_id = ${this.orgId}
         and status <> 'CANCELADA'
       for update
     `)
@@ -253,7 +295,7 @@ export class AcomodacaoRepository {
     const [inscricao] = await tx
       .update(inscricoes)
       .set({ cama_id: camaId, updated_at: new Date() })
-      .where(eq(inscricoes.id, inscricaoId))
+      .where(and(eq(inscricoes.id, inscricaoId), this.whereOrg(inscricoes)))
       .returning()
 
     return inscricao
@@ -264,6 +306,7 @@ export class AcomodacaoRepository {
       select id, evento_id, pessoa_id, papel, status, cama_id
       from ${inscricoes}
       where cama_id = ${camaId}
+        and organization_id = ${this.orgId}
         and status <> 'CANCELADA'
       for update
     `)
@@ -275,9 +318,27 @@ export class AcomodacaoRepository {
     const [inscricao] = await tx
       .update(inscricoes)
       .set({ cama_id: null, updated_at: new Date() })
-      .where(eq(inscricoes.id, inscricaoId))
+      .where(and(eq(inscricoes.id, inscricaoId), this.whereOrg(inscricoes)))
       .returning()
 
     return inscricao
+  }
+
+  private async ensureLocalOwned(localId: string) {
+    const local = await this.findLocalById(localId)
+    if (!local) {
+      throw new Error('Local não encontrado')
+    }
+
+    return local
+  }
+
+  private async ensureQuartoOwned(quartoId: string) {
+    const quarto = await this.findQuartoById(quartoId)
+    if (!quarto) {
+      throw new Error('Quarto não encontrado')
+    }
+
+    return quarto
   }
 }

@@ -1,6 +1,5 @@
 import { InscricaoRepository } from '../repositories/InscricaoRepository'
 import { EventoRepository } from '../repositories/EventoRepository'
-import { CreateInscricao } from '../../../db/schema'
 
 interface RegisterInscricaoRequest {
   evento_id: string
@@ -46,7 +45,7 @@ export class RegisterInscricaoUseCase {
       valor_total: config.valor,
       status,
       observacoes,
-    } as CreateInscricao)
+    })
 
     return inscricao
   }

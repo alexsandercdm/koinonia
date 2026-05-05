@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { CreatePessoa, Pessoa, UpdatePessoa } from '@koinonia/shared'
 import { apiFetch, ApiListResponse } from '../lib/api'
+import { useOrgContext } from '../contexts/org-context'
 
 export interface ParticipanteListParams {
   q?: string
@@ -25,11 +26,11 @@ export interface ParticipanteHistoricoItem {
 }
 
 export const participantesKeys = {
-  all: ['participantes'] as const,
-  lists: () => [...participantesKeys.all, 'list'] as const,
-  list: (params: ParticipanteListParams) => [...participantesKeys.lists(), params] as const,
-  detail: (id: string) => [...participantesKeys.all, 'detail', id] as const,
-  historico: (id: string) => [...participantesKeys.all, 'historico', id] as const,
+  all: (orgId: string | null) => ['org', orgId, 'participantes'] as const,
+  lists: (orgId: string | null) => [...participantesKeys.all(orgId), 'list'] as const,
+  list: (orgId: string | null, params: ParticipanteListParams) => [...participantesKeys.lists(orgId), params] as const,
+  detail: (orgId: string | null, id: string) => [...participantesKeys.all(orgId), 'detail', id] as const,
+  historico: (orgId: string | null, id: string) => [...participantesKeys.all(orgId), 'historico', id] as const,
 }
 
 function buildParticipantesPath(params: ParticipanteListParams) {
@@ -48,32 +49,40 @@ function buildParticipantesPath(params: ParticipanteListParams) {
 }
 
 export function useParticipantes(params: ParticipanteListParams = {}) {
+  const { activeOrgId } = useOrgContext()
+
   return useQuery({
-    queryKey: participantesKeys.list(params),
+    queryKey: participantesKeys.list(activeOrgId, params),
     queryFn: () => apiFetch<ApiListResponse<Pessoa>>(buildParticipantesPath(params)),
+    enabled: !!activeOrgId,
     staleTime: 1000 * 60 * 5,
   })
 }
 
 export function useParticipante(id: string, enabled = true) {
+  const { activeOrgId } = useOrgContext()
+
   return useQuery({
-    queryKey: participantesKeys.detail(id),
+    queryKey: participantesKeys.detail(activeOrgId, id),
     queryFn: () => apiFetch<Pessoa>(`/api/v1/participantes/${id}`),
-    enabled: enabled && !!id,
+    enabled: enabled && !!activeOrgId && !!id,
     staleTime: 1000 * 60 * 5,
   })
 }
 
 export function useParticipanteHistorico(id: string, enabled = true) {
+  const { activeOrgId } = useOrgContext()
+
   return useQuery({
-    queryKey: participantesKeys.historico(id),
+    queryKey: participantesKeys.historico(activeOrgId, id),
     queryFn: () => apiFetch<ParticipanteHistoricoItem[]>(`/api/v1/participantes/${id}/historico`),
-    enabled: enabled && !!id,
+    enabled: enabled && !!activeOrgId && !!id,
     staleTime: 1000 * 60 * 5,
   })
 }
 
 export function useCreateParticipante() {
+  const { activeOrgId } = useOrgContext()
   const queryClient = useQueryClient()
 
   return useMutation({
@@ -83,12 +92,13 @@ export function useCreateParticipante() {
         body: JSON.stringify(payload),
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: participantesKeys.lists() })
+      queryClient.invalidateQueries({ queryKey: participantesKeys.all(activeOrgId) })
     },
   })
 }
 
 export function useUpdateParticipante() {
+  const { activeOrgId } = useOrgContext()
   const queryClient = useQueryClient()
 
   return useMutation({
@@ -98,14 +108,15 @@ export function useUpdateParticipante() {
         body: JSON.stringify(payload),
       }),
     onSuccess: (_participante, { id }) => {
-      queryClient.invalidateQueries({ queryKey: participantesKeys.lists() })
-      queryClient.invalidateQueries({ queryKey: participantesKeys.detail(id) })
-      queryClient.invalidateQueries({ queryKey: participantesKeys.historico(id) })
+      queryClient.invalidateQueries({ queryKey: participantesKeys.all(activeOrgId) })
+      queryClient.invalidateQueries({ queryKey: participantesKeys.detail(activeOrgId, id) })
+      queryClient.invalidateQueries({ queryKey: participantesKeys.historico(activeOrgId, id) })
     },
   })
 }
 
 export function useDeleteParticipante() {
+  const { activeOrgId } = useOrgContext()
   const queryClient = useQueryClient()
 
   return useMutation({
@@ -114,8 +125,8 @@ export function useDeleteParticipante() {
         method: 'DELETE',
       }),
     onSuccess: (_data, id) => {
-      queryClient.invalidateQueries({ queryKey: participantesKeys.lists() })
-      queryClient.removeQueries({ queryKey: participantesKeys.detail(id) })
+      queryClient.invalidateQueries({ queryKey: participantesKeys.all(activeOrgId) })
+      queryClient.removeQueries({ queryKey: participantesKeys.detail(activeOrgId, id) })
     },
   })
 }

@@ -1,31 +1,38 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiFetch } from '../lib/api'
+import { useOrgContext } from '../contexts/org-context'
 import type { CreateEvento, Evento, EventoListItem, UpdateEvento } from '@koinonia/shared'
 
 export const eventosKeys = {
-  all: ['eventos'] as const,
-  list: () => [...eventosKeys.all, 'list'] as const,
-  detail: (id: string) => [...eventosKeys.all, 'detail', id] as const,
+  all: (orgId: string | null) => ['org', orgId, 'eventos'] as const,
+  list: (orgId: string | null) => [...eventosKeys.all(orgId), 'list'] as const,
+  detail: (orgId: string | null, id: string) => [...eventosKeys.all(orgId), 'detail', id] as const,
 }
 
 export function useEventos() {
+  const { activeOrgId } = useOrgContext()
+
   return useQuery({
-    queryKey: eventosKeys.list(),
+    queryKey: eventosKeys.list(activeOrgId),
     queryFn: () => apiFetch<EventoListItem[]>('/api/v1/eventos'),
+    enabled: !!activeOrgId,
     staleTime: 1000 * 60 * 5,
   })
 }
 
 export function useEvento(id: string) {
+  const { activeOrgId } = useOrgContext()
+
   return useQuery({
-    queryKey: eventosKeys.detail(id),
+    queryKey: eventosKeys.detail(activeOrgId, id),
     queryFn: () => apiFetch<Evento>(`/api/v1/eventos/${id}`),
-    enabled: !!id,
+    enabled: !!activeOrgId && !!id,
     staleTime: 1000 * 60 * 5,
   })
 }
 
 export function useCreateEvento() {
+  const { activeOrgId } = useOrgContext()
   const queryClient = useQueryClient()
 
   return useMutation({
@@ -35,12 +42,13 @@ export function useCreateEvento() {
         body: JSON.stringify(payload),
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: eventosKeys.list() })
+      queryClient.invalidateQueries({ queryKey: eventosKeys.all(activeOrgId) })
     },
   })
 }
 
 export function useUpdateEvento() {
+  const { activeOrgId } = useOrgContext()
   const queryClient = useQueryClient()
 
   return useMutation({
@@ -50,8 +58,8 @@ export function useUpdateEvento() {
         body: JSON.stringify(payload),
       }),
     onSuccess: (_data, { id }) => {
-      queryClient.invalidateQueries({ queryKey: eventosKeys.list() })
-      queryClient.invalidateQueries({ queryKey: eventosKeys.detail(id) })
+      queryClient.invalidateQueries({ queryKey: eventosKeys.all(activeOrgId) })
+      queryClient.invalidateQueries({ queryKey: eventosKeys.detail(activeOrgId, id) })
     },
   })
 }

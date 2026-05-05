@@ -1,24 +1,24 @@
 import { FastifyReply, FastifyRequest } from 'fastify'
+import { AssignCamaDTO } from '@koinonia/shared'
 import { db } from '../../../db'
+import { requireTenantCtx } from '../../../middleware/tenant'
 import { AcomodacaoError, isAcomodacaoError } from '../errors'
 import { AcomodacaoRepository } from '../repositories/AcomodacaoRepository'
 import { AssignCamaUseCase } from '../usecases/AssignCamaUseCase'
 import { ListInscricoesDisponiveisUseCase } from '../usecases/ListInscricoesDisponiveisUseCase'
 import { ListMapaAcomodacaoUseCase } from '../usecases/ListMapaAcomodacaoUseCase'
 import { ReleaseCamaUseCase } from '../usecases/ReleaseCamaUseCase'
-import { AssignCamaDTO } from '@koinonia/shared'
 
 export class AcomodacaoOperationsController {
-  private readonly repository = new AcomodacaoRepository(db)
-  private readonly listMapaUseCase = new ListMapaAcomodacaoUseCase(this.repository)
-  private readonly listInscricoesDisponiveisUseCase = new ListInscricoesDisponiveisUseCase(this.repository)
-  private readonly assignCamaUseCase = new AssignCamaUseCase(this.repository)
-  private readonly releaseCamaUseCase = new ReleaseCamaUseCase(this.repository)
+  private buildRepository(request: FastifyRequest, reply: FastifyReply) {
+    return new AcomodacaoRepository(db, requireTenantCtx(request, reply))
+  }
 
   async listMapa(request: FastifyRequest, reply: FastifyReply) {
     try {
       const { eventoId } = request.params as { eventoId: string }
-      const mapa = await this.listMapaUseCase.execute(eventoId)
+      const useCase = new ListMapaAcomodacaoUseCase(this.buildRepository(request, reply))
+      const mapa = await useCase.execute(eventoId)
       return reply.send(mapa)
     } catch (error) {
       return this.handleError(error, reply)
@@ -29,7 +29,8 @@ export class AcomodacaoOperationsController {
     try {
       const { eventoId } = request.params as { eventoId: string }
       const { q } = request.query as { q?: string }
-      const inscricoes = await this.listInscricoesDisponiveisUseCase.execute({ eventoId, query: q })
+      const useCase = new ListInscricoesDisponiveisUseCase(this.buildRepository(request, reply))
+      const inscricoes = await useCase.execute({ eventoId, query: q })
       return reply.send(inscricoes)
     } catch (error) {
       return this.handleError(error, reply)
@@ -43,7 +44,8 @@ export class AcomodacaoOperationsController {
         throw new AcomodacaoError('Body da requisição é obrigatório', 400)
       }
       const payload = AssignCamaDTO.parse(request.body)
-      const inscricao = await this.assignCamaUseCase.execute({
+      const useCase = new AssignCamaUseCase(this.buildRepository(request, reply))
+      const inscricao = await useCase.execute({
         camaId,
         inscricaoId: payload.inscricao_id,
       })
@@ -56,7 +58,8 @@ export class AcomodacaoOperationsController {
   async releaseCama(request: FastifyRequest, reply: FastifyReply) {
     try {
       const { camaId } = request.params as { camaId: string }
-      const inscricao = await this.releaseCamaUseCase.execute({ camaId })
+      const useCase = new ReleaseCamaUseCase(this.buildRepository(request, reply))
+      const inscricao = await useCase.execute({ camaId })
       return reply.send(inscricao)
     } catch (error) {
       return this.handleError(error, reply)

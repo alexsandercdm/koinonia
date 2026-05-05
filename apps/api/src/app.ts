@@ -6,6 +6,7 @@ import multipart from '@fastify/multipart'
 import staticFiles from '@fastify/static'
 import path from 'path'
 import { env } from './config/env'
+import { tenantMiddleware } from './middleware/tenant'
 import { acomodacaoRoutes } from './modules/acomodacoes/routes/acomodacoes'
 import { participanteRoutes } from './modules/pessoas/routes/participantes'
 import { inscricaoRoutes } from './modules/inscricoes/routes/inscricoes'
@@ -13,6 +14,7 @@ import { authRoutes } from './routes/auth'
 import { customAuthRoutes } from './routes/custom-auth'
 import { adminRoutes } from './modules/admin/routes/admin'
 import { financeiroRoutes } from './modules/financeiro/routes/financeiro'
+import { organizationRoutes } from './modules/organizations/routes/organizations'
 
 export const buildApp = () => {
   const app = Fastify({
@@ -37,6 +39,7 @@ export const buildApp = () => {
   })
 
   app.register(multipart)
+  app.register(tenantMiddleware)
 
   // Use a fallback for dirname to avoid crashes during tests if paths mismatch
   const uploadsPath = path.join(__dirname, '../uploads')
@@ -62,6 +65,7 @@ export const buildApp = () => {
   app.register(acomodacaoRoutes, { prefix: '/api/v1' })
   app.register(adminRoutes, { prefix: '/api/v1' })
   app.register(financeiroRoutes, { prefix: '/api/v1' })
+  app.register(organizationRoutes, { prefix: '/api/v1/organization' })
 
   return app
 }

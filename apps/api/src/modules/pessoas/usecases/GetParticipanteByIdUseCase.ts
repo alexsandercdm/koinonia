@@ -1,16 +1,14 @@
-import { Database } from '../../../db'
-import { pessoas } from '../../../db/schema'
-import { eq, isNull, and } from 'drizzle-orm'
+import { type Database } from '../../../db'
+import type { TenantContext } from '../../../lib/tenant/types'
+import { PessoasRepository } from '../repositories/PessoasRepository'
 
 export class GetParticipanteByIdUseCase {
-  constructor(private db: Database) {}
+  constructor(
+    private db: Database,
+    private ctx: TenantContext,
+  ) {}
 
   async execute(id: string) {
-    const [participante] = await this.db.select()
-      .from(pessoas)
-      .where(and(eq(pessoas.id, id), isNull(pessoas.deleted_at)))
-      .limit(1)
-
-    return participante || null
+    return new PessoasRepository(this.db, this.ctx).findById(id)
   }
 }

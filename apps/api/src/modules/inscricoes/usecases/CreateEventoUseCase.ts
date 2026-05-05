@@ -1,5 +1,4 @@
 import { EventoRepository } from '../repositories/EventoRepository'
-import { CreateEvento } from '../../../db/schema'
 
 interface CreateEventoRequest {
   nome: string
@@ -26,7 +25,7 @@ export class CreateEventoUseCase {
     const evento = await this.eventoRepository.create({
       ...eventoData,
       status: 'rascunho',
-    } as CreateEvento)
+    })
 
     // Add configurations if provided
     if (configuracoes && configuracoes.length > 0) {

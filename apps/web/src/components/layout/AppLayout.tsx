@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuthContext } from '../../contexts/auth-context'
 import { Badge } from '../ui/badge'
 import { useEventos } from '../../hooks/use-eventos'
+import { OrgSwitcher } from './OrgSwitcher'
 import type { EventoListItem } from '@koinonia/shared'
 
 const NAV_ITEMS = [
@@ -202,7 +203,10 @@ export function AppLayout({ children, title, actions }: AppLayoutProps) {
               onSelect={handleEventoSelect}
             />
           </div>
-          {actions && <div className="flex shrink-0 items-center gap-3">{actions}</div>}
+          <div className="flex shrink-0 items-center gap-3">
+            <OrgSwitcher />
+            {actions}
+          </div>
         </header>
 
         {mobileMenuOpen ? (

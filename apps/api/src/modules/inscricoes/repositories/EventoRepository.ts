@@ -1,16 +1,22 @@
 import { and, count, eq, ne } from 'drizzle-orm'
-import { Database } from '../../../db'
-import { eventos, inscricoes, configuracaoEvento, CreateEvento, CreateConfiguracaoEvento } from '../../../db/schema'
+import { type Database } from '../../../db'
+import { type CreateConfiguracaoEvento, type CreateEvento, configuracaoEvento, eventos, inscricoes } from '../../../db/schema'
+import { BaseRepository } from '../../../lib/tenant/base-repository'
+import type { TenantContext } from '../../../lib/tenant/types'
 
-export class EventoRepository {
-  constructor(private db: Database) {}
+export class EventoRepository extends BaseRepository {
+  constructor(db: Database, ctx: TenantContext) {
+    super(db, ctx)
+  }
 
-  async create(data: CreateEvento) {
-    const [evento] = await this.db.insert(eventos).values(data).returning()
+  async create(data: Omit<CreateEvento, 'organization_id'>) {
+    const [evento] = await this.db.insert(eventos).values(this.withOrg(data)).returning()
     return evento
   }
 
   async addConfig(data: CreateConfiguracaoEvento) {
+    await this.ensureEventoOwned(data.evento_id)
+
     const [config] = await this.db.insert(configuracaoEvento).values(data).returning()
     return config
   }
@@ -19,13 +25,15 @@ export class EventoRepository {
     const [evento] = await this.db
       .update(eventos)
       .set({ ...data, updated_at: new Date() })
-      .where(eq(eventos.id, id))
+      .where(and(this.whereOrg(eventos), eq(eventos.id, id)))
       .returning()
 
     return evento
   }
 
   async replaceConfigs(eventoId: string, configs: CreateConfiguracaoEvento[]) {
+    await this.ensureEventoOwned(eventoId)
+
     await this.db.transaction(async (tx) => {
       await tx.delete(configuracaoEvento).where(eq(configuracaoEvento.evento_id, eventoId))
 
@@ -37,7 +45,7 @@ export class EventoRepository {
 
   async findById(id: string) {
     return await this.db.query.eventos.findFirst({
-      where: eq(eventos.id, id),
+      where: and(this.whereOrg(eventos), eq(eventos.id, id)),
       with: {
         configuracoes: true,
       },
@@ -46,13 +54,15 @@ export class EventoRepository {
 
   async list() {
     return await this.db.query.eventos.findMany({
-      orderBy: (eventos, { desc }) => [desc(eventos.created_at)],
+      where: this.whereOrg(eventos),
+      orderBy: (table, { desc }) => [desc(table.created_at)],
     })
   }
 
   async listWithStats() {
     const eventRows = await this.db.query.eventos.findMany({
-      orderBy: (eventos, { desc }) => [desc(eventos.created_at)],
+      where: this.whereOrg(eventos),
+      orderBy: (table, { desc }) => [desc(table.created_at)],
       with: {
         local: true,
         configuracoes: true,
@@ -64,12 +74,7 @@ export class EventoRepository {
         const [result] = await this.db
           .select({ value: count() })
           .from(inscricoes)
-          .where(
-            and(
-              eq(inscricoes.evento_id, evento.id),
-              ne(inscricoes.status, 'CANCELADA'),
-            ),
-          )
+          .where(and(this.whereOrg(inscricoes), eq(inscricoes.evento_id, evento.id), ne(inscricoes.status, 'CANCELADA')))
 
         const inscritosCount = Number(result?.value ?? 0)
         const capacidadeMaxima = Number(evento.capacidade_maxima ?? 0)
@@ -94,5 +99,16 @@ export class EventoRepository {
         }
       }),
     )
+  }
+
+  private async ensureEventoOwned(eventoId: string) {
+    const evento = await this.db.query.eventos.findFirst({
+      where: and(this.whereOrg(eventos), eq(eventos.id, eventoId)),
+      columns: { id: true },
+    })
+
+    if (!evento) {
+      throw new Error('Evento não encontrado')
+    }
   }
 }

@@ -8,32 +8,40 @@ import { UpdateParticipanteSaudeUseCase } from '../usecases/UpdateParticipanteSa
 import { DeleteParticipanteUseCase } from '../usecases/DeleteParticipanteUseCase'
 import { AuditLogRepository } from '../repositories/AuditLogRepository'
 import { db } from '../../../db'
+import { DEFAULT_ORGANIZATION_ID } from '../../../db/default-organization'
+import { OrgRole, type TenantContext } from '../../../lib/tenant/types'
+
+function mapLegacyRole(role?: string): OrgRole {
+  switch (role) {
+    case 'admin':
+      return OrgRole.PRESIDENTE
+    case 'lider':
+      return OrgRole.PASTOR_REDE
+    case 'servo':
+    default:
+      return OrgRole.MEMBRO
+  }
+}
 
 export class ParticipanteController {
-  private createUseCase: CreateParticipanteUseCase
-  private listUseCase: ListParticipantesUseCase
-  private getByIdUseCase: GetParticipanteByIdUseCase
-  private getHistoricoUseCase: GetParticipanteHistoricoUseCase
-  private updateUseCase: UpdateParticipanteUseCase
-  private updateSaudeUseCase: UpdateParticipanteSaudeUseCase
-  private deleteUseCase: DeleteParticipanteUseCase
+  private resolveCtx(request: FastifyRequest): TenantContext {
+    if (request.tenantCtx) {
+      return request.tenantCtx
+    }
 
-  constructor() {
-    this.createUseCase = new CreateParticipanteUseCase(db)
-    this.listUseCase = new ListParticipantesUseCase(db)
-    this.getByIdUseCase = new GetParticipanteByIdUseCase(db)
-    this.getHistoricoUseCase = new GetParticipanteHistoricoUseCase(db)
-    
-    const auditLogRepo = new AuditLogRepository(db)
-    this.updateUseCase = new UpdateParticipanteUseCase(db, auditLogRepo)
-    this.updateSaudeUseCase = new UpdateParticipanteSaudeUseCase(db, auditLogRepo)
-    
-    this.deleteUseCase = new DeleteParticipanteUseCase(db)
+    const user = (request as any).user
+
+    return {
+      orgId: DEFAULT_ORGANIZATION_ID,
+      userId: user?.id ?? 'system',
+      userRole: mapLegacyRole(user?.role),
+    }
   }
 
   async create(request: FastifyRequest, reply: FastifyReply) {
     try {
-      const participante = await this.createUseCase.execute(request.body as any)
+      const ctx = this.resolveCtx(request)
+      const participante = await new CreateParticipanteUseCase(db, ctx).execute(request.body as any)
       return reply.status(201).send(participante)
     } catch (error) {
       if (error instanceof Error) {
@@ -46,7 +54,8 @@ export class ParticipanteController {
   async list(request: FastifyRequest, reply: FastifyReply) {
     try {
       const { q, page = 1, pageSize = 20 } = request.query as any
-      const result = await this.listUseCase.execute({ q, page, pageSize })
+      const ctx = this.resolveCtx(request)
+      const result = await new ListParticipantesUseCase(db, ctx).execute({ q, page, pageSize })
       return reply.send(result)
     } catch (error) {
       if (error instanceof Error) {
@@ -59,7 +68,8 @@ export class ParticipanteController {
   async getById(request: FastifyRequest, reply: FastifyReply) {
     try {
       const { id } = request.params as any
-      const participante = await this.getByIdUseCase.execute(id)
+      const ctx = this.resolveCtx(request)
+      const participante = await new GetParticipanteByIdUseCase(db, ctx).execute(id)
       if (!participante) {
         return reply.status(404).send({ error: 'Participante not found' })
       }
@@ -75,7 +85,8 @@ export class ParticipanteController {
   async getHistorico(request: FastifyRequest, reply: FastifyReply) {
     try {
       const { id } = request.params as any
-      const historico = await this.getHistoricoUseCase.execute(id)
+      const ctx = this.resolveCtx(request)
+      const historico = await new GetParticipanteHistoricoUseCase(db, ctx).execute(id)
       return reply.send(historico)
     } catch (error) {
       if (error instanceof Error) {
@@ -90,7 +101,9 @@ export class ParticipanteController {
       const { id } = request.params as any
       const updateData = request.body as any
       const user_id = (request as any).user.id
-      const participante = await this.updateUseCase.execute(id, user_id, updateData)
+      const ctx = this.resolveCtx(request)
+      const useCase = new UpdateParticipanteUseCase(db, new AuditLogRepository(db, ctx), ctx)
+      const participante = await useCase.execute(id, user_id, updateData)
       return reply.send(participante)
     } catch (error) {
       if (error instanceof Error) {
@@ -113,7 +126,9 @@ export class ParticipanteController {
       const { id } = request.params as any
       const updateData = request.body as any
       const user_id = (request as any).user.id
-      const participante = await this.updateSaudeUseCase.execute(id, user_id, updateData)
+      const ctx = this.resolveCtx(request)
+      const useCase = new UpdateParticipanteSaudeUseCase(db, new AuditLogRepository(db, ctx), ctx)
+      const participante = await useCase.execute(id, user_id, updateData)
       return reply.send(participante)
     } catch (error) {
       if (error instanceof Error) {
@@ -126,7 +141,8 @@ export class ParticipanteController {
   async delete(request: FastifyRequest, reply: FastifyReply) {
     try {
       const { id } = request.params as any
-      await this.deleteUseCase.execute(id)
+      const ctx = this.resolveCtx(request)
+      await new DeleteParticipanteUseCase(db, ctx).execute(id)
       return reply.status(204).send()
     } catch (error) {
       if (error instanceof Error) {

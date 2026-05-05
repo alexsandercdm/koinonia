@@ -1,10 +1,14 @@
-import { Database } from '../../../db'
-import { pessoas } from '../../../db/schema'
-import { eq, isNull, and } from 'drizzle-orm'
+import { type Database } from '../../../db'
+import type { TenantContext } from '../../../lib/tenant/types'
 import { AuditLogRepository } from '../repositories/AuditLogRepository'
+import { PessoasRepository } from '../repositories/PessoasRepository'
 
 export class UpdateParticipanteSaudeUseCase {
-  constructor(private db: Database, private auditLogRepo: AuditLogRepository) {}
+  constructor(
+    private db: Database,
+    private auditLogRepo: AuditLogRepository,
+    private ctx: TenantContext,
+  ) {}
 
   async execute(id: string, user_id: string, data: Partial<{
     alergias: string
@@ -14,13 +18,8 @@ export class UpdateParticipanteSaudeUseCase {
     contato_emergencia_nome: string
     contato_emergencia_tel: string
   }>) {
-    const [participante] = await this.db.update(pessoas)
-      .set({
-        ...data,
-        updated_at: new Date()
-      })
-      .where(and(eq(pessoas.id, id), isNull(pessoas.deleted_at)))
-      .returning()
+    const repository = new PessoasRepository(this.db, this.ctx)
+    const participante = await repository.update(id, data)
 
     if (participante) {
       await this.auditLogRepo.logAction({

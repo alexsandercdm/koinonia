@@ -1,20 +1,14 @@
-import { Database } from '../../../db'
-import { pessoas, inscricoes, eventos } from '../../../db/schema'
-import { eq, isNull } from 'drizzle-orm'
+import { type Database } from '../../../db'
+import type { TenantContext } from '../../../lib/tenant/types'
+import { PessoasRepository } from '../repositories/PessoasRepository'
 
 export class GetParticipanteHistoricoUseCase {
-  constructor(private db: Database) {}
+  constructor(
+    private db: Database,
+    private ctx: TenantContext,
+  ) {}
 
   async execute(pessoaId: string) {
-    const historico = await this.db.select({
-      evento: eventos,
-      inscricao: inscricoes
-    })
-      .from(inscricoes)
-      .innerJoin(eventos, eq(inscricoes.evento_id, eventos.id))
-      .where(eq(inscricoes.pessoa_id, pessoaId))
-      .orderBy(eventos.data_inicio)
-
-    return historico
+    return new PessoasRepository(this.db, this.ctx).getHistorico(pessoaId)
   }
 }

@@ -1,24 +1,21 @@
-import { FastifyRequest, FastifyReply } from 'fastify'
+import { FastifyReply, FastifyRequest } from 'fastify'
 import { db } from '../../../db'
+import { requireTenantCtx } from '../../../middleware/tenant'
+import { FinanceiroRepository } from '../repositories/FinanceiroRepository'
+import { CreateDespesaUseCase } from '../usecases/CreateDespesaUseCase'
 import { GetMetricasUseCase } from '../usecases/GetMetricasUseCase'
 import { ListDespesasUseCase } from '../usecases/ListDespesasUseCase'
-import { CreateDespesaUseCase } from '../usecases/CreateDespesaUseCase'
 
 export class FinanceiroController {
-  private getMetricasUseCase: GetMetricasUseCase
-  private listDespesasUseCase: ListDespesasUseCase
-  private createDespesaUseCase: CreateDespesaUseCase
-
-  constructor() {
-    this.getMetricasUseCase = new GetMetricasUseCase(db)
-    this.listDespesasUseCase = new ListDespesasUseCase(db)
-    this.createDespesaUseCase = new CreateDespesaUseCase(db)
+  private buildRepository(request: FastifyRequest, reply: FastifyReply) {
+    return new FinanceiroRepository(db, requireTenantCtx(request, reply))
   }
 
   async getMetricas(request: FastifyRequest, reply: FastifyReply) {
     try {
       const query = request.query as { eventoId?: string }
-      const metricas = await this.getMetricasUseCase.execute(query.eventoId)
+      const useCase = new GetMetricasUseCase(this.buildRepository(request, reply))
+      const metricas = await useCase.execute(query.eventoId)
       return reply.send(metricas)
     } catch (error) {
       if (error instanceof Error) {
@@ -31,7 +28,8 @@ export class FinanceiroController {
   async listDespesas(request: FastifyRequest, reply: FastifyReply) {
     try {
       const query = request.query as { eventoId?: string }
-      const despesas = await this.listDespesasUseCase.execute(query.eventoId)
+      const useCase = new ListDespesasUseCase(this.buildRepository(request, reply))
+      const despesas = await useCase.execute(query.eventoId)
       return reply.send({ data: despesas })
     } catch (error) {
       if (error instanceof Error) {
@@ -53,7 +51,8 @@ export class FinanceiroController {
         registrado_por?: string
       }
 
-      const despesa = await this.createDespesaUseCase.execute({
+      const useCase = new CreateDespesaUseCase(this.buildRepository(request, reply))
+      const despesa = await useCase.execute({
         evento_id: body.evento_id,
         descricao: body.descricao,
         categoria: body.categoria,

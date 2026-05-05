@@ -1,155 +1,50 @@
-import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest'
-import { buildApp } from '../app'
-import { db, schema } from '../db'
-import { eq } from 'drizzle-orm'
+import { describe, it, expect } from 'vitest'
+import { canPerform, canViewPessoas, canViewEvento } from '../lib/tenant/permission-resolver'
+import { OrgRole, Operation } from '../lib/tenant/types'
 
-describe('RBAC E2E', { timeout: 30000 }, () => {
-  const app = buildApp()
-  const baseUrl = `http://localhost:3005`
+describe('RBAC matrix', () => {
+  const eventOps = [Operation.CREATE_EVENTO, Operation.EDIT_EVENTO, Operation.TRANSITION_EVENTO, Operation.CANCEL_EVENTO]
+  const admins = [OrgRole.PRESIDENTE, OrgRole.PASTOR_PRINCIPAL]
+  const nonAdmins = [OrgRole.PASTOR_REDE, OrgRole.DISCIPULADOR, OrgRole.LIDER_CELULA, OrgRole.MEMBRO]
 
-  beforeAll(async () => {
-    try {
-      await app.listen({ port: 3005 })
-    } catch (err) {
-      // Ignore if already listening
+  it('only admins can manage eventos', () => {
+    for (const op of eventOps) {
+      for (const role of admins) expect(canPerform(role, op), `${role} / ${op}`).toBe(true)
+      for (const role of nonAdmins) expect(canPerform(role, op), `${role} / ${op}`).toBe(false)
     }
   })
 
-  afterAll(async () => {
-    await app.close()
+  it('only PRESIDENTE can transfer presidency', () => {
+    expect(canPerform(OrgRole.PRESIDENTE, Operation.TRANSFER_PRESIDENCY)).toBe(true)
+    for (const role of nonAdmins) expect(canPerform(role, Operation.TRANSFER_PRESIDENCY)).toBe(false)
+    expect(canPerform(OrgRole.PASTOR_PRINCIPAL, Operation.TRANSFER_PRESIDENCY)).toBe(false)
   })
 
-  async function clearTables() {
-    await db.delete(schema.session)
-    await db.delete(schema.account)
-    await db.delete(schema.user)
-    await db.delete(schema.pessoas)
-  }
-
-  beforeEach(async () => {
-    await clearTables()
-  })
-
-  async function getAuthToken(email: string, role: string = 'servo') {
-    // 1. Signup
-    await fetch(`${baseUrl}/api/v1/auth/sign-up/email`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        email,
-        password: 'Password123!',
-        name: 'Test User'
-      })
-    })
-
-    // 2. Update Role in DB (Better Auth doesn't allow role in signup)
-    await db.update(schema.user)
-      .set({ role })
-      .where(eq(schema.user.email, email))
-
-    // 3. Signin to get fresh token with role
-    const signInResponse = await fetch(`${baseUrl}/api/v1/auth/sign-in/email`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password: 'Password123!' })
-    })
-
-    const body = await signInResponse.json() as any
-    if (signInResponse.status !== 200) {
-      console.error(`Signin Failed for ${email}:`, body)
+  it('all roles can self-enroll', () => {
+    for (const role of Object.values(OrgRole)) {
+      expect(canPerform(role as OrgRole, Operation.SELF_ENROLL)).toBe(true)
     }
-    return body.token
-  }
+  })
 
-  it('should allow LIDER to list participants', async () => {
-    const token = await getAuthToken('lider@example.com', 'lider')
-    
-    const response = await fetch(`${baseUrl}/api/v1/participantes`, {
-      headers: {
-        authorization: `Bearer ${token}`
+  it('pessoas visibility scope per role', () => {
+    expect(canViewPessoas(OrgRole.PRESIDENTE)).toBe('ALL_ORG')
+    expect(canViewPessoas(OrgRole.PASTOR_PRINCIPAL)).toBe('ALL_ORG')
+    expect(canViewPessoas(OrgRole.PASTOR_REDE)).toBe('OWN_SUBTREE')
+    expect(canViewPessoas(OrgRole.DISCIPULADOR)).toBe('OWN_SUBTREE')
+    expect(canViewPessoas(OrgRole.LIDER_CELULA)).toBe('DIRECT_CHILDREN')
+    expect(canViewPessoas(OrgRole.MEMBRO)).toBe('SELF_ONLY')
+  })
+
+  it('planejamento visible only to admins', () => {
+    for (const role of admins) expect(canViewEvento(role, 'planejamento')).toBe(true)
+    for (const role of nonAdmins) expect(canViewEvento(role, 'planejamento')).toBe(false)
+  })
+
+  it('all public statuses visible to all roles', () => {
+    for (const status of ['inscricoes_abertas', 'em_andamento', 'finalizado', 'cancelado']) {
+      for (const role of Object.values(OrgRole)) {
+        expect(canViewEvento(role as OrgRole, status)).toBe(true)
       }
-    })
-
-    expect(response.status).toBe(200)
-  })
-
-  it('should allow SERVO to list participants', async () => {
-    const token = await getAuthToken('servo@example.com', 'servo')
-    
-    const response = await fetch(`${baseUrl}/api/v1/participantes`, {
-      headers: {
-        authorization: `Bearer ${token}`
-      }
-    })
-
-    expect(response.status).toBe(200)
-  })
-
-  it('should deny SERVO to create participant', async () => {
-    const token = await getAuthToken('servo_create@example.com', 'servo')
-    
-    const response = await fetch(`${baseUrl}/api/v1/participantes`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        authorization: `Bearer ${token}`
-      },
-      body: JSON.stringify({
-        nome: 'Test Post',
-        genero: 'M'
-      })
-    })
-
-    expect(response.status).toBe(403)
-  })
-
-  it('should allow LIDER to create participant', async () => {
-    const token = await getAuthToken('lider_create@example.com', 'lider')
-    
-    const response = await fetch(`${baseUrl}/api/v1/participantes`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        authorization: `Bearer ${token}`
-      },
-      body: JSON.stringify({
-        nome: 'Test Lider Post',
-        genero: 'M'
-      })
-    })
-
-    expect(response.status).toBe(201)
-  })
-
-  it('should deny LIDER to delete participant', async () => {
-    const token = await getAuthToken('lider_delete@example.com', 'lider')
-    const id = '00000000-0000-0000-0000-000000000000'
-    
-    const response = await fetch(`${baseUrl}/api/v1/participantes/${id}`, {
-      method: 'DELETE',
-      headers: {
-        authorization: `Bearer ${token}`
-      }
-    })
-
-    expect(response.status).toBe(403)
-  })
-
-  it('should deny unauthenticated user to list participants', async () => {
-    const response = await fetch(`${baseUrl}/api/v1/participantes`)
-
-    expect(response.status).toBe(401)
-  })
-
-  it('should allow ADMIN to list participants', async () => {
-    const token = await getAuthToken('admin@example.com', 'admin')
-    
-    const response = await fetch(`${baseUrl}/api/v1/participantes`, {
-      headers: {
-        authorization: `Bearer ${token}`
-      }
-    })
-
-    expect(response.status).toBe(200)
+    }
   })
 })
