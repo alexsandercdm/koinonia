@@ -6,6 +6,7 @@ import { db } from '../db'
 import { member } from '../db/schema'
 import { MissingTenantContextError } from '../lib/tenant/errors'
 import type { OrgRole, TenantContext } from '../lib/tenant/types'
+import { mapOrgRoleToAuthRole } from '../lib/tenant/role-mapper'
 
 declare module 'fastify' {
   interface FastifyRequest {
@@ -65,6 +66,14 @@ const tenantPlugin: FastifyPluginAsync = async (fastify) => {
       orgId: activeOrganizationId,
       userId,
       userRole: membership.role as OrgRole,
+    }
+
+    // Map Koinonia org roles to admin/member for authorization checks
+    const orgRole = membership.role as OrgRole
+    const mappedRole = mapOrgRoleToAuthRole(orgRole)
+    const authenticatedRequest = request as any & { user?: any }
+    if (authenticatedRequest.user) {
+      authenticatedRequest.user.role = mappedRole
     }
   })
 }
