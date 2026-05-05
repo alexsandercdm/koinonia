@@ -19,25 +19,25 @@ This matrix shows which Koinonia organization roles have access to which feature
 
 ### Create Events
 - **Allowed Roles:** PRESIDENTE, PASTOR_PRINCIPAL
-- **Source:** `apps/api/src/lib/tenant/role-mapper.ts:12` (`canCreateEvents()`)
+- **Source:** `apps/api/src/lib/tenant/role-mapper.ts:17` (`canCreateEvents()`)
 - **API Implementation:** POST `/api/v1/eventos` requires admin role
 - **Web Implementation:** `apps/web/src/pages/EventosPage.tsx:33` checks role before showing button
 
 ### Edit Events
 - **Allowed Roles:** PRESIDENTE, PASTOR_PRINCIPAL  
-- **Source:** `apps/api/src/lib/tenant/role-mapper.ts:12` (`canCreateEvents()`)
+- **Source:** `apps/api/src/lib/tenant/role-mapper.ts:17` (`canCreateEvents()`)
 - **API Implementation:** PATCH `/api/v1/eventos/:id` requires admin role
 - **Web Implementation:** Event card shows edit button for admin roles only
 
 ### Manage Organization
 - **Allowed Roles:** PRESIDENTE only
-- **Source:** `apps/api/src/lib/tenant/role-mapper.ts:19` (`canManageOrganization()`)
+- **Source:** `apps/api/src/lib/tenant/role-mapper.ts:25` (`canManageOrganization()`)
 - **API Implementation:** Organization endpoints require PRESIDENTE
 - **Web Implementation:** Organization settings available to PRESIDENTE only
 
 ### Manage Members
 - **Allowed Roles:** PRESIDENTE, PASTOR_PRINCIPAL
-- **Source:** `apps/api/src/lib/tenant/role-mapper.ts:25` (`canManageMembers()`)
+- **Source:** `apps/api/src/lib/tenant/role-mapper.ts:33` (`canManageMembers()`)
 - **API Implementation:** Member management endpoints require admin role
 - **Web Implementation:** Member UI available to admin roles
 
