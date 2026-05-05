@@ -209,3 +209,26 @@ Record durable project knowledge here.
 - Status: ✅ No blocking issues found; events infrastructure is tenant-scoped correctly; all type-checks passing
 - Gaps Found: None blocking Phase 8.5 completion
 - Final Verification: `pnpm --filter @koinonia/api type-check` ✅ and `pnpm --filter @koinonia/web type-check` ✅
+
+## COMPLETION_RECORD - Task 7: Role Authorization Matrix
+
+- Date: 2026-05-05
+- Task: Create comprehensive role authorization matrix
+- Input: Phase 8.5 permission resolver (`apps/api/src/lib/tenant/permission-resolver.ts`) with 12 operations and 6 org roles
+- Output: `.holyhouse/ROLE-MATRIX.md` with:
+  - Quick reference matrix table (6 roles × 13 features/operations)
+  - Detailed operation descriptions with sources (file + line numbers)
+  - Resource visibility scopes per role (`ALL_ORG`, `OWN_SUBTREE`, `DIRECT_CHILDREN`, `SELF_ONLY`)
+  - Developer guidelines for adding new features
+  - Code reviewer checklist
+  - Testing and verification notes
+  - Known limitations and gaps during Phase 8.5 transition
+- Key Findings:
+  - ✅ 12 distinct operations defined and fully permission-mapped
+  - ✅ All operations have sources cited in permission-resolver.ts and role-mapper.ts
+  - ✅ Admin roles (PRESIDENTE, PASTOR_PRINCIPAL) control event/member management
+  - ✅ Leadership roles (+ PASTOR_REDE, DISCIPULADOR) can create/edit pessoas
+  - ✅ All roles can self-enroll; view limited by event status and resource scope
+  - ✅ Matrix cross-references actual implementation files (routes, components, permission logic)
+- Evidence: Commit fceb3f5 (`docs: create role authorization matrix`)
+- Status: ✅ Complete
