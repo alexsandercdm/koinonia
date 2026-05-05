@@ -30,14 +30,22 @@ export class TransferPresidencyUseCase {
           AND role = 'PRESIDENTE'
       `)
 
-      const result = await tx.execute(sql`
+      await tx.execute(sql`
         UPDATE member
         SET role = 'PRESIDENTE'
         WHERE organization_id = ${orgId}
           AND user_id = ${newPresidentUserId}
       `)
 
-      if ((result as any).count === 0 && (result as any).rowCount === 0) {
+      const [updated] = await tx.execute(sql`
+        SELECT 1
+        FROM member
+        WHERE organization_id = ${orgId}
+          AND user_id = ${newPresidentUserId}
+          AND role = 'PRESIDENTE'
+      `)
+
+      if (!updated) {
         throw new Error('Target user is not a member of this organization')
       }
     })
